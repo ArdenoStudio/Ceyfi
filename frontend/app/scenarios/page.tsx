@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FlaskConical, RotateCcw, Save } from "lucide-react";
 import { ScenarioFanChart } from "@/components/charts/ScenarioFanChart";
 import { ChartCard } from "@/components/ui/ChartCard";
@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
+import { getFinancialSnapshot } from "@/lib/api";
 import { CHART_COLORS } from "@/lib/chartUtils";
 import { cn, formatters } from "@/lib/utils";
 
@@ -51,8 +53,7 @@ function computeImpact(shocks: ShockState): number {
   return Math.round(impact);
 }
 
-function buildPaths(shocks: ShockState) {
-  const base = 245000;
+function buildPaths(shocks: ShockState, base: number) {
   const impact = computeImpact(shocks);
   const dates = Array.from({ length: 90 }, (_, i) => {
     const d = new Date();
@@ -81,12 +82,21 @@ function buildPaths(shocks: ShockState) {
 }
 
 export default function ScenariosPage() {
+  const { user } = useAuth();
+  const [baseBalance, setBaseBalance] = useState(245000);
   const [shocks, setShocks] = useState<ShockState>(DEFAULT_SHOCKS);
   const [saved, setSaved] = useState<SavedScenario[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [scenarioName, setScenarioName] = useState("");
 
-  const paths = useMemo(() => buildPaths(shocks), [shocks]);
+  useEffect(() => {
+    if (!user) return;
+    getFinancialSnapshot(user.user_id)
+      .then((s) => setBaseBalance(s.scenario_base_balance))
+      .catch(() => null);
+  }, [user]);
+
+  const paths = useMemo(() => buildPaths(shocks, baseBalance), [shocks, baseBalance]);
   const impact = computeImpact(shocks);
   const minBalance = Math.min(...paths[0].data.map((d) => d.balance));
   const runway = Math.max(0.5, minBalance / 42000);

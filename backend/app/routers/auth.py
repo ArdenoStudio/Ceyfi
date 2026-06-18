@@ -1,0 +1,42 @@
+"""Demo persona authentication endpoints."""
+
+from fastapi import APIRouter, Header, HTTPException
+from pydantic import BaseModel
+
+from app.services.auth import (
+    DEMO_PERSONAS,
+    create_session_token,
+    list_personas,
+    resolve_session,
+)
+
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+class LoginRequest(BaseModel):
+    user_id: str
+
+
+@router.get("/personas")
+async def get_personas():
+    return {"personas": list_personas()}
+
+
+@router.post("/login")
+async def login(req: LoginRequest):
+    if req.user_id not in DEMO_PERSONAS:
+        raise HTTPException(status_code=404, detail="Unknown persona")
+    persona = DEMO_PERSONAS[req.user_id]
+    token = create_session_token(req.user_id)
+    return {
+        "token": token,
+        "user": persona,
+    }
+
+
+@router.get("/me")
+async def me(authorization: str | None = Header(default=None)):
+    session = resolve_session(authorization)
+    if not session:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return {"user": session}

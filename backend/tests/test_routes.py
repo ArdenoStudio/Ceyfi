@@ -218,10 +218,52 @@ async def test_business_insight(client):
 
 @pytest.mark.asyncio
 async def test_admin_seed(client):
-    resp = await client.post("/mock/seed")
+    resp = await client.post("/mock/seed", headers={"X-Demo-Admin-Key": "ceyfi-demo-admin"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "seeded"
+
+
+@pytest.mark.asyncio
+async def test_admin_seed_requires_key(client):
+    resp = await client.post("/mock/seed")
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_financial_snapshot(client):
+    resp = await client.get("/api/financial-snapshot/SEY-USR-001")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "health_score" in data
+    assert "decisions" in data
+    assert "health_components" in data
+    assert len(data["decisions"]) >= 2
+
+
+@pytest.mark.asyncio
+async def test_auth_login(client):
+    resp = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "token" in data
+    assert data["user"]["name"] == "Nimal Fernando"
+
+
+@pytest.mark.asyncio
+async def test_auth_me(client):
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    resp = await client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    assert resp.json()["user"]["user_id"] == "SEY-USR-001"
+
+
+@pytest.mark.asyncio
+async def test_auth_personas(client):
+    resp = await client.get("/api/auth/personas")
+    assert resp.status_code == 200
+    assert len(resp.json()["personas"]) == 3
 
 
 @pytest.mark.asyncio
