@@ -61,9 +61,9 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
         <Skeleton className="h-24 w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
@@ -90,35 +90,14 @@ export default function WalletPage() {
   const latestSpend = transactions.find((tx) => tx.type === "debit");
 
   return (
-    <div
-      data-module="wallet"
-      className="dark relative min-h-full overflow-hidden"
-      style={{ background: "#0c0407" }}
-    >
-      {/* Ambient glow layers — mirrors the assistant page */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(227,24,33,0.15),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(114,28,36,0.10),transparent)]" />
-      </div>
-      {/* Subtle dot-grid texture */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.018]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
-
-      {/* Actual page content */}
-      <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+    <div data-module="wallet" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <PageHeader
         eyebrow="Diaspora family wallet"
         title="Track money sent home with confidence"
         description="See the latest remittance, how the family is using each bucket, and adjust the next split before sending again."
         
         action={
-          <Button onClick={() => setModalOpen(true)} className="rounded-full">
+          <Button onClick={() => setModalOpen(true)} className="rounded-full bg-ceyfi-green text-white hover:bg-ceyfi-deep">
             Send Money
           </Button>
         }
@@ -240,7 +219,6 @@ export default function WalletPage() {
         open={modalOpen}
         onOpenChange={setModalOpen}
       />
-      </div>{/* /z-10 content */}
     </div>
   );
 }

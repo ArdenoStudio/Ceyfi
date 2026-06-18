@@ -72,15 +72,20 @@ function enrichBasic(
     const match = FALLBACK_TRANSACTIONS.find((f) => f.id === t.id);
     if (match) return match;
     const desc = t.description.toLowerCase();
-    let category = "Shopping";
-    let merchant = t.description.split("·")[0]?.trim() ?? "Other";
-    if (desc.includes("salary")) category = "Income";
-    else if (desc.includes("loan") || desc.includes("emi")) category = "Loan";
-    else if (desc.includes("keells") || desc.includes("food")) category = "Food & Dining";
-    else if (desc.includes("dialog") || desc.includes("ceb") || desc.includes("school"))
-      category = "Bills & Utilities";
-    else if (desc.includes("pickme") || desc.includes("uber")) category = "Transport";
-    else if (desc.includes("hospital")) category = "Healthcare";
+    const category = desc.includes("salary")
+      ? "Income"
+      : desc.includes("loan") || desc.includes("emi")
+        ? "Loan"
+        : desc.includes("keells") || desc.includes("food")
+          ? "Food & Dining"
+          : desc.includes("dialog") || desc.includes("ceb") || desc.includes("school")
+            ? "Bills & Utilities"
+            : desc.includes("pickme") || desc.includes("uber")
+              ? "Transport"
+              : desc.includes("hospital")
+                ? "Healthcare"
+                : "Shopping";
+    const merchant = t.description.split("·")[0]?.trim() ?? "Other";
     const d = new Date(t.date);
     return {
       ...t,
@@ -99,6 +104,11 @@ export default function TransactionsPage() {
   const [category, setCategory] = useState("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "debit" | "credit">("all");
   const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [heatmapFilter, setHeatmapFilter] = useState<{
+    band: number;
+    weekday: number;
+  } | null>(null);
   const [anomalyTip, setAnomalyTip] = useState<string | null>(null);
   const perPage = 10;
 
@@ -208,9 +218,19 @@ export default function TransactionsPage() {
       if (month !== "all" && !t.date.startsWith(month)) return false;
       if (category !== "all" && t.category !== category) return false;
       if (typeFilter !== "all" && t.type !== typeFilter) return false;
+      if (heatmapFilter) {
+        const band = TIME_BANDS[heatmapFilter.band];
+        if (
+          t.weekday !== heatmapFilter.weekday ||
+          !band.hours.includes(t.hour) ||
+          t.type !== "debit"
+        ) {
+          return false;
+        }
+      }
       return true;
     });
-  }, [transactions, query, month, category, typeFilter]);
+  }, [transactions, query, month, category, typeFilter, heatmapFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
@@ -236,7 +256,7 @@ export default function TransactionsPage() {
         </p>
       </header>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-ceyfi-canvas">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -296,7 +316,21 @@ export default function TransactionsPage() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <ChartCard title="When do you spend?" subtitle="Tap a cell to filter · 7×4 heatmap">
+          <ChartCard title="When do you spend?" subtitle="Tap a cell to filter the transactions table">
+            {heatmapFilter ? (
+              <div className="mb-3 flex items-center gap-2">
+                <span className="rounded-full bg-ceyfi-sprout px-2.5 py-1 text-[10px] font-semibold text-ceyfi-green">
+                  Filter: {WEEKDAYS[heatmapFilter.weekday]} · {TIME_BANDS[heatmapFilter.band].label}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setHeatmapFilter(null)}
+                  className="text-[10px] font-semibold text-ceyfi-muted hover:text-ceyfi-ink"
+                >
+                  Clear
+                </button>
+              </div>
+            ) : null}
             <div className="overflow-x-auto">
               <div className="inline-grid min-w-[320px] gap-1" style={{ gridTemplateColumns: `48px repeat(7, 1fr)` }}>
                 <div />
@@ -306,15 +340,33 @@ export default function TransactionsPage() {
                 {TIME_BANDS.map((band, ri) => (
                   <Fragment key={band.label}>
                     <div className="flex items-center text-[9px] font-medium text-ceyfi-muted">{band.label}</div>
-                    {WEEKDAYS.map((_, ci) => (
-                      <div
-                        key={`${ri}-${ci}`}
-                        title={`${heatmap[ri][ci]} transactions`}
-                        className={cn("flex h-8 items-center justify-center rounded-md text-[10px] font-semibold", heatColor(heatmap[ri][ci]))}
-                      >
-                        {heatmap[ri][ci] > 0 ? heatmap[ri][ci] : ""}
-                      </div>
-                    ))}
+                    {WEEKDAYS.map((_, ci) => {
+                      const count = heatmap[ri][ci];
+                      const selected =
+                        heatmapFilter?.band === ri && heatmapFilter?.weekday === ci;
+                      return (
+                        <button
+                          key={`${ri}-${ci}`}
+                          type="button"
+                          title={`${count} transactions · tap to filter`}
+                          disabled={count === 0}
+                          onClick={() => {
+                            setHeatmapFilter({ band: ri, weekday: ci });
+                            setTypeFilter("debit");
+                            setPage(1);
+                            setActiveTab("transactions");
+                          }}
+                          className={cn(
+                            "flex h-8 items-center justify-center rounded-md text-[10px] font-semibold transition",
+                            heatColor(count),
+                            count > 0 && "cursor-pointer hover:ring-2 hover:ring-ceyfi-green/40",
+                            selected && "ring-2 ring-ceyfi-green"
+                          )}
+                        >
+                          {count > 0 ? count : ""}
+                        </button>
+                      );
+                    })}
                   </Fragment>
                 ))}
               </div>
@@ -337,7 +389,7 @@ export default function TransactionsPage() {
                   data={scatterData.filter((d) => !d.anomaly)}
                   fill="#059669"
                   fillOpacity={0.6}
-                  onClick={(d) => setAnomalyTip(null)}
+                  onClick={() => setAnomalyTip(null)}
                 />
                 <Scatter
                   name="Anomaly"

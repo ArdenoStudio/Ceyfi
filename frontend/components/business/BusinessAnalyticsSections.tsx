@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -45,7 +45,6 @@ function buildWaterfall() {
     else if (step.subtotal) running = step.value;
     else if (step.total) running = step.value;
     const display = step.subtotal || step.total ? step.value : Math.abs(step.value);
-    const base = step.subtotal || step.total ? 0 : step.value < 0 ? running : start;
     return {
       ...step,
       base: step.value < 0 && !step.subtotal && !step.total ? running : start,

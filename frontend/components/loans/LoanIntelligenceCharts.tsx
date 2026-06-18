@@ -43,7 +43,6 @@ function buildWaterfallData() {
     let outstanding = PRINCIPAL;
     let totalPrincipal = 0;
     let totalInterest = 0;
-    const startMonth = (year - 1) * 12;
     for (let m = 0; m < 12; m++) {
       const interest = outstanding * RATE;
       const principal = EMI - interest;
