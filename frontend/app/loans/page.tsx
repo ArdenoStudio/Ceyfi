@@ -9,6 +9,7 @@ import { RepaymentProgressBar } from "@/components/loans/RepaymentProgressBar";
 import { PaymentCountdown } from "@/components/loans/PaymentCountdown";
 import { AIAdvisorPanel } from "@/components/loans/AIAdvisorPanel";
 import { RepaymentTimeline } from "@/components/loans/RepaymentTimeline";
+import { LoanIntelligenceCharts } from "@/components/loans/LoanIntelligenceCharts";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -152,6 +153,10 @@ export default function LoansPage() {
       </section>
       <section id="repayment-timeline" className="scroll-mt-6">
         <RepaymentTimeline schedule={loan.schedule} />
+      </section>
+
+      <section id="loan-intelligence" className="scroll-mt-6">
+        <LoanIntelligenceCharts />
       </section>
     </div>{/* /z-10 */}
     </div>

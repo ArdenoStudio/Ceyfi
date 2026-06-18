@@ -8,24 +8,46 @@ import {
   ArrowUpDown,
   BriefcaseBusiness,
   CreditCard,
+  FlaskConical,
   LayoutDashboard,
+  Lightbulb,
   Sparkles,
   Wallet,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Overview", icon: LayoutDashboard },
-  { href: "/wallet", label: "Wallet", icon: Wallet },
-  { href: "/transactions", label: "Transactions", icon: ArrowUpDown },
-  { href: "/loans", label: "Loans", icon: CreditCard },
-  { href: "/business", label: "Business", icon: BriefcaseBusiness },
-  { href: "/assistant", label: "CEYFI AI", icon: Sparkles },
+const NAV_GROUPS = [
+  {
+    label: "My Money",
+    items: [
+      { href: "/", label: "Overview", icon: LayoutDashboard },
+      { href: "/wallet", label: "Wallet", icon: Wallet },
+      { href: "/transactions", label: "Transactions", icon: ArrowUpDown },
+      { href: "/loans", label: "Loans", icon: CreditCard },
+      { href: "/business", label: "Business", icon: BriefcaseBusiness },
+    ],
+  },
+  {
+    label: "Intelligence",
+    items: [
+      { href: "/intelligence", label: "Intelligence", icon: Lightbulb },
+      { href: "/scenarios", label: "Scenarios", icon: FlaskConical },
+      { href: "/decisions", label: "Decisions", icon: Zap },
+      { href: "/assistant", label: "CEYFI AI", icon: Sparkles },
+    ],
+  },
+];
+
+const SYSTEM_ITEMS = [
   { href: "/metrics", label: "Metrics", icon: Activity },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(href));
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[17.5rem] flex-col border-r border-white/8 bg-ceyfi-deep text-white md:flex">
@@ -68,42 +90,72 @@ export function Sidebar() {
         </Link>
       </div>
 
-      <nav className="relative flex-1 space-y-1 px-4 py-5">
+      <nav className="relative flex-1 overflow-y-auto px-4 py-5">
         <div className="absolute bottom-8 left-[2.05rem] top-8 w-px bg-gradient-to-b from-ceyfi-mint/35 via-white/8 to-transparent" />
-        {NAV_ITEMS.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="mb-5">
+            <div className="mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/28">
+              {group.label}
+            </div>
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
+                      active
+                        ? "bg-white/[0.09] text-white"
+                        : "text-white/52 hover:bg-white/[0.055] hover:text-white"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "relative z-10 grid h-8 w-8 place-items-center rounded-[11px] border transition-colors",
+                        active
+                          ? "border-ceyfi-mint/30 bg-ceyfi-green text-white"
+                          : "border-white/8 bg-ceyfi-deep text-white/55 group-hover:text-white"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" strokeWidth={1.8} />
+                    </span>
+                    <span className="font-medium">{item.label}</span>
+                    {active ? (
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-ceyfi-mint shadow-[0_0_10px_rgba(52,211,153,0.7)]" />
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
-                isActive
-                  ? "bg-white/[0.09] text-white"
-                  : "text-white/52 hover:bg-white/[0.055] hover:text-white"
-              )}
-            >
-              <span
+        <div className="mt-auto border-t border-white/8 pt-4">
+          <div className="mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/28">
+            System
+          </div>
+          {SYSTEM_ITEMS.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
                 className={cn(
-                  "relative z-10 grid h-8 w-8 place-items-center rounded-[11px] border transition-colors",
-                  isActive
-                    ? "border-ceyfi-mint/30 bg-ceyfi-green text-white"
-                    : "border-white/8 bg-ceyfi-deep text-white/55 group-hover:text-white"
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
+                  active ? "bg-white/[0.09] text-white" : "text-white/52 hover:bg-white/[0.055] hover:text-white"
                 )}
               >
-                <item.icon className="h-4 w-4" strokeWidth={1.8} />
-              </span>
-              <span className="font-medium">{item.label}</span>
-              {isActive ? (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-ceyfi-mint shadow-[0_0_10px_rgba(52,211,153,0.7)]" />
-              ) : null}
-            </Link>
-          );
-        })}
+                <span className="grid h-8 w-8 place-items-center rounded-[11px] border border-white/8 bg-ceyfi-deep">
+                  <item.icon className="h-4 w-4" strokeWidth={1.8} />
+                </span>
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       <div className="border-t border-white/8 px-6 py-5">

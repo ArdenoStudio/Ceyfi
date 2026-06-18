@@ -17,6 +17,7 @@ import { saveAllocationRules, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { type RemittanceCurrency } from "@/lib/remittance-fx";
 import { ArrowRightLeft, Bot, PieChart, ShieldCheck } from "lucide-react";
+import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSections";
 
 const FAMILY_ACCOUNT_ID = "SEY-ACC-002";
 const WALLET_SENDER_ID = "SEY-USR-001";
@@ -214,6 +215,8 @@ export default function WalletPage() {
       </section>
 
       <TransactionFeed transactions={transactions} />
+
+      <WalletAnalyticsSections />
 
       <SendMoneyModal
         senderId={WALLET_SENDER_ID}

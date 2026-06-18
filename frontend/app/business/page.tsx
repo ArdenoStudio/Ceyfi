@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getPlSummary, getBusinessAccount } from "@/lib/api";
 import { PlSummary, Transaction } from "@/types";
 import { Bot, PiggyBank, ReceiptText, TrendingUp } from "lucide-react";
+import { BusinessAnalyticsSections } from "@/components/business/BusinessAnalyticsSections";
 import { toast } from "sonner";
 
 const BUSINESS_USER_ID = "SEY-BIZ-001";
@@ -186,6 +187,8 @@ export default function BusinessPage() {
           extraTransactions={extraTransactions}
         />
       </section>
+
+      <BusinessAnalyticsSections />
     </div>{/* /z-10 */}
     </div>
   );
