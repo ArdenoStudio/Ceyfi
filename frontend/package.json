@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:smoke": "node scripts/smoke.mjs"
+    "test:smoke": "node scripts/smoke.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium --with-deps"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -38,6 +40,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "@playwright/test": "^1.52.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

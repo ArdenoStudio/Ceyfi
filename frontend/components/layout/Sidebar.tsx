@@ -11,10 +11,12 @@ import {
   FlaskConical,
   LayoutDashboard,
   Lightbulb,
+  LogOut,
   Sparkles,
   Wallet,
   Zap,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const NAV_GROUPS = [
@@ -45,6 +47,7 @@ const SYSTEM_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -61,7 +64,7 @@ export function Sidebar() {
               CEYFI
             </span>
             <span className="block text-[11px] text-white/42">
-              Clarity for every rupee
+              Powered by Seylan Bank
             </span>
           </span>
         </Link>
@@ -74,17 +77,17 @@ export function Sidebar() {
         >
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-[14px] ring-1 ring-white/12">
             <Image
-              src="/nimal-avatar.jpg"
-              alt="Nimal Fernando"
+              src={user?.avatar ?? "/nimal-avatar.jpg"}
+              alt={user?.name ?? "User"}
               width={40}
               height={40}
               className="h-full w-full object-cover"
             />
           </div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">Nimal Fernando</div>
+            <div className="truncate text-sm font-semibold">{user?.name ?? "Demo user"}</div>
             <div className="truncate font-mono text-[10px] text-white/38">
-              SEY-USR-001
+              {user?.user_id ?? "—"}
             </div>
           </div>
         </Link>
@@ -159,12 +162,20 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-white/8 px-6 py-5">
+        <button
+          type="button"
+          onClick={logout}
+          className="mb-3 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] text-white/45 transition hover:bg-white/[0.06] hover:text-white"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          Switch persona
+        </button>
         <div className="flex items-center gap-2 text-[11px] text-white/32">
           <span className="h-1.5 w-1.5 rounded-full bg-ceyfi-mint" />
           Demo data connected
         </div>
         <div className="mt-1 text-[10px] text-white/20">
-          CEYFI v2 · Buildathon 2026
+          CEYFI · Powered by Seylan
         </div>
       </div>
     </aside>

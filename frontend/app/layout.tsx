@@ -3,6 +3,8 @@ import { DM_Sans, Geist_Mono, Noto_Sans_Sinhala, Sora } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthGuard } from "@/components/layout/AuthGuard";
 import "./globals.css";
 
 const headingFont = Sora({
@@ -68,7 +70,11 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <ErrorBoundary>
-          <AppShell>{children}</AppShell>
+          <AuthProvider>
+            <AuthGuard>
+              <AppShell>{children}</AppShell>
+            </AuthGuard>
+          </AuthProvider>
         </ErrorBoundary>
         <Toaster />
       </body>

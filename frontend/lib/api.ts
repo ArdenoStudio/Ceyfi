@@ -1,4 +1,6 @@
 /** Backend URL: env override, else Vercel API in production builds, else local dev. */
+import { adminHeaders } from "@/lib/auth";
+
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ??
   (process.env.NODE_ENV === "production"
@@ -82,6 +84,57 @@ export async function getBusinessAccount(userId: string) {
 
 export async function getPlSummary(userId: string) {
   return request(`/mock/pl-summary/${userId}`);
+}
+
+export interface FinancialSnapshot {
+  user_id: string;
+  name: string;
+  persona: string;
+  balance_lkr: number;
+  savings_balance: number;
+  current_balance: number;
+  health_score: number;
+  health_components: {
+    name: string;
+    score: number;
+    insight: string;
+    actions: string[];
+  }[];
+  anomalies: {
+    id: string;
+    title: string;
+    description: string;
+    date: string;
+    resolved: boolean;
+  }[];
+  opportunities: {
+    title: string;
+    benefit: number;
+    confidence: number;
+    icon: string;
+  }[];
+  decisions: {
+    id: string;
+    title: string;
+    category: "Grow" | "Protect" | "Move" | "Save";
+    benefit_lkr: number;
+    benefit_label: string;
+    risk_reduced: string;
+    confidence: number;
+    evidence: string[];
+    tradeoffs: string[];
+    deadline: string;
+    reversible: boolean;
+    urgency: "High" | "Medium" | "Low";
+  }[];
+  forecast: { day: string; actual: number; predicted: number }[];
+  scenario_base_balance: number;
+  updated_at: string;
+  data_source: "live" | "fixture";
+}
+
+export async function getFinancialSnapshot(userId: string) {
+  return request<FinancialSnapshot>(`/api/financial-snapshot/${userId}`);
 }
 
 export async function postWalletTransfer(payload: {
@@ -356,6 +409,7 @@ export async function prewarmDemoData() {
 export async function postDemoReset() {
   const result = await request("/mock/reset-demo", {
     method: "POST",
+    headers: adminHeaders(),
   });
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("seylan:demo-reset"));

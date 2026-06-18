@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -19,138 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { getFinancialSnapshot, type FinancialSnapshot } from "@/lib/api";
 import { cn, formatters } from "@/lib/utils";
 import { toast } from "sonner";
 
-interface Decision {
-  id: string;
-  title: string;
-  category: "Grow" | "Protect" | "Move" | "Save";
-  benefitLkr: number;
-  benefitLabel: string;
-  riskReduced: string;
-  confidence: number;
-  evidence: string[];
-  tradeoffs: string[];
-  deadline: string;
-  reversible: boolean;
-  urgency: "High" | "Medium" | "Low";
-}
-
-const DECISIONS: Decision[] = [
-  {
-    id: "d1",
-    title: "Move LKR 18,000 to savings this week",
-    category: "Save",
-    benefitLkr: 18000,
-    benefitLabel: "LKR 18,000 moved to savings",
-    riskReduced: "Reduces shortfall probability by 34%",
-    confidence: 87,
-    evidence: ["Salary cleared yesterday", "No bills due for 9 days"],
-    tradeoffs: ["Reduces everyday account to LKR 26,000"],
-    deadline: "Act within 3 days",
-    reversible: true,
-    urgency: "High",
-  },
-  {
-    id: "d2",
-    title: "Optimize EMI payment date to the 28th",
-    category: "Protect",
-    benefitLkr: 2200,
-    benefitLabel: "LKR 2,200 late-fee risk avoided",
-    riskReduced: "Aligns EMI with salary cycle",
-    confidence: 79,
-    evidence: ["Salary arrives on the 1st", "Current EMI on 25th creates a 4-day gap"],
-    tradeoffs: ["Requires bank request", "One-time processing fee may apply"],
-    deadline: "Act within 7 days",
-    reversible: false,
-    urgency: "Medium",
-  },
-  {
-    id: "d3",
-    title: "Time remittance for best GBP rate",
-    category: "Grow",
-    benefitLkr: 3200,
-    benefitLabel: "LKR 3,200 extra on next transfer",
-    riskReduced: "FX timing improves yield by 0.8%",
-    confidence: 76,
-    evidence: ["GBP/LKR at 30-day high tomorrow", "Last transfer was 12 days ago"],
-    tradeoffs: ["Family may wait 1 extra day for funds"],
-    deadline: "Act within 1 day",
-    reversible: false,
-    urgency: "High",
-  },
-  {
-    id: "d4",
-    title: "Cancel Netflix and unused subscriptions",
-    category: "Save",
-    benefitLkr: 1750,
-    benefitLabel: "LKR 1,750/month saved",
-    riskReduced: "Cuts discretionary spend by 2.1%",
-    confidence: 92,
-    evidence: ["No usage in 45 days", "Duplicate streaming on Dialog TV"],
-    tradeoffs: ["Family entertainment plan needs alternative"],
-    deadline: "Act within 14 days",
-    reversible: true,
-    urgency: "Low",
-  },
-  {
-    id: "d5",
-    title: "Refinance personal loan at lower rate",
-    category: "Grow",
-    benefitLkr: 42000,
-    benefitLabel: "LKR 42,000 interest saved over term",
-    riskReduced: "Reduces debt service ratio to 10.8%",
-    confidence: 68,
-    evidence: ["Current rate 14%", "Seylan promotional rate 11.5% available"],
-    tradeoffs: ["Processing fee LKR 5,000", "Credit check required"],
-    deadline: "Act within 30 days",
-    reversible: false,
-    urgency: "Medium",
-  },
-  {
-    id: "d6",
-    title: "Top up emergency fund by LKR 25,000",
-    category: "Protect",
-    benefitLkr: 25000,
-    benefitLabel: "Emergency fund reaches 2.8 months",
-    riskReduced: "Liquidity score improves to 78/100",
-    confidence: 84,
-    evidence: ["Current buffer covers 2.1 months", "CEB bill spike expected"],
-    tradeoffs: ["Less available for discretionary spend"],
-    deadline: "Act within 5 days",
-    reversible: true,
-    urgency: "High",
-  },
-  {
-    id: "d7",
-    title: "Send payment reminder to Negombo Builders",
-    category: "Move",
-    benefitLkr: 128000,
-    benefitLabel: "LKR 128,000 receivable collected",
-    riskReduced: "Reduces 60+ day overdue exposure",
-    confidence: 71,
-    evidence: ["Invoice 34 days overdue", "Client paid on time last quarter"],
-    tradeoffs: ["May strain client relationship"],
-    deadline: "Act within 2 days",
-    reversible: true,
-    urgency: "High",
-  },
-  {
-    id: "d8",
-    title: "Convert AED remittance at today's peak rate",
-    category: "Grow",
-    benefitLkr: 1800,
-    benefitLabel: "LKR 1,800 better than weekly average",
-    riskReduced: "Captures 0.4% FX improvement",
-    confidence: 74,
-    evidence: ["AED/LKR up 0.6% this week", "Brother's school fees due in 5 days"],
-    tradeoffs: ["Transfer fee LKR 250 applies"],
-    deadline: "Act today",
-    reversible: false,
-    urgency: "Medium",
-  },
-];
+type Decision = FinancialSnapshot["decisions"][0];
 
 const CATEGORY_COLORS = {
   Grow: "bg-emerald-50 text-emerald-700",
@@ -166,32 +40,49 @@ const URGENCY_DOT = {
 };
 
 export default function DecisionsPage() {
+  const { user } = useAuth();
+  const [decisions, setDecisions] = useState<Decision[]>([]);
   const [filter, setFilter] = useState<"All" | Decision["category"]>("All");
   const [sort, setSort] = useState<"impact" | "urgency" | "confidence">("impact");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [executeTarget, setExecuteTarget] = useState<Decision | null>(null);
   const [executing, setExecuting] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+    getFinancialSnapshot(user.user_id)
+      .then((s) => setDecisions(s.decisions))
+      .catch(() => setDecisions([]));
+  }, [user]);
+
+  useEffect(() => {
+    const onReset = () => {
+      if (user) getFinancialSnapshot(user.user_id).then((s) => setDecisions(s.decisions)).catch(() => null);
+    };
+    window.addEventListener("seylan:demo-reset", onReset);
+    return () => window.removeEventListener("seylan:demo-reset", onReset);
+  }, [user]);
+
   const filtered = useMemo(() => {
-    let list = filter === "All" ? DECISIONS : DECISIONS.filter((d) => d.category === filter);
+    let list = filter === "All" ? decisions : decisions.filter((d) => d.category === filter);
     const urgencyOrder = { High: 0, Medium: 1, Low: 2 };
     list = [...list].sort((a, b) => {
-      if (sort === "impact") return b.benefitLkr - a.benefitLkr;
+      if (sort === "impact") return b.benefit_lkr - a.benefit_lkr;
       if (sort === "urgency") return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
       return b.confidence - a.confidence;
     });
     return list;
-  }, [filter, sort]);
+  }, [decisions, filter, sort]);
 
-  const totalBenefit = DECISIONS.reduce((s, d) => s + d.benefitLkr, 0);
-  const highUrgency = DECISIONS.filter((d) => d.urgency === "High").length;
+  const totalBenefit = decisions.reduce((s, d) => s + d.benefit_lkr, 0);
+  const highUrgency = decisions.filter((d) => d.urgency === "High").length;
 
   const handleExecute = () => {
     setExecuting(true);
     setTimeout(() => {
       setExecuting(false);
       setExecuteTarget(null);
-      toast.success("Action confirmed", { description: executeTarget?.benefitLabel });
+      toast.success("Action confirmed", { description: executeTarget?.benefit_label });
     }, 1500);
   };
 
@@ -214,7 +105,7 @@ export default function DecisionsPage() {
         {[
           { label: "Total potential benefit", value: formatters.currency({ number: totalBenefit, maxFractionDigits: 0 }) },
           { label: "High urgency", value: `${highUrgency}` },
-          { label: "Pending decisions", value: `${DECISIONS.length}` },
+          { label: "Pending decisions", value: `${decisions.length}` },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-ceyfi-line/70 bg-ceyfi-paper p-4">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-ceyfi-muted">{s.label}</div>
@@ -270,7 +161,7 @@ export default function DecisionsPage() {
                   </div>
                   <h2 className="mt-2 font-heading text-base font-semibold text-ceyfi-ink">{d.title}</h2>
                   <p className="mt-1 font-mono text-lg font-bold text-emerald-700">
-                    {formatters.currency({ number: d.benefitLkr, maxFractionDigits: 0 })}
+                    {formatters.currency({ number: d.benefit_lkr, maxFractionDigits: 0 })}
                   </p>
                 </div>
                 {isOpen ? <ChevronUp className="h-4 w-4 text-ceyfi-faint" /> : <ChevronDown className="h-4 w-4 text-ceyfi-faint" />}
@@ -335,8 +226,8 @@ export default function DecisionsPage() {
             <DialogTitle>Confirm action</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-ceyfi-muted">{executeTarget?.title}</p>
-          <p className="font-mono font-semibold text-emerald-700">{executeTarget?.benefitLabel}</p>
-          <p className="text-xs text-ceyfi-faint">{executeTarget?.riskReduced}</p>
+          <p className="font-mono font-semibold text-emerald-700">{executeTarget?.benefit_label}</p>
+          <p className="text-xs text-ceyfi-faint">{executeTarget?.risk_reduced}</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setExecuteTarget(null)}>Cancel</Button>
             <Button className="bg-ceyfi-green text-white" disabled={executing} onClick={handleExecute}>
