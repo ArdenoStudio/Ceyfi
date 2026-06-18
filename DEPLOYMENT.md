@@ -2,15 +2,15 @@
 
 Single source of truth for live URLs and environment setup.
 
-## Live URLs (target)
+## Live URLs (canonical)
 
 | Surface | URL | Git repo branch |
 |---------|-----|-----------------|
-| **Frontend** | https://ceyfi.vercel.app (or https://seylan-hub.vercel.app) | `ArdenoStudio/Ceyfi` `main` |
+| **Frontend** | https://seylan-hub1.vercel.app | `ArdenoStudio/seylan-hub` `main` |
 | **Backend API** | https://seylan-hub-backend.vercel.app | same monorepo `backend/` |
 | **Status** | https://seylanhub-www.vercel.app | `status-site/` |
 
-> **Action:** Link the Vercel project to **Ceyfi** (not legacy seylan-hub) so production matches this repo.
+> **Vercel:** Project `seylan-hub1` auto-deploys from `ArdenoStudio/seylan-hub` on push to `main`. Root directory: `frontend/`.
 
 ## Vercel (monorepo)
 

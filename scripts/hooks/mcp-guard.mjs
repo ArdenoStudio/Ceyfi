@@ -6,12 +6,18 @@ async function main() {
   try {
     const payload = JSON.parse(input || "{}");
     const tool = payload?.tool_input?.name ?? payload?.tool_name ?? "";
-    if (String(tool).includes("transfer")) {
+    const financial = [
+      "transfer",
+      "pay_loan_instalment",
+      "execute_decision",
+      "initiate_payment",
+    ];
+    if (financial.some((k) => String(tool).includes(k))) {
       process.stdout.write(
         JSON.stringify({
           permission: "ask",
           user_message:
-            "CEYFI demo: confirm before executing a funds transfer via MCP.",
+            "CEYFI demo: confirm before executing a financial action via MCP.",
         })
       );
       return;
