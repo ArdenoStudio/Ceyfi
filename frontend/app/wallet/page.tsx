@@ -97,7 +97,7 @@ export default function WalletPage() {
         description="See the latest remittance, how the family is using each bucket, and adjust the next split before sending again."
         
         action={
-          <Button onClick={() => setModalOpen(true)} className="rounded-full bg-ceyfi-green text-white hover:bg-ceyfi-deep">
+          <Button onClick={() => setModalOpen(true)} className="interactive-press rounded-full shadow-brand">
             Send Money
           </Button>
         }

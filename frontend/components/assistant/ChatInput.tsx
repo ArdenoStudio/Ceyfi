@@ -52,7 +52,7 @@ export function ChatInput({ onSend, disabled, language }: ChatInputProps) {
   return (
     <div className="relative z-10 shrink-0 p-4">
       <div className="mx-auto max-w-2xl">
-        <div className="relative rounded-2xl border border-white/[0.10] bg-white/[0.05] shadow-xl shadow-black/40 backdrop-blur-xl transition-all focus-within:border-white/[0.18] focus-within:bg-white/[0.07]">
+        <div className="relative rounded-2xl border border-border/80 bg-card/85 shadow-brand-lg backdrop-blur-xl transition-all focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/10 dark:border-white/10 dark:bg-white/5 dark:shadow-black/40 dark:focus-within:border-white/20 dark:focus-within:bg-white/[0.07]">
           <textarea
             ref={textareaRef}
             value={value}
@@ -66,8 +66,8 @@ export function ChatInput({ onSend, disabled, language }: ChatInputProps) {
             disabled={disabled}
             rows={1}
             className={cn(
-              "w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-sm text-white",
-              "placeholder:text-white/25 focus:outline-none",
+              "w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-sm text-foreground dark:text-white",
+              "placeholder:text-muted-foreground/70 focus:outline-none dark:placeholder:text-white/25",
               "min-h-[48px] max-h-[150px]",
               language === "si" && "sinhala"
             )}
@@ -93,7 +93,7 @@ export function ChatInput({ onSend, disabled, language }: ChatInputProps) {
                 "h-8 w-8 rounded-xl transition-all duration-150",
                 canSend
                   ? "bg-seylan-red text-white shadow-md shadow-seylan-red/30 hover:bg-seylan-red/90 hover:shadow-seylan-red/40"
-                  : "bg-white/[0.08] text-white/20 cursor-not-allowed"
+                  : "bg-muted text-muted-foreground cursor-not-allowed dark:bg-white/[0.08] dark:text-white/20"
               )}
             >
               <ArrowUp className="h-4 w-4" />
@@ -101,7 +101,7 @@ export function ChatInput({ onSend, disabled, language }: ChatInputProps) {
           </div>
         </div>
 
-        <p className="mt-2 text-center text-[10px] text-white/15">
+        <p className="mt-2 text-center text-[10px] text-muted-foreground/70 dark:text-white/15">
           Enter to send · Shift + Enter for new line
         </p>
       </div>

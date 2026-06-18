@@ -24,7 +24,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
       {!isUser && message.thinking && (
         <button
           onClick={() => setThinkingOpen((v) => !v)}
-          className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/55 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground dark:text-white/35 dark:hover:text-white/55"
         >
           {isThinking ? (
             <span className="flex items-center gap-1.5">
@@ -47,7 +47,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
 
       {/* Expanded thinking content */}
       {!isUser && message.thinking && (thinkingOpen || isThinking) && (
-        <div className="max-w-[82%] px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03] text-white/40 text-xs leading-5 whitespace-pre-wrap font-mono">
+        <div className="max-w-[82%] rounded-xl border border-border/70 bg-muted/50 px-3 py-2.5 font-mono text-xs leading-5 whitespace-pre-wrap text-muted-foreground dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-white/40">
           {message.thinking}
           {isThinking && (
             <span className="inline-block w-1 h-3 bg-current opacity-50 animate-pulse ml-0.5 rounded-sm" />
@@ -61,7 +61,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
           "max-w-[82%] px-4 py-3 text-sm leading-6",
           isUser
             ? "bg-seylan-red text-white shadow-lg shadow-seylan-red/20 rounded-tl-[20px] rounded-bl-[20px] rounded-br-[20px] rounded-tr-md"
-            : "border border-white/[0.08] bg-white/[0.06] text-white/85 backdrop-blur-sm rounded-tr-[20px] rounded-br-[20px] rounded-bl-[20px] rounded-tl-md"
+            : "rounded-tr-[20px] rounded-br-[20px] rounded-bl-[20px] rounded-tl-md border border-border/80 bg-card/90 text-foreground backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white/85"
         )}
       >
         <p

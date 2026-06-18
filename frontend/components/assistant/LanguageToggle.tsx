@@ -16,18 +16,18 @@ const LANGS: { id: Language; label: string; className?: string }[] = [
 
 export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
   return (
-    <div className="flex items-center gap-1 rounded-full border border-white/[0.10] bg-white/[0.05] p-1 backdrop-blur-sm">
+    <div className="flex items-center gap-1 rounded-full border border-border/80 bg-card/80 p-1 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
       {LANGS.map((lang) => (
         <button
           key={lang.id}
           type="button"
           onClick={() => onChange(lang.id)}
           className={cn(
-            "px-3 py-1 text-xs rounded-full transition-all duration-150",
+            "interactive-press rounded-full px-3 py-1 text-xs transition-all duration-200",
             lang.className,
             language === lang.id
-              ? "bg-white text-seylan-charcoal shadow-sm font-semibold"
-              : "text-white/35 hover:text-white/60"
+              ? "bg-background font-semibold text-foreground shadow-sm dark:bg-white dark:text-seylan-charcoal"
+              : "text-muted-foreground hover:text-foreground dark:text-white/35 dark:hover:text-white/60",
           )}
         >
           {lang.label}

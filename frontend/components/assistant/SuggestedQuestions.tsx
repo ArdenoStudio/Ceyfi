@@ -60,10 +60,9 @@ export function SuggestedQuestions({ language, onSelect }: SuggestedQuestionsPro
             key={action.label}
             onClick={() => onSelect(action.q)}
             className={cn(
-              "flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.04]",
-              "px-4 py-2 text-xs text-white/50 backdrop-blur-sm",
-              "transition-all duration-150",
-              "hover:border-seylan-red/30 hover:bg-seylan-red/[0.08] hover:text-white/80",
+              "interactive-card flex items-center gap-2 rounded-full border border-border/80 bg-card/70 px-4 py-2 text-xs text-muted-foreground backdrop-blur-sm",
+              "transition-all duration-200",
+              "hover:border-primary/30 hover:bg-primary/5 hover:text-foreground dark:border-white/10 dark:bg-white/[0.04] dark:text-white/50 dark:hover:border-seylan-red/30 dark:hover:bg-seylan-red/[0.08] dark:hover:text-white/80",
               isSinhala && "sinhala"
             )}
           >

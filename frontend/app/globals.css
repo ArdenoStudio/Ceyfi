@@ -224,8 +224,14 @@
 [data-module="wallet"] {
   --module-accent: #E31821;
   --module-accent-soft: rgba(227, 24, 33, 0.06);
+  background:
+    radial-gradient(circle at top right, rgba(227, 24, 33, 0.06), transparent 28rem),
+    linear-gradient(180deg, #fff8f6 0%, #fffdf8 58%, #fff6ec 100%);
 }
 .dark [data-module="wallet"] {
+  background:
+    radial-gradient(circle at top right, rgba(227, 24, 33, 0.14), transparent 28rem),
+    linear-gradient(180deg, #1a090c 0%, #2a0b0f 58%, #241316 100%);
   /* Glass tokens — transparent cards on wallet dark canvas */
   --card: rgba(255, 255, 255, 0.05);
   --card-foreground: #FFF8F1;
