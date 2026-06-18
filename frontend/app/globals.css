@@ -82,6 +82,7 @@
   --color-ceyfi-mint: #34D399;
   --color-ceyfi-canvas: #F4F8F3;
   --color-ceyfi-paper: #FBFDF9;
+  --color-ceyfi-surface: var(--ceyfi-surface);
   --color-ceyfi-sprout: #E8F7EE;
   --color-ceyfi-line: #D8E8DC;
   --color-ceyfi-ink: #10261A;
@@ -90,6 +91,7 @@
 }
 
 :root {
+  --ceyfi-surface: #EDF5EF;
   --background: #F4F8F3;
   --foreground: #10261A;
   --card: #FBFDF9;
@@ -125,6 +127,7 @@
 }
 
 .dark {
+  --ceyfi-surface: rgb(255 255 255 / 4%);
   --background: #2A0B0F;
   --foreground: #FFF8F1;
   --card: #3A1016;
@@ -163,11 +166,16 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-ceyfi-canvas text-foreground;
+    @apply bg-background text-foreground;
     background:
       radial-gradient(circle at 16% 0%, rgb(52 211 153 / 8%), transparent 28rem),
       linear-gradient(180deg, #f7faf5 0%, #f4f8f3 46%, #eff6f0 100%);
     font-feature-settings: "kern" 1, "liga" 1, "tnum" 1;
+  }
+  .dark body {
+    background:
+      radial-gradient(circle at 16% 0%, rgb(227 24 33 / 10%), transparent 28rem),
+      linear-gradient(180deg, #2a0b0f 0%, #241316 46%, #1a090c 100%);
   }
   html {
     @apply font-sans;
@@ -216,8 +224,9 @@
 [data-module="wallet"] {
   --module-accent: #E31821;
   --module-accent-soft: rgba(227, 24, 33, 0.06);
-  /* Dark glass tokens — override shadcn dark card variables so bg-card
-     renders as transparent glass instead of the dark-red #3A1016 value */
+}
+.dark [data-module="wallet"] {
+  /* Glass tokens — transparent cards on wallet dark canvas */
   --card: rgba(255, 255, 255, 0.05);
   --card-foreground: #FFF8F1;
   --border: rgba(255, 255, 255, 0.08);
@@ -231,6 +240,11 @@
     radial-gradient(circle at top right, rgba(59, 130, 246, 0.07), transparent 28rem),
     linear-gradient(180deg, #f5f8ff 0%, #fffdf8 58%, #fff6ec 100%);
 }
+.dark [data-module="loans"] {
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 28rem),
+    linear-gradient(180deg, #1a1228 0%, #2a0b0f 58%, #241316 100%);
+}
 [data-module="business"] {
   --module-accent: #10B981;
   --module-accent-soft: rgba(16, 185, 129, 0.06);
@@ -238,12 +252,22 @@
     radial-gradient(circle at top right, rgba(16, 185, 129, 0.07), transparent 28rem),
     linear-gradient(180deg, #f4fbf8 0%, #fffdf8 58%, #fff6ec 100%);
 }
+.dark [data-module="business"] {
+  background:
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 28rem),
+    linear-gradient(180deg, #0f1f18 0%, #2a0b0f 58%, #241316 100%);
+}
 [data-module="assistant"] {
   --module-accent: #8B5CF6;
   --module-accent-soft: rgba(139, 92, 246, 0.06);
   background:
     radial-gradient(circle at top right, rgba(139, 92, 246, 0.08), transparent 28rem),
     linear-gradient(180deg, #f8f5ff 0%, #fffdf8 58%, #fff6ec 100%);
+}
+.dark [data-module="assistant"] {
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.14), transparent 28rem),
+    linear-gradient(180deg, #1a1028 0%, #2a0b0f 58%, #241316 100%);
 }
 
 /* Tabular number utility */
@@ -341,4 +365,22 @@
 ::selection {
   background-color: rgba(52, 211, 153, 0.24);
   color: #052E16;
+}
+.dark ::selection {
+  background-color: rgba(227, 24, 33, 0.35);
+  color: #fff8f1;
+}
+
+/* Immersive dashboards (profile, metrics) */
+[data-module="profile"],
+[data-module="metrics"] {
+  background:
+    radial-gradient(circle at 16% 0%, rgb(52 211 153 / 8%), transparent 28rem),
+    linear-gradient(180deg, #f7faf5 0%, #f4f8f3 46%, #eff6f0 100%);
+  color: var(--foreground);
+}
+.dark [data-module="profile"],
+.dark [data-module="metrics"] {
+  background: #0c0407;
+  color: #fff8f1;
 }

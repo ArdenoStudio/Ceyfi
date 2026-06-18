@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { API_BASE } from "@/lib/api";
 import type { DemoPersona } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export default function LoginPage() {
   const { login, user } = useAuth();
@@ -71,31 +72,34 @@ export default function LoginPage() {
   } as const;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-ceyfi-canvas px-4 py-12">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle variant="standalone" />
+      </div>
       <div className="w-full max-w-lg">
         <div className="text-center">
-          <span className="inline-grid h-14 w-14 place-items-center rounded-2xl bg-ceyfi-green text-2xl font-bold text-white shadow-lg">
+          <span className="inline-grid h-14 w-14 place-items-center rounded-2xl bg-primary text-2xl font-bold text-primary-foreground shadow-lg">
             C
           </span>
-          <h1 className="mt-4 font-heading text-3xl font-semibold tracking-tight text-ceyfi-ink">
+          <h1 className="mt-4 font-heading text-3xl font-semibold tracking-tight text-foreground">
             CEYFI
           </h1>
-          <p className="mt-1 text-sm text-ceyfi-muted">Clarity for every rupee</p>
-          <p className="mt-3 text-xs text-ceyfi-faint">
+          <p className="mt-1 text-sm text-muted-foreground">Clarity for every rupee</p>
+          <p className="mt-3 text-xs text-muted-foreground/80">
             Powered by{" "}
             <span className="font-semibold text-seylan-red">Seylan Bank</span>
           </p>
         </div>
 
-        <div className="mt-8 rounded-2xl border border-ceyfi-line/70 bg-ceyfi-paper p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-ceyfi-green">
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-primary">
             <Shield className="h-3.5 w-3.5" />
             Demo environment
           </div>
-          <h2 className="font-heading text-lg font-semibold text-ceyfi-ink">
+          <h2 className="font-heading text-lg font-semibold text-foreground">
             Choose a persona
           </h2>
-          <p className="mt-1 text-sm text-ceyfi-muted">
+          <p className="mt-1 text-sm text-muted-foreground">
             Three Sri Lankan banking journeys — diaspora, borrower, and SME.
           </p>
 
@@ -107,11 +111,11 @@ export default function LoginPage() {
                 disabled={loading !== null}
                 onClick={() => handleLogin(p.user_id)}
                 className={cn(
-                  "flex w-full items-center gap-4 rounded-xl border border-ceyfi-line/70 p-4 text-left transition",
-                  "hover:border-ceyfi-green/40 hover:bg-ceyfi-surface disabled:opacity-60"
+                  "flex w-full items-center gap-4 rounded-xl border border-border p-4 text-left transition",
+                  "hover:border-primary/40 hover:bg-ceyfi-surface disabled:opacity-60"
                 )}
               >
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl ring-1 ring-ceyfi-line">
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
                   <Image
                     src={p.avatar}
                     alt={p.name}
@@ -121,23 +125,23 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold text-ceyfi-ink">{p.name}</div>
-                  <div className="text-xs text-ceyfi-muted">{p.tagline}</div>
-                  <div className="mt-1 text-[10px] font-medium uppercase tracking-wider text-ceyfi-green">
+                  <div className="font-semibold text-foreground">{p.name}</div>
+                  <div className="text-xs text-muted-foreground">{p.tagline}</div>
+                  <div className="mt-1 text-[10px] font-medium uppercase tracking-wider text-primary">
                     {personaLabels[p.persona]}
                   </div>
                 </div>
-                <ArrowRight className="h-4 w-4 shrink-0 text-ceyfi-faint" />
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
               </button>
             ))}
           </div>
 
           {error ? (
-            <p className="mt-4 text-center text-sm text-rose-600">{error}</p>
+            <p className="mt-4 text-center text-sm text-destructive">{error}</p>
           ) : null}
         </div>
 
-        <p className="mt-6 text-center text-[11px] text-ceyfi-faint">
+        <p className="mt-6 text-center text-[11px] text-muted-foreground/80">
           Demo data only · Not connected to live Internet Banking
         </p>
       </div>

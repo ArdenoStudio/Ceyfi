@@ -35,7 +35,7 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-ceyfi-canvas">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main className="flex min-w-0 flex-1 flex-col pb-24 md:ml-[17.5rem] md:pb-0">
         <AppTopbar />

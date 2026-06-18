@@ -75,8 +75,7 @@ export default function ProfilePage() {
   return (
     <div
       data-module="profile"
-      className="dark relative min-h-full overflow-hidden"
-      style={{ background: "#0c0407" }}
+      className="relative min-h-full overflow-hidden"
     >
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(227,24,33,0.15),transparent)]" />
@@ -92,12 +91,12 @@ export default function ProfilePage() {
       />
 
       <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-        <header className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.05] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
+        <header className="relative overflow-hidden rounded-[2rem] border-border bg-card/90 shadow-brand dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
           <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-seylan-red/25 blur-3xl" />
           <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center">
             {/* Avatar */}
             <div className="relative group">
-              <div className="h-24 w-24 overflow-hidden rounded-full ring-4 ring-white/10 sm:h-28 sm:w-28">
+              <div className="h-24 w-24 overflow-hidden rounded-full ring-4 ring-border dark:ring-white/10 sm:h-28 sm:w-28">
                 <Image
                   src="/nimal-avatar.jpg"
                   alt={profile.account_holder}
@@ -114,13 +113,13 @@ export default function ProfilePage() {
               <p className="mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-seylan-red">
                 My account
               </p>
-              <h1 className="font-heading text-2xl font-semibold text-white sm:text-4xl">
+              <h1 className="font-heading text-2xl font-semibold text-foreground dark:text-white sm:text-4xl">
                 {profile.account_holder}
               </h1>
-              <p className="mt-1 text-sm text-white/45">
+              <p className="mt-1 text-sm text-foreground dark:text-white/45">
                 {profile.accounts.join(" · ")}
               </p>
-              <p className="mt-0.5 text-xs text-white/30">
+              <p className="mt-0.5 text-xs text-muted-foreground/80 dark:text-white/30">
                 User ID: {profile.user_id}
               </p>
             </div>
@@ -150,37 +149,37 @@ export default function ProfilePage() {
         {/* Loan & FD row */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {loan && (
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border-border bg-card/80 dark:border-white/[0.08] dark:bg-white/[0.04] p-5 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-4">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15">
                   <TrendingUp className="h-4 w-4 text-amber-400" />
                 </span>
-                <h3 className="text-sm font-semibold text-white/70">
+                <h3 className="text-sm font-semibold text-foreground dark:text-white/70">
                   {loan.type}
                 </h3>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-white/50">Disbursed</span>
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm text-muted-foreground dark:text-white/50">Disbursed</span>
+                  <span className="text-sm font-medium text-foreground dark:text-white">
                     {formatLKR(loan.disbursed_amount_lkr)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-white/50">Outstanding</span>
+                  <span className="text-sm text-muted-foreground dark:text-white/50">Outstanding</span>
                   <span className="text-sm font-medium text-amber-400">
                     {formatLKR(loan.outstanding_lkr)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-white/50">Monthly EMI</span>
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm text-muted-foreground dark:text-white/50">Monthly EMI</span>
+                  <span className="text-sm font-medium text-foreground dark:text-white">
                     {formatLKR(loan.monthly_installment_lkr)}
                   </span>
                 </div>
                 {/* Progress bar */}
                 <div className="pt-1">
-                  <div className="flex justify-between text-xs text-white/40 mb-1">
+                  <div className="flex justify-between text-xs text-muted-foreground dark:text-white/40 mb-1">
                     <span>Repaid</span>
                     <span>
                       {Math.round(
@@ -191,7 +190,7 @@ export default function ProfilePage() {
                       %
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div className="h-2 rounded-full bg-muted/60 dark:bg-white/10 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400"
                       style={{
@@ -200,7 +199,7 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 pt-1 text-xs text-white/40">
+                <div className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground dark:text-white/40">
                   <Calendar className="h-3 w-3" />
                   <span>Next payment: {formatDate(loan.next_payment_date)}</span>
                 </div>
@@ -209,12 +208,12 @@ export default function ProfilePage() {
           )}
 
           {fd && (
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="rounded-2xl border-border bg-card/80 dark:border-white/[0.08] dark:bg-white/[0.04] p-5 backdrop-blur-sm">
               <div className="flex items-center gap-2 mb-4">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/15">
                   <Landmark className="h-4 w-4 text-emerald-400" />
                 </span>
-                <h3 className="text-sm font-semibold text-white/70">
+                <h3 className="text-sm font-semibold text-foreground dark:text-white/70">
                   Fixed Deposit
                 </h3>
                 <span className="ml-auto rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-400">
@@ -223,25 +222,25 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-white/50">Principal</span>
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm text-muted-foreground dark:text-white/50">Principal</span>
+                  <span className="text-sm font-medium text-foreground dark:text-white">
                     {formatLKR(fd.amount_lkr)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-white/50">Interest Rate</span>
+                  <span className="text-sm text-muted-foreground dark:text-white/50">Interest Rate</span>
                   <span className="flex items-center gap-1 text-sm font-medium text-emerald-400">
                     <Percent className="h-3 w-3" />
                     {fd.interest_rate_pct}% p.a.
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-white/50">Term</span>
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm text-muted-foreground dark:text-white/50">Term</span>
+                  <span className="text-sm font-medium text-foreground dark:text-white">
                     {fd.term_months} months
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 pt-1 text-xs text-white/40">
+                <div className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground dark:text-white/40">
                   <Clock className="h-3 w-3" />
                   <span>Matures: {formatDate(fd.maturity_date)}</span>
                 </div>
@@ -250,8 +249,8 @@ export default function ProfilePage() {
           )}
 
           {!loan && !fd && (
-            <div className="col-span-2 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-8 text-center">
-              <p className="text-sm text-white/40">
+            <div className="col-span-2 rounded-2xl border-border bg-card/80 dark:border-white/[0.08] dark:bg-white/[0.04] p-8 text-center">
+              <p className="text-sm text-muted-foreground dark:text-white/40">
                 No active loans or fixed deposits.
               </p>
             </div>
@@ -259,14 +258,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Recent transactions */}
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 backdrop-blur-sm">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-white/70 mb-4">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10">
-              <Receipt className="h-4 w-4 text-white/60" />
+        <div className="rounded-2xl border-border bg-card/80 dark:border-white/[0.08] dark:bg-white/[0.04] p-5 backdrop-blur-sm">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground dark:text-white/70 mb-4">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted/60 dark:bg-white/10">
+              <Receipt className="h-4 w-4 text-muted-foreground dark:text-white/60" />
             </span>
             Recent Transactions
           </h3>
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-border dark:divide-white/[0.06]">
             {profile.recent_transactions.map((tx) => (
               <div
                 key={tx.id}
@@ -287,10 +286,10 @@ export default function ProfilePage() {
                     )}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-white/90">
+                    <p className="text-sm font-medium text-foreground dark:text-white/90">
                       {tx.description}
                     </p>
-                    <p className="text-xs text-white/40">
+                    <p className="text-xs text-muted-foreground dark:text-white/40">
                       {formatDate(tx.date)}
                     </p>
                   </div>
@@ -299,7 +298,7 @@ export default function ProfilePage() {
                   className={`text-sm font-semibold ${
                     tx.type === "credit"
                       ? "text-emerald-400"
-                      : "text-white/80"
+                      : "text-foreground dark:text-white/80"
                   }`}
                 >
                   {tx.type === "credit" ? "+" : "-"}{" "}
@@ -336,22 +335,22 @@ function BalanceCard({
       <div className="flex items-center gap-2 mb-3">
         <span
           className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-            accent ? "bg-seylan-red/20" : "bg-white/10"
+            accent ? "bg-seylan-red/20" : "bg-muted/60 dark:bg-white/10"
           }`}
         >
           <Icon
             className={`h-4 w-4 ${
-              accent ? "text-seylan-red" : "text-white/60"
+              accent ? "text-seylan-red" : "text-muted-foreground dark:text-white/60"
             }`}
           />
         </span>
-        <span className="text-xs font-medium uppercase tracking-wider text-white/50">
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-white/50">
           {label}
         </span>
       </div>
       <p
         className={`text-2xl font-bold ${
-          accent ? "text-white" : "text-white/90"
+          accent ? "text-foreground dark:text-white" : "text-foreground dark:text-white/90"
         }`}
       >
         {value}

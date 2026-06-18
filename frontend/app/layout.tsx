@@ -70,7 +70,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${headingFont.variable} ${bodyFont.variable} ${geistMono.variable} ${notoSansSinhala.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-ceyfi-canvas text-ceyfi-ink dark:bg-ceyfi-deep dark:text-white">
+      <body className="flex min-h-full flex-col bg-background text-foreground">
         <ErrorBoundary>
           <ThemeProvider>
             <AuthProvider>

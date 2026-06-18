@@ -72,7 +72,11 @@ export default function IntelligencePage() {
   const forecast = snapshot?.forecast ?? [];
   const totalScore = snapshot?.health_score ?? 0;
   const scoreColor =
-    totalScore >= 80 ? "text-emerald-700" : totalScore >= 60 ? "text-amber-700" : "text-rose-700";
+    totalScore >= 80
+      ? "text-emerald-700 dark:text-emerald-300 dark:text-emerald-300"
+      : totalScore >= 60
+        ? "text-amber-700 dark:text-amber-300"
+        : "text-rose-700 dark:text-rose-300";
 
   const forecastError = forecast.length > 1
     ? Math.abs((forecast[forecast.length - 1].actual - forecast[forecast.length - 1].predicted) / forecast[forecast.length - 1].actual * 100)
@@ -81,28 +85,28 @@ export default function IntelligencePage() {
   return (
     <div className="mx-auto w-full max-w-[1240px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10">
       <header>
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
           Financial intelligence
           {snapshot?.data_source === "live" ? (
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] text-emerald-700">Live data</span>
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 dark:text-emerald-300">Live data</span>
           ) : null}
         </div>
-        <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-ceyfi-ink">
+        <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-foreground">
           Explainable financial health
         </h1>
-        <p className="mt-2 text-sm text-ceyfi-muted">
+        <p className="mt-2 text-sm text-muted-foreground">
           Score breakdown, anomaly feed, forecast accuracy, and ranked opportunities for {snapshot?.name ?? user?.name}.
         </p>
       </header>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <div className="flex flex-col items-center justify-center rounded-[22px] border border-ceyfi-line/75 bg-ceyfi-paper p-8">
+        <div className="flex flex-col items-center justify-center rounded-[22px] border border-border/75 bg-card p-8">
           <ProgressCircle value={totalScore} size={160} strokeWidth={12}>
             <div className="text-center">
               <div className={cn("font-heading text-5xl font-semibold tracking-[-0.05em]", scoreColor)}>
                 {totalScore || "—"}
               </div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-ceyfi-faint">Health score</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Health score</div>
             </div>
           </ProgressCircle>
         </div>
@@ -119,10 +123,10 @@ export default function IntelligencePage() {
           </ChartContainer>
           <div className="mt-4 space-y-2">
             {components.map((c) => (
-              <div key={c.name} className="flex items-center justify-between rounded-lg bg-ceyfi-canvas px-3 py-2 text-xs">
+              <div key={c.name} className="flex items-center justify-between rounded-lg bg-muted px-3 py-2 text-xs">
                 <div>
-                  <span className="font-medium text-ceyfi-ink">{c.name}</span>
-                  <span className="ml-2 text-ceyfi-muted">— {c.insight}</span>
+                  <span className="font-medium text-foreground">{c.name}</span>
+                  <span className="ml-2 text-muted-foreground">— {c.insight}</span>
                 </div>
                 <Button variant="outline" size="sm" className="text-[10px]" onClick={() => setImproveTarget(c)}>
                   Improve
@@ -136,17 +140,17 @@ export default function IntelligencePage() {
       <ChartCard title="Anomaly feed" subtitle="AI-detected financial events">
         <div className="space-y-3">
           {anomalies.length === 0 ? (
-            <p className="text-sm text-ceyfi-muted">No anomalies detected in recent transactions.</p>
+            <p className="text-sm text-muted-foreground">No anomalies detected in recent transactions.</p>
           ) : (
             anomalies.map((a) => (
-              <div key={a.id} className="flex items-start gap-3 rounded-xl border border-ceyfi-line/60 p-4">
+              <div key={a.id} className="flex items-start gap-3 rounded-xl border border-border/60 p-4">
                 <span className={cn("mt-0.5 h-2 w-2 shrink-0 rounded-full", a.resolved ? "bg-emerald-500" : "animate-pulse bg-amber-500")} />
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium text-ceyfi-ink">{a.title}</div>
-                  <div className="mt-1 text-xs text-ceyfi-muted">{a.description}</div>
-                  <div className="mt-1 text-[10px] text-ceyfi-faint">{a.date}</div>
+                  <div className="font-medium text-foreground">{a.title}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">{a.description}</div>
+                  <div className="mt-1 text-[10px] text-muted-foreground/70">{a.date}</div>
                 </div>
-                <Link href={`/assistant?prompt=${encodeURIComponent(a.title)}`} className="shrink-0 text-[11px] font-semibold text-ceyfi-green hover:text-ceyfi-deep">
+                <Link href={`/assistant?prompt=${encodeURIComponent(a.title)}`} className="shrink-0 text-[11px] font-semibold text-primary hover:text-primary/80">
                   Ask CEYFI
                 </Link>
               </div>
@@ -177,20 +181,20 @@ export default function IntelligencePage() {
           {opportunities.map((o, i) => {
             const Icon = ICON_MAP[o.icon as keyof typeof ICON_MAP] ?? Lightbulb;
             return (
-              <div key={o.title} className="flex items-center gap-4 rounded-xl border border-ceyfi-line/60 p-4">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-ceyfi-sprout text-ceyfi-green">
+              <div key={o.title} className="flex items-center gap-4 rounded-xl border border-border/60 p-4">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-primary">
                   <Icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium text-ceyfi-ink">{i + 1}. {o.title}</div>
+                  <div className="font-medium text-foreground">{i + 1}. {o.title}</div>
                   {o.benefit > 0 && (
-                    <div className="mt-1 font-mono text-sm font-semibold text-emerald-700">
+                    <div className="mt-1 font-mono text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                       +{formatters.currency({ number: o.benefit, maxFractionDigits: 0 })}
                     </div>
                   )}
                 </div>
                 <PeriodBadge value={o.confidence} positive label={`${o.confidence}%`} />
-                <Link href="/scenarios" className="inline-flex items-center gap-1 text-[11px] font-semibold text-ceyfi-green">
+                <Link href="/scenarios" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
                   Simulate <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
@@ -206,8 +210,8 @@ export default function IntelligencePage() {
           </SheetHeader>
           <ul className="mt-4 space-y-3 px-4">
             {improveTarget?.actions.map((action) => (
-              <li key={action} className="flex items-start gap-2 text-sm text-ceyfi-muted">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-ceyfi-green" />
+              <li key={action} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 {action}
               </li>
             ))}

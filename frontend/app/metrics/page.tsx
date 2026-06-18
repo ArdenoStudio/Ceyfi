@@ -22,17 +22,21 @@ function OverallStat({
   tone?: "success" | "error" | "neutral";
 }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-white/8 bg-white/[0.04] p-4 backdrop-blur">
-      <span className="text-[10px] uppercase tracking-widest text-white/40 mb-1">{label}</span>
+    <div className="flex flex-col rounded-2xl border border-border bg-card/80 p-4 backdrop-blur dark:border-white/8 dark:bg-white/[0.04]">
+      <span className="text-[10px] uppercase tracking-widest text-muted-foreground dark:text-white/40 mb-1">{label}</span>
       <span
         className={cn(
           "text-2xl font-semibold font-mono tabular-nums",
-          tone === "error" ? "text-red-400" : tone === "success" ? "text-emerald-400" : "text-white"
+          tone === "error"
+            ? "text-red-600 dark:text-red-400"
+            : tone === "success"
+              ? "text-emerald-700 dark:text-emerald-400"
+              : "text-foreground dark:text-white"
         )}
       >
         {value}
       </span>
-      {sub && <span className="text-[11px] text-white/30 mt-0.5">{sub}</span>}
+      {sub && <span className="text-[11px] text-muted-foreground/80 dark:text-white/30 mt-0.5">{sub}</span>}
     </div>
   );
 }
@@ -105,7 +109,7 @@ export default function MetricsPage() {
     operational: { label: "All Systems Operational", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
     degraded: { label: "Partial Degradation", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
     outage: { label: "Service Outage Detected", color: "text-red-400", bg: "bg-red-500/10 border-red-500/20" },
-    loading: { label: "Loading metrics…", color: "text-white/40", bg: "bg-white/5 border-white/10" },
+    loading: { label: "Loading metrics…", color: "text-muted-foreground dark:text-white/40", bg: "bg-muted border-border dark:bg-white/5 dark:border-white/10" },
   };
 
   const banner = STATUS_BANNER[overallStatus];
@@ -113,8 +117,7 @@ export default function MetricsPage() {
   return (
     <div
       data-module="metrics"
-      className="dark relative min-h-full overflow-hidden"
-      style={{ background: "#0c0407" }}
+      className="relative min-h-full overflow-hidden"
     >
       {/* Background gradients */}
       <div className="pointer-events-none absolute inset-0">
@@ -136,10 +139,10 @@ export default function MetricsPage() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red mb-1">
               Nasiko · Arize Phoenix
             </p>
-            <h1 className="font-heading text-2xl font-bold text-white">
+            <h1 className="font-heading text-2xl font-bold text-foreground dark:text-white">
               Agent Performance
             </h1>
-            <p className="text-sm text-white/40 mt-1">
+            <p className="text-sm text-muted-foreground dark:text-white/40 mt-1">
               Per-agent metrics for the last 24 hours
             </p>
           </div>
@@ -148,13 +151,13 @@ export default function MetricsPage() {
             <button
               onClick={() => fetchMetrics(true)}
               disabled={refreshing || loading}
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40"
+              className="flex items-center gap-2 rounded-xl border border-border bg-card/80 px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 dark:border-white/10 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
             >
               <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
               Refresh
             </button>
             {lastUpdated && (
-              <span className="text-[10px] text-white/25">
+              <span className="text-[10px] text-muted-foreground/70 dark:text-white/25">
                 Updated {lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 {" · "}next in {countdown}s
               </span>
