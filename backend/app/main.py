@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from app.services import metrics_store
 
 from app.config import settings
-from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot
+from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot, banking_tools
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 log = logging.getLogger(__name__)
@@ -140,6 +140,9 @@ app.include_router(stt.router)
 app.include_router(loans.router)
 app.include_router(business.router)
 app.include_router(payments.router)
+
+
+app.include_router(banking_tools.router)
 
 
 @app.exception_handler(Exception)

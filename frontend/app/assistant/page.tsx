@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useChat } from "@/hooks/useChat";
 import { ChatThread } from "@/components/assistant/ChatThread";
 import { ChatInput } from "@/components/assistant/ChatInput";
@@ -13,12 +14,13 @@ import { WalletState } from "@/types";
 import Image from "next/image";
 
 function AssistantPageContent() {
+  const { userId, walletAccountId } = useCurrentUser();
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt");
   const context = searchParams.get("context");
-  const accountId = searchParams.get("accountId") ?? "SEY-ACC-002";
+  const accountId = searchParams.get("accountId") ?? walletAccountId;
   const promptSentRef = useRef(false);
-  const { messages, isStreaming, language, setLanguage, send } = useChat("SEY-USR-001");
+  const { messages, isStreaming, language, setLanguage, send } = useChat(userId);
 
   useEffect(() => {
     promptSentRef.current = false;

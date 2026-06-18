@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAccountContext } from "@/lib/api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { lkrAxisTick } from "@/lib/chartUtils";
 import {
   CATEGORY_COLORS,
@@ -98,6 +99,7 @@ function enrichBasic(
 }
 
 export default function TransactionsPage() {
+  const { userId } = useCurrentUser();
   const [transactions, setTransactions] = useState(FALLBACK_TRANSACTIONS);
   const [query, setQuery] = useState("");
   const [month, setMonth] = useState("all");
@@ -114,7 +116,7 @@ export default function TransactionsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    getAccountContext("SEY-USR-001")
+    getAccountContext(userId)
       .then((data) => {
         if (cancelled) return;
         const ctx = data as { recent_transactions?: typeof FALLBACK_TRANSACTIONS };
@@ -126,7 +128,7 @@ export default function TransactionsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [userId]);
 
   const weeklyAmount = useMemo(() => {
     const map = new Map<string, number>();

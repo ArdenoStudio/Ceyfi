@@ -5,7 +5,7 @@ export interface DemoPersona {
   tagline: string;
   wallet_account_id: string | null;
   avatar: string;
-  language_preference: "en" | "si";
+  language_preference: "en" | "si" | "ta";
 }
 
 const SESSION_KEY = "ceyfi_demo_session";

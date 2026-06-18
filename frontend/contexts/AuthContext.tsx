@@ -75,7 +75,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await res.json();
     storeSession(data.user, data.token);
     setUser(data.user);
-    router.push("/");
+    const persona = data.user as DemoPersona;
+    const dest =
+      persona.persona === "sme"
+        ? "/business"
+        : persona.persona === "borrower"
+          ? "/loans"
+          : "/wallet";
+    router.push(dest);
   }, [router]);
 
   const logout = useCallback(() => {

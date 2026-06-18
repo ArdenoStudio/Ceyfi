@@ -8,21 +8,25 @@ import { CategorisedTransactionFeed } from "@/components/business/CategorisedTra
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getPlSummary, getBusinessAccount } from "@/lib/api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getPlSummary, getBusinessAccount, getFinancialSnapshot } from "@/lib/api";
 import { PlSummary, Transaction } from "@/types";
 import { Bot, PiggyBank, ReceiptText, TrendingUp } from "lucide-react";
+import { CfoBriefPanel } from "@/components/business/CfoBriefPanel";
 import { BusinessAnalyticsSections } from "@/components/business/BusinessAnalyticsSections";
 import { toast } from "sonner";
 
-const BUSINESS_USER_ID = "SEY-BIZ-001";
 const ASSISTANT_PROMPT =
   "Act as my SME bookkeeper. Review this week's revenue, expenses, tax jar readiness, and transactions that need category review.";
 
 export default function BusinessPage() {
+  const { businessUserId, user } = useCurrentUser();
+  const BUSINESS_USER_ID = businessUserId;
   const [extraTransactions, setExtraTransactions] = useState<Transaction[]>([]);
   const [pl, setPl] = useState<PlSummary | null>(null);
   const [taxJarBalance, setTaxJarBalance] = useState(15070);
   const [plLoading, setPlLoading] = useState(true);
+  const [anomalyCount, setAnomalyCount] = useState(0);
   const paidToastFired = useRef(false);
 
   // Handle redirect back from MPGS payment
@@ -57,9 +61,10 @@ export default function BusinessPage() {
     Promise.allSettled([
       getPlSummary(BUSINESS_USER_ID),
       getBusinessAccount(BUSINESS_USER_ID),
+      getFinancialSnapshot(BUSINESS_USER_ID),
     ]).then((results) => {
       if (cancelled) return;
-      const [plRes, bizRes] = results;
+      const [plRes, bizRes, snapRes] = results;
       if (plRes.status === "fulfilled") {
         setPl(plRes.value as PlSummary);
       } else {
@@ -73,13 +78,16 @@ export default function BusinessPage() {
       } else {
         setTaxJarBalance(15070);
       }
+      if (snapRes.status === "fulfilled") {
+        setAnomalyCount((snapRes.value as { anomalies?: unknown[] }).anomalies?.length ?? 0);
+      }
     }).finally(() => {
       if (!cancelled) setPlLoading(false);
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [BUSINESS_USER_ID]);
 
   const handleNewTransaction = useCallback((tx: Transaction) => {
     setExtraTransactions((prev) => [tx, ...prev]);
@@ -115,7 +123,7 @@ export default function BusinessPage() {
     <div data-module="business" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <PageHeader
         eyebrow="SME bookkeeper"
-        title="Silva Hardware & Electricals"
+        title={user?.persona === "sme" ? "Silva Hardware & Electricals" : "Business cockpit"}
         description="A weekly finance cockpit for revenue, spending, tax savings, and AI-assisted transaction categories."
         meta={
           <span className="inline-flex rounded-full border border-ceyfi-line bg-ceyfi-canvas px-3 py-1 text-xs font-medium text-ceyfi-muted">
@@ -143,6 +151,13 @@ export default function BusinessPage() {
             icon: PiggyBank,
           },
           {
+            label: "Anomalies",
+            value: `${anomalyCount}`,
+            detail: "Unusual spends or income gaps detected by CEYFI intelligence.",
+            tone: anomalyCount > 0 ? "alert" : "success",
+            icon: ReceiptText,
+          },
+          {
             label: "Needs review",
             value: `${reviewCount}`,
             detail: "Recent transactions should be checked before filing.",
@@ -160,6 +175,8 @@ export default function BusinessPage() {
           { label: "Check categories", icon: ReceiptText, href: "#business-feed" },
         ]}
       />
+
+      <CfoBriefPanel userId={BUSINESS_USER_ID} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

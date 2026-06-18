@@ -1,5 +1,13 @@
 /** Backend URL: env override, else Vercel API in production builds, else local dev. */
-import { adminHeaders } from "@/lib/auth";
+import { adminHeaders, authHeaders } from "@/lib/auth";
+
+function jsonHeaders(extra?: Record<string, string>): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    ...authHeaders(),
+    ...extra,
+  };
+}
 
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ??
@@ -19,6 +27,10 @@ export class ApiError extends Error {
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
+    headers: {
+      ...authHeaders(),
+      ...(options?.headers as Record<string, string> | undefined),
+    },
     signal: AbortSignal.timeout(5000),
   });
   if (!res.ok) {
@@ -157,7 +169,7 @@ export async function postWalletTransfer(payload: {
       : `${API_BASE}/api/wallet/transfer`;
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body,
     signal: AbortSignal.timeout(30000),
   });
@@ -177,7 +189,7 @@ export async function postDemoLoanPayment(payload: {
     "/api/loans/demo-payment",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: jsonHeaders(),
       body: JSON.stringify(payload),
     }
   );
@@ -191,7 +203,7 @@ export async function createPaymentSession(args: {
 }): Promise<{ order_id: string; session_id: string; checkout_url: string }> {
   const res = await fetch(`${API_BASE}/api/payments/session`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body: JSON.stringify(args),
   });
   if (!res.ok) {
@@ -231,7 +243,7 @@ export async function saveAllocationRules(
 ) {
   return request(`/api/wallet/rules/${senderId}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body: JSON.stringify({
       account_id: accountId,
       allocation_rules: Object.entries(allocations).map(([bucket_id, pct]) => ({
@@ -261,7 +273,7 @@ export async function postChat(
   try {
     const res = await fetch(`${API_BASE}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: jsonHeaders(),
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
@@ -311,7 +323,7 @@ export async function postChat(
 export function postTts(payload: { text: string; language: string }) {
   return request<{ audio_base64: string; content_type: string }>("/api/tts", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
 }
@@ -321,6 +333,7 @@ export async function postStt(audioBlob: Blob) {
   form.append("audio", audioBlob, "speech.webm");
   const res = await fetch(`${API_BASE}/api/stt`, {
     method: "POST",
+    headers: authHeaders(),
     body: form,
     signal: AbortSignal.timeout(20000),
   });
@@ -345,7 +358,7 @@ export async function postCategorize(payload: { transaction_ids: string[] }): Pr
 > {
   const raw = await request<{ categorized: CategorizedItem[] }>("/api/categorize-transactions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
   const map: Record<string, { category_en: string; category_si: string; subcategory: string }> = {};
@@ -424,7 +437,7 @@ export function postTaxJarRule(payload: {
 }) {
   return request("/api/tax-jar/rule", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
 }
@@ -440,7 +453,7 @@ export async function postTaxJarTrigger(payload: {
     tax_transfer_amount_lkr?: number;
   }>("/mock/tax-jar/trigger", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
   return {
@@ -457,7 +470,76 @@ export function postTriggerSpend(payload: {
 }) {
   return request("/mock/trigger-spend", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(),
     body: JSON.stringify(payload),
   });
+}
+
+export interface CfoBrief {
+  user_id: string;
+  date: string;
+  summary: string;
+  bullets: string[];
+  actions: { priority: number; title: string; benefit_lkr: number; href: string }[];
+  runway_days: number;
+  overdue_receivables_lkr: number;
+  tax_jar_balance: number;
+}
+
+export interface ReceivableRow {
+  client: string;
+  invoice: string;
+  amount: number;
+  due: string;
+  overdue: number;
+  status: string;
+  trust_score: number;
+}
+
+export async function getCfoBrief(userId: string) {
+  return request<CfoBrief>(`/api/business/cfo-brief?user_id=${encodeURIComponent(userId)}`);
+}
+
+export async function getReceivables() {
+  return request<{ receivables: ReceivableRow[]; predictions: Record<string, unknown>[] }>(
+    "/api/business/receivables"
+  );
+}
+
+export async function postRecoveryMessage(payload: {
+  client: string;
+  invoice: string;
+  amount: number;
+  overdue_days: number;
+  tone?: string;
+}) {
+  return request<{ messages: { en: string; si: string; ta: string }; tone: string }>(
+    "/api/business/recovery-message",
+    {
+      method: "POST",
+      headers: jsonHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function executeDecision(userId: string, decisionId: string) {
+  return request<{
+    ok: boolean;
+    action_type: string;
+    redirect: string;
+    message: string;
+    recovery_messages?: { en: string; si: string; ta: string };
+    client?: string;
+  }>("/api/decisions/execute", {
+    method: "POST",
+    headers: jsonHeaders(),
+    body: JSON.stringify({ user_id: userId, decision_id: decisionId }),
+  });
+}
+
+export async function listMcpTools() {
+  return request<{ tools: { name: string; description: string }[]; protocol: string }>(
+    "/api/mcp/tools"
+  );
 }

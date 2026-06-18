@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getProfileData } from "@/lib/api";
 import {
   Wallet,
@@ -17,7 +18,7 @@ import {
   Receipt,
 } from "lucide-react";
 
-const USER_ID = "SEY-USR-001";
+const USER_ID = "SEY-USR-001"; // fallback only
 
 function formatLKR(amount: number) {
   return `LKR ${Math.abs(amount).toLocaleString("en-LK")}`;
@@ -34,15 +35,16 @@ function formatDate(dateStr: string) {
 type ProfileData = Awaited<ReturnType<typeof getProfileData>>;
 
 export default function ProfilePage() {
+  const { userId, user } = useCurrentUser();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getProfileData(USER_ID)
+    getProfileData(userId)
       .then(setProfile)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [userId]);
 
   if (loading) {
     return (

@@ -13,16 +13,18 @@ import { LoanIntelligenceCharts } from "@/components/loans/LoanIntelligenceChart
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AlertTriangle, Bot, CalendarCheck, Gauge, WalletCards } from "lucide-react";
 
 const ASSISTANT_PROMPT =
   "Show me repayment scenarios for my current loan: paying today, paying three days late, and making a partial payment.";
 
 export default function LoansPage() {
+  const { loanUserId, user } = useCurrentUser();
   const [loan, setLoan] = useState<Loan | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const userId = "SEY-USR-001";
+  const userId = loanUserId;
 
   useEffect(() => {
     // Show success toast when redirected back from MPGS payment
@@ -100,6 +102,42 @@ export default function LoansPage() {
         <LoanSummaryCard loan={loan} onPaymentSuccess={fetchLoan} />
         <PaymentCountdown loan={loan} />
       </div>
+
+      <InsightActionStrip
+        eyebrow="Early payoff"
+        title="Paying 6 months early could save meaningful interest"
+        insights={[
+          {
+            label: "Interest saved",
+            value: `LKR ${Math.round(loan.outstanding_lkr * 0.025).toLocaleString()}`,
+            detail: "Estimated savings if you clear the loan 6 months ahead of schedule.",
+            tone: "success",
+            icon: Gauge,
+          },
+          {
+            label: "Progress",
+            value: `${progressPct}%`,
+            detail: `${loan.payments_made} of ${loan.total_payments} instalments complete.`,
+            tone: "info",
+            icon: CalendarCheck,
+          },
+          {
+            label: "Risk",
+            value: riskCopy,
+            detail: `Next payment LKR ${loan.monthly_payment_lkr.toLocaleString()} in ${daysUntil} days.`,
+            tone: loan.health_score === "ON_TRACK" ? "success" : "alert",
+            icon: AlertTriangle,
+          },
+        ]}
+        actions={[
+          {
+            label: "Ask loan advisor",
+            icon: Bot,
+            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}`,
+          },
+          { label: "Simulate payoff", icon: WalletCards, href: "/scenarios" },
+        ]}
+      />
 
       <InsightActionStrip
         eyebrow="Repayment signal"

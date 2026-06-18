@@ -20,9 +20,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { getFinancialSnapshot, type FinancialSnapshot } from "@/lib/api";
+import { getFinancialSnapshot, executeDecision, type FinancialSnapshot } from "@/lib/api";
 import { cn, formatters } from "@/lib/utils";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type Decision = FinancialSnapshot["decisions"][0];
 
@@ -41,6 +42,7 @@ const URGENCY_DOT = {
 
 export default function DecisionsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [filter, setFilter] = useState<"All" | Decision["category"]>("All");
   const [sort, setSort] = useState<"impact" | "urgency" | "confidence">("impact");
@@ -77,13 +79,29 @@ export default function DecisionsPage() {
   const totalBenefit = decisions.reduce((s, d) => s + d.benefit_lkr, 0);
   const highUrgency = decisions.filter((d) => d.urgency === "High").length;
 
-  const handleExecute = () => {
+  const handleExecute = async () => {
+    if (!executeTarget || !user) return;
     setExecuting(true);
-    setTimeout(() => {
-      setExecuting(false);
+    try {
+      const result = await executeDecision(user.user_id, executeTarget.id);
       setExecuteTarget(null);
-      toast.success("Action confirmed", { description: executeTarget?.benefit_label });
-    }, 1500);
+      if (result.recovery_messages) {
+        toast.success("Recovery message ready", {
+          description: result.recovery_messages.en.slice(0, 120) + "…",
+          action: {
+            label: "Open business",
+            onClick: () => router.push("/business"),
+          },
+        });
+      } else {
+        toast.success("Action confirmed", { description: result.message });
+        if (result.redirect) router.push(result.redirect);
+      }
+    } catch {
+      toast.error("Could not execute action");
+    } finally {
+      setExecuting(false);
+    }
   };
 
   return (

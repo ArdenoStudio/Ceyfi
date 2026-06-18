@@ -22,6 +22,7 @@ import {
 } from "@/components/charts/OverviewCharts";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { KpiCard } from "@/components/ui/KpiCard";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getAccountContext, getFamilyWallet, getLoans } from "@/lib/api";
 import { periodDelta } from "@/lib/chartUtils";
 import { cn, formatters } from "@/lib/utils";
@@ -148,6 +149,7 @@ function TransactionIcon({
 }
 
 export default function OverviewPage() {
+  const { userId, walletAccountId, loanUserId, user } = useCurrentUser();
   const [context, setContext] = useState<AccountContext>(FALLBACK_CONTEXT);
   const [wallet, setWallet] =
     useState<Pick<WalletState, "buckets" | "total_balance_lkr">>(
@@ -160,9 +162,9 @@ export default function OverviewPage() {
     let cancelled = false;
 
     Promise.allSettled([
-      getAccountContext("SEY-USR-001"),
-      getFamilyWallet("SEY-ACC-002"),
-      getLoans("SEY-USR-001"),
+      getAccountContext(userId),
+      walletAccountId ? getFamilyWallet(walletAccountId) : Promise.reject(),
+      getLoans(loanUserId),
     ]).then(([contextResult, walletResult, loanResult]) => {
       if (cancelled) return;
       if (contextResult.status === "fulfilled") {
@@ -180,14 +182,17 @@ export default function OverviewPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [userId, walletAccountId, loanUserId]);
 
   const balance = context.balance_lkr ?? 245000;
   const savings = context.savings_balance ?? 125400;
   const current = context.current_balance ?? Math.max(0, balance - savings);
-  const firstName = (context.name ?? context.account_holder ?? "Nimal").split(
-    " "
-  )[0];
+  const firstName = (
+    user?.name ??
+    context.name ??
+    context.account_holder ??
+    "there"
+  ).split(" ")[0];
   const safeToMove = Math.max(0, current - UPCOMING_OBLIGATIONS - 20000);
   const balance30dAgo = Math.round(balance / 1.024);
   const balanceDelta = periodDelta(balance, balance30dAgo);

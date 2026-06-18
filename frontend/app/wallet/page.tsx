@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useLayoutEffect, useEffect } from "react";
 import { useWalletRealtime } from "@/hooks/useWalletRealtime";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { BucketGrid } from "@/components/wallet/BucketGrid";
 import { AllocationEditor } from "@/components/wallet/AllocationEditor";
 import { TransactionFeed } from "@/components/wallet/TransactionFeed";
@@ -19,12 +20,11 @@ import { type RemittanceCurrency } from "@/lib/remittance-fx";
 import { ArrowRightLeft, Bot, PieChart, ShieldCheck } from "lucide-react";
 import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSections";
 
-const FAMILY_ACCOUNT_ID = "SEY-ACC-002";
-const WALLET_SENDER_ID = "SEY-USR-001";
 const ASSISTANT_PROMPT =
   "Explain the latest family wallet activity and tell me whether any bucket needs attention before the next transfer.";
 
 export default function WalletPage() {
+  const { walletAccountId, userId } = useCurrentUser();
   const [modalOpen, setModalOpen] = useState(false);
   const [allocationFromHash, setAllocationFromHash] = useState(false);
   const [remittanceOverride, setRemittanceOverride] = useState<{
@@ -51,7 +51,7 @@ export default function WalletPage() {
 
   const { wallet, transactions, buckets, loading, refetch } =
     useWalletRealtime({
-      accountId: FAMILY_ACCOUNT_ID,
+      accountId: walletAccountId,
       onSpend: handleSpend,
     });
 
@@ -158,7 +158,7 @@ export default function WalletPage() {
           {
             label: "Ask Assistant",
             icon: Bot,
-            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}&context=wallet&accountId=${encodeURIComponent(FAMILY_ACCOUNT_ID)}`,
+            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}&context=wallet&accountId=${encodeURIComponent(walletAccountId)}`,
           },
           { label: "Tune split", icon: PieChart, href: "#allocation-editor" },
         ]}
@@ -174,9 +174,9 @@ export default function WalletPage() {
           onSave={async (newAllocations) => {
             try {
               await saveAllocationRules(
-                WALLET_SENDER_ID,
+                userId,
                 newAllocations,
-                FAMILY_ACCOUNT_ID
+                walletAccountId
               );
               toast.success("Allocation rules saved for your next transfer.");
               await refetch(true);
@@ -198,8 +198,8 @@ export default function WalletPage() {
       <WalletAnalyticsSections />
 
       <SendMoneyModal
-        senderId={WALLET_SENDER_ID}
-        recipientId={FAMILY_ACCOUNT_ID}
+        senderId={userId}
+        recipientId={walletAccountId}
         recipientAccountHolder={wallet?.account_holder ?? ""}
         allocations={allocations}
         onSuccess={(amountLkr?: number, amountGbp?: number, currency?: RemittanceCurrency) => {

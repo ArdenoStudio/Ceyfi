@@ -16,6 +16,7 @@ import {
   Wallet,
   Zap,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -162,6 +163,10 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-white/8 px-6 py-5">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-white/35">Theme</span>
+          <ThemeToggle />
+        </div>
         <button
           type="button"
           onClick={logout}
