@@ -100,7 +100,7 @@ export default function IntelligencePage() {
       </header>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <div className="flex flex-col items-center justify-center rounded-[22px] border border-border/75 bg-card p-8">
+        <div className="flex flex-col items-center justify-center rounded-[22px] border border-border/75 bg-card p-8 interactive-card">
           <ProgressCircle value={totalScore} size={160} strokeWidth={12}>
             <div className="text-center">
               <div className={cn("font-heading text-5xl font-semibold tracking-[-0.05em]", scoreColor)}>
@@ -143,7 +143,7 @@ export default function IntelligencePage() {
             <p className="text-sm text-muted-foreground">No anomalies detected in recent transactions.</p>
           ) : (
             anomalies.map((a) => (
-              <div key={a.id} className="flex items-start gap-3 rounded-xl border border-border/60 p-4">
+              <div key={a.id} className="interactive-card flex items-start gap-3 rounded-xl border border-border/60 p-4">
                 <span className={cn("mt-0.5 h-2 w-2 shrink-0 rounded-full", a.resolved ? "bg-emerald-500" : "animate-pulse bg-amber-500")} />
                 <div className="min-w-0 flex-1">
                   <div className="font-medium text-foreground">{a.title}</div>
@@ -181,7 +181,7 @@ export default function IntelligencePage() {
           {opportunities.map((o, i) => {
             const Icon = ICON_MAP[o.icon as keyof typeof ICON_MAP] ?? Lightbulb;
             return (
-              <div key={o.title} className="flex items-center gap-4 rounded-xl border border-border/60 p-4">
+              <div key={o.title} className="interactive-card flex items-center gap-4 rounded-xl border border-border/60 p-4">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-primary">
                   <Icon className="h-4 w-4" />
                 </span>

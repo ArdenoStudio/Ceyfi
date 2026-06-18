@@ -42,8 +42,8 @@ export function PaymentModeToggle({
           key={mode}
           type="button"
           onClick={() => onChange(mode)}
-          className={cn(
-            "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg font-medium transition-colors",
+      className={cn(
+        "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg font-medium transition-colors duration-200",
             py,
             text,
             value === mode ? "text-foreground" : "text-muted-foreground",

@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { AppTopbar } from "./AppTopbar";
 import { MobileNav } from "./MobileNav";
 import { DemoModeBadge } from "./DemoModeBadge";
+import { PageEnter } from "@/components/motion/PageEnter";
 import { SeylanBankHandoffBanner } from "@/components/seylan/SeylanBankHandoffBanner";
 import { usePathname } from "next/navigation";
 
@@ -39,7 +40,9 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar />
       <main className="flex min-w-0 flex-1 flex-col pb-24 md:ml-[17.5rem] md:pb-0">
         <AppTopbar />
-        <div className="flex-1">{children}</div>
+        <PageEnter key={pathname} className="flex-1">
+          {children}
+        </PageEnter>
         {showSeylanHandoff ? <SeylanBankHandoffBanner /> : null}
       </main>
       <MobileNav />

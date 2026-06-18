@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, useReducedMotion } from "motion/react";
 import {
   Activity,
   ArrowUpDown,
@@ -43,6 +44,7 @@ const MOBILE_MORE = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -50,7 +52,7 @@ export function MobileNav() {
   const moreActive = MOBILE_MORE.some((item) => isActive(item.href));
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-30 flex rounded-[22px] border border-ceyfi-line/80 bg-white/94 p-1.5 shadow-[0_16px_44px_rgba(5,46,22,0.14)] backdrop-blur-xl md:hidden">
+    <nav className="fixed inset-x-3 bottom-3 z-30 flex rounded-[22px] border border-border/80 bg-card/92 p-1.5 shadow-[0_16px_44px_rgba(5,46,22,0.12)] backdrop-blur-xl dark:bg-card/88 dark:shadow-[0_16px_44px_rgba(0,0,0,0.45)] md:hidden">
       {MOBILE_PRIMARY.map((item) => {
         const active = isActive(item.href);
         return (
@@ -59,14 +61,26 @@ export function MobileNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[16px] py-2 text-[10px] font-medium transition-colors",
+              "relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[16px] py-2 text-[10px] font-medium transition-colors duration-200",
               active
-                ? "bg-ceyfi-sprout text-ceyfi-green"
-                : "text-ceyfi-muted hover:text-ceyfi-ink"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
-            <item.icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
-            <span className="truncate">{item.label}</span>
+            {active && !reduceMotion ? (
+              <motion.span
+                layoutId="mobile-nav-pill"
+                className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15"
+                transition={{ type: "spring", stiffness: 520, damping: 34 }}
+              />
+            ) : active ? (
+              <span className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15" />
+            ) : null}
+            <item.icon
+              className="relative z-10 h-[18px] w-[18px]"
+              strokeWidth={active ? 2.2 : 1.8}
+            />
+            <span className="relative z-10 truncate">{item.label}</span>
           </Link>
         );
       })}
@@ -77,14 +91,23 @@ export function MobileNav() {
             <Button
               variant="ghost"
               className={cn(
-                "flex h-auto min-w-0 flex-1 flex-col items-center gap-1 rounded-[16px] py-2 text-[10px] font-medium",
-                moreActive ? "bg-ceyfi-sprout text-ceyfi-green" : "text-ceyfi-muted"
+                "relative flex h-auto min-w-0 flex-1 flex-col items-center gap-1 rounded-[16px] py-2 text-[10px] font-medium",
+                moreActive ? "text-primary" : "text-muted-foreground",
               )}
             />
           }
         >
-          <MoreHorizontal className="h-[18px] w-[18px]" />
-          <span>More</span>
+          {moreActive && !reduceMotion ? (
+            <motion.span
+              layoutId="mobile-nav-pill"
+              className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15"
+              transition={{ type: "spring", stiffness: 520, damping: 34 }}
+            />
+          ) : moreActive ? (
+            <span className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15" />
+          ) : null}
+          <MoreHorizontal className="relative z-10 h-[18px] w-[18px]" />
+          <span className="relative z-10">More</span>
         </SheetTrigger>
         <SheetContent side="bottom" className="rounded-t-[22px]">
           <SheetHeader>
@@ -96,10 +119,10 @@ export function MobileNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-2 rounded-xl border p-4 text-center text-xs font-medium",
+                  "interactive-card flex flex-col items-center gap-2 rounded-xl border p-4 text-center text-xs font-medium",
                   isActive(item.href)
-                    ? "border-ceyfi-green/30 bg-ceyfi-sprout text-ceyfi-green"
-                    : "border-ceyfi-line text-ceyfi-muted"
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:text-foreground",
                 )}
               >
                 <item.icon className="h-5 w-5" />

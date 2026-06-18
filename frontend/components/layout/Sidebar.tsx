@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -74,17 +74,14 @@ export function Sidebar() {
       <div className="border-b border-white/8 px-4 py-4">
         <Link
           href="/profile"
-          className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.055] p-3 transition-colors hover:bg-white/[0.08]"
+          className="interactive-card flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.055] p-3 transition-all duration-200 hover:bg-white/[0.08]"
         >
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-[14px] ring-1 ring-white/12">
-            <Image
-              src={user?.avatar ?? "/nimal-avatar.jpg"}
-              alt={user?.name ?? "User"}
-              width={40}
-              height={40}
-              className="h-full w-full object-cover"
-            />
-          </div>
+          <PersonaAvatar
+            name={user?.name ?? "Demo user"}
+            persona={user?.persona}
+            size="sm"
+            className="rounded-[14px]"
+          />
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{user?.name ?? "Demo user"}</div>
             <div className="truncate font-mono text-[10px] text-white/38">
@@ -110,7 +107,7 @@ export function Sidebar() {
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200",
                       active
                         ? "bg-white/[0.09] text-white"
                         : "text-white/52 hover:bg-white/[0.055] hover:text-white"

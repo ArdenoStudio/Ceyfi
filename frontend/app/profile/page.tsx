@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getProfileData } from "@/lib/api";
 import {
@@ -91,22 +91,16 @@ export default function ProfilePage() {
       />
 
       <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-        <header className="relative overflow-hidden rounded-[2rem] border-border bg-card/90 shadow-brand dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-8">
+        <header className="relative overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-brand-lg backdrop-blur-xl sm:p-8 dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
           <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-seylan-red/25 blur-3xl" />
           <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center">
-            {/* Avatar */}
-            <div className="relative group">
-              <div className="h-24 w-24 overflow-hidden rounded-full ring-4 ring-border dark:ring-white/10 sm:h-28 sm:w-28">
-                <Image
-                  src="/nimal-avatar.jpg"
-                  alt={profile.account_holder}
-                  width={112}
-                  height={112}
-                  className="h-full w-full object-cover"
-                  priority
-                />
-              </div>
-              <span className="absolute bottom-0 right-0 h-5 w-5 rounded-full border-2 border-[#0c0407] bg-emerald-400" />
+            <div className="relative">
+              <PersonaAvatar
+                name={profile.account_holder}
+                persona={user?.persona}
+                size="lg"
+              />
+              <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-background bg-emerald-400 dark:border-[#0c0407]" />
             </div>
             {/* Info */}
             <div className="text-center sm:text-left">

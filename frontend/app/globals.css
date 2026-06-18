@@ -384,3 +384,65 @@
   background: #0c0407;
   color: #fff8f1;
 }
+
+/* Smooth theme color transitions */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.2s ease,
+    fill 0.2s ease,
+    stroke 0.2s ease,
+    box-shadow 0.35s ease !important;
+}
+
+/* Login ambient mesh */
+.ambient-login {
+  background:
+    radial-gradient(circle at 12% 18%, rgb(52 211 153 / 14%), transparent 32rem),
+    radial-gradient(circle at 88% 12%, rgb(227 24 33 / 10%), transparent 28rem),
+    radial-gradient(circle at 50% 100%, rgb(5 150 105 / 8%), transparent 36rem);
+}
+.dark .ambient-login {
+  background:
+    radial-gradient(circle at 12% 18%, rgb(227 24 33 / 16%), transparent 32rem),
+    radial-gradient(circle at 88% 12%, rgb(224 175 73 / 10%), transparent 28rem),
+    radial-gradient(circle at 50% 100%, rgb(114 28 36 / 18%), transparent 36rem);
+}
+
+/* Interactive surfaces */
+.interactive-card {
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.22s ease,
+    background-color 0.22s ease;
+}
+@media (hover: hover) {
+  .interactive-card:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.interactive-press {
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.interactive-press:active {
+  transform: scale(0.96);
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.animate-pulse-soft {
+  animation: pulseSoft 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .interactive-card:hover { transform: none; }
+  .interactive-press:active { transform: none; }
+  .animate-pulse-soft { animation: none; }
+}

@@ -125,7 +125,7 @@ export default function DecisionsPage() {
           { label: "High urgency", value: `${highUrgency}` },
           { label: "Pending decisions", value: `${decisions.length}` },
         ].map((s) => (
-          <div key={s.label} className="rounded-xl border border-border/70 bg-card p-4">
+          <div key={s.label} className="interactive-card rounded-xl border border-border/70 bg-card p-4">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</div>
             <div className="mt-2 font-heading text-xl font-semibold text-foreground">{s.value}</div>
           </div>
@@ -163,7 +163,7 @@ export default function DecisionsPage() {
         {filtered.map((d) => {
           const isOpen = expanded === d.id;
           return (
-            <article key={d.id} className="rounded-xl border border-border/70 bg-card">
+            <article key={d.id} className="interactive-card rounded-xl border border-border/70 bg-card">
               <button
                 type="button"
                 className="flex w-full items-start gap-3 p-4 text-left"
