@@ -1,0 +1,21 @@
+{
+  "name": "CEYFI — Clarity for every rupee",
+  "short_name": "CEYFI",
+  "description": "AI-powered financial clarity for Sri Lankan families, borrowers, and business owners.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F8F3",
+  "theme_color": "#059669",
+  "icons": [
+    {
+      "src": "/seylan-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/seylan-logo-white.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

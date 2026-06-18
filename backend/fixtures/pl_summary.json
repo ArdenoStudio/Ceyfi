@@ -1,0 +1,25 @@
+{
+  "SEY-BIZ-001": {
+    "user_id": "SEY-BIZ-001",
+    "week_label": "May 5 - May 10, 2026",
+    "revenue_lkr": 47200,
+    "expenses_lkr": 31160,
+    "net_lkr": 16040,
+    "margin_pct": 34.0,
+    "previous_margin_pct": 28.5,
+    "expense_breakdown": {
+      "SUPPLIER": 22500,
+      "UTILITIES": 2200,
+      "TRANSPORT": 3920,
+      "WAGES": 1000,
+      "MISC": 1540
+    },
+    "previous_expense_breakdown": {
+      "SUPPLIER": 17600,
+      "UTILITIES": 680,
+      "TRANSPORT": 4200,
+      "WAGES": 3000,
+      "MISC": 1200
+    }
+  }
+}

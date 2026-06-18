@@ -1,0 +1,11 @@
+services:
+  seylan-status:
+    build: .
+    ports:
+      - "8010:8000"
+    environment:
+      # Point at your local SeylanHub backend
+      - SEYLAN_BACKEND_URL=http://host.docker.internal:8000
+      - CHECK_TIMEOUT_SECONDS=5.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,43 @@
+{
+  "name": "SeylanHub Dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  // Forward frontend (3000) and backend API (8000)
+  "forwardPorts": [3000, 8000],
+  "portsAttributes": {
+    "3000": { "label": "Next.js Frontend", "onAutoForward": "openBrowser" },
+    "8000": { "label": "Backend API", "onAutoForward": "silent" }
+  },
+
+  // Mock mode on by default — frontend works without Supabase secrets
+  "containerEnv": {
+    "NEXT_PUBLIC_USE_MOCK": "true"
+  },
+
+  // Auto-install frontend deps after container first creates
+  "postCreateCommand": "cd frontend && npm ci",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.tsdk": "frontend/node_modules/typescript/lib",
+        "eslint.workingDirectories": ["frontend"]
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}

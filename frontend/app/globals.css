@@ -1,0 +1,344 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stagger > * {
+  opacity: 0;
+  animation: fadeUp 360ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.stagger > *:nth-child(1) { animation-delay: 40ms; }
+.stagger > *:nth-child(2) { animation-delay: 100ms; }
+.stagger > *:nth-child(3) { animation-delay: 160ms; }
+.stagger > *:nth-child(4) { animation-delay: 220ms; }
+.stagger > *:nth-child(5) { animation-delay: 280ms; }
+.stagger > *:nth-child(6) { animation-delay: 340ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger > * { opacity: 1; animation: none; }
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-dm-sans), var(--font-noto-sinhala), ui-sans-serif,
+    system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sora), var(--font-noto-sinhala),
+    ui-sans-serif, system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --color-seylan-red: #E31821;
+  --color-seylan-plum: #721C24;
+  --color-seylan-charcoal: #241316;
+  --color-seylan-mist: #FFF8F1;
+  --color-seylan-border: #EAD7C2;
+  --color-seylan-gold: #D9A441;
+
+  --color-ceyfi-green: #059669;
+  --color-ceyfi-deep: #052E16;
+  --color-ceyfi-mint: #34D399;
+  --color-ceyfi-canvas: #F4F8F3;
+  --color-ceyfi-paper: #FBFDF9;
+  --color-ceyfi-sprout: #E8F7EE;
+  --color-ceyfi-line: #D8E8DC;
+  --color-ceyfi-ink: #10261A;
+  --color-ceyfi-muted: #617267;
+  --color-ceyfi-faint: #8C9A91;
+}
+
+:root {
+  --background: #F4F8F3;
+  --foreground: #10261A;
+  --card: #FBFDF9;
+  --card-foreground: #10261A;
+  --popover: #FBFDF9;
+  --popover-foreground: #10261A;
+  --primary: #059669;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8F7EE;
+  --secondary-foreground: #075C3E;
+  --muted: #EDF3ED;
+  --muted-foreground: #617267;
+  --accent: #D8F7E5;
+  --accent-foreground: #075C3E;
+  --destructive: #DC2626;
+  --border: #D8E8DC;
+  --input: #D2E2D6;
+  --ring: #059669;
+  --chart-1: #059669;
+  --chart-2: #34D399;
+  --chart-3: #2563EB;
+  --chart-4: #D97706;
+  --chart-5: #E11D48;
+  --radius: 0.8rem;
+  --sidebar: #052E16;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #059669;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #0A4424;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #174D2C;
+  --sidebar-ring: #34D399;
+}
+
+.dark {
+  --background: #2A0B0F;
+  --foreground: #FFF8F1;
+  --card: #3A1016;
+  --card-foreground: #FFF8F1;
+  --popover: #3A1016;
+  --popover-foreground: #FFF8F1;
+  --primary: #E31821;
+  --primary-foreground: #FFFFFF;
+  --secondary: #721C24;
+  --secondary-foreground: #FFF8F1;
+  --muted: #721C24;
+  --muted-foreground: #F1D8C9;
+  --accent: #E0AF49;
+  --accent-foreground: #2A0B0F;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgb(241 216 201 / 18%);
+  --input: rgb(241 216 201 / 24%);
+  --ring: #E0AF49;
+  --chart-1: #E31821;
+  --chart-2: #E0AF49;
+  --chart-3: #FFF8F1;
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: #721C24;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #E31821;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #8A2730;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #8A2730;
+  --sidebar-ring: #E0AF49;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-ceyfi-canvas text-foreground;
+    background:
+      radial-gradient(circle at 16% 0%, rgb(52 211 153 / 8%), transparent 28rem),
+      linear-gradient(180deg, #f7faf5 0%, #f4f8f3 46%, #eff6f0 100%);
+    font-feature-settings: "kern" 1, "liga" 1, "tnum" 1;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+.sinhala {
+  font-family: var(--font-noto-sinhala), var(--font-sora), sans-serif;
+}
+
+/* Glassmorphism card utility */
+.card-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(234, 215, 194, 0.55);
+  box-shadow: 0 4px 24px rgba(114, 28, 36, 0.07), 0 1px 4px rgba(114, 28, 36, 0.04);
+}
+
+/* Dark glass card — used inside .dark wrappers */
+.dark .card-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Plum brand shadow utility */
+.shadow-brand {
+  box-shadow: 0 4px 24px rgba(114, 28, 36, 0.10), 0 1px 4px rgba(114, 28, 36, 0.05);
+}
+.shadow-brand-lg {
+  box-shadow: 0 8px 40px rgba(114, 28, 36, 0.14), 0 2px 8px rgba(114, 28, 36, 0.06);
+}
+
+/* Dark overrides for brand shadows */
+.dark .shadow-brand {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.30);
+}
+.dark .shadow-brand-lg {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.40);
+}
+
+/* Persona module color zones — accent gradient overlay per page */
+[data-module="wallet"] {
+  --module-accent: #E31821;
+  --module-accent-soft: rgba(227, 24, 33, 0.06);
+  /* Dark glass tokens — override shadcn dark card variables so bg-card
+     renders as transparent glass instead of the dark-red #3A1016 value */
+  --card: rgba(255, 255, 255, 0.05);
+  --card-foreground: #FFF8F1;
+  --border: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(255, 248, 241, 0.45);
+  --ring: rgba(255, 255, 255, 0.15);
+}
+[data-module="loans"] {
+  --module-accent: #3B82F6;
+  --module-accent-soft: rgba(59, 130, 246, 0.06);
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.07), transparent 28rem),
+    linear-gradient(180deg, #f5f8ff 0%, #fffdf8 58%, #fff6ec 100%);
+}
+[data-module="business"] {
+  --module-accent: #10B981;
+  --module-accent-soft: rgba(16, 185, 129, 0.06);
+  background:
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.07), transparent 28rem),
+    linear-gradient(180deg, #f4fbf8 0%, #fffdf8 58%, #fff6ec 100%);
+}
+[data-module="assistant"] {
+  --module-accent: #8B5CF6;
+  --module-accent-soft: rgba(139, 92, 246, 0.06);
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.08), transparent 28rem),
+    linear-gradient(180deg, #f8f5ff 0%, #fffdf8 58%, #fff6ec 100%);
+}
+
+/* Tabular number utility */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Card inner gradient accent */
+.card-top-accent {
+  position: relative;
+}
+.card-top-accent::before {
+  content: "";
+  position: absolute;
+  inset-x: 0;
+  top: 0;
+  height: 3px;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: linear-gradient(90deg, var(--color-seylan-red), var(--color-seylan-gold), transparent);
+  opacity: 0.6;
+}
+
+/* Pulse ring for alert insight */
+@keyframes ping-soft {
+  0%   { transform: scale(1); opacity: 0.3; }
+  70%  { transform: scale(1.8); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+.animate-ping-soft {
+  animation: ping-soft 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Spotlight persona card effect */
+.persona-card-spotlight {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.persona-card-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    180px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(227, 24, 33, 0.07),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.persona-card-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* Footer grid drift animation */
+@keyframes gridDrift {
+  0%, 100% { background-position: 0 0; }
+  50% { background-position: 3px 3px; }
+}
+.animate-grid-drift {
+  animation: gridDrift 8s ease-in-out infinite;
+}
+
+/* Hide scrollbar for module tabs */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Floating hero card animations */
+@keyframes floatLeft {
+  0%, 100% { transform: rotate(-3deg) translateY(0px); }
+  50% { transform: rotate(-3deg) translateY(-10px); }
+}
+@keyframes floatRight {
+  0%, 100% { transform: rotate(2deg) translateY(-6px); }
+  50% { transform: rotate(2deg) translateY(4px); }
+}
+.animate-float-left { animation: floatLeft 6s ease-in-out infinite; }
+.animate-float-right { animation: floatRight 7s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-left { animation: none; transform: rotate(-3deg); }
+  .animate-float-right { animation: none; transform: rotate(2deg); }
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fadeUp 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up { opacity: 1; animation: none; }
+}
+
+/* Selection highlight */
+::selection {
+  background-color: rgba(52, 211, 153, 0.24);
+  color: #052E16;
+}

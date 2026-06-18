@@ -1,0 +1,31 @@
+# Seylan Hub — Cursor Project Rules
+
+You are building Seylan Hub, an AI banking platform for Sri Lanka.
+Audience: judges at Cursor Buildathon Colombo. 24-hour build. Polish > breadth.
+
+## Tech
+- Next.js 15 App Router, TypeScript strict, Tailwind, shadcn/ui, lucide-react.
+- FastAPI backend at NEXT_PUBLIC_API_BASE. Supabase for real-time + sessions.
+- Groq llama-3.3-70b for AI. ElevenLabs for TTS. Web Speech API for STT.
+
+## Conventions
+- Brand colours via Tailwind tokens (seylan-red #C8102E, seylan-charcoal
+  #1A1A2E, seylan-mist #F7F8FA). Health: green-700 / amber-700 / red-700.
+- Format LKR via formatLKR() in lib/utils.ts. Always "LKR 1,234,567".
+- Sinhala text wrapped in span.sinhala. Font: Noto Sans Sinhala.
+- No comments in code unless explaining a non-obvious workaround.
+- No console.log left in. No `any` types. No `// TODO` without a reason.
+- All props typed via interfaces in the component file or types/index.ts.
+
+## Style
+- shadcn primitives only. No custom Button. No new Card variants.
+- Cards: white bg, 12px radius, border seylan-border, subtle shadow.
+- No emoji in production UI — use Lucide icons.
+- No gradients, no animations beyond shadcn defaults, no dark mode.
+
+## Personas
+P1 Diaspora Provider → /wallet
+P2 Digital-Native Customer → /assistant
+P3 Anxious Borrower → /loans
+P4 Mudalali → /business
+Every feature must serve at least one persona.

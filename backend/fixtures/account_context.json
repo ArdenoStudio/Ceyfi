@@ -1,0 +1,66 @@
+{
+  "SEY-USR-001": {
+    "user_id": "SEY-USR-001",
+    "name": "Nimal Fernando",
+    "account_holder": "Nimal Fernando",
+    "accounts": ["SEY-SAV-001", "SEY-CUR-001"],
+    "balance_lkr": 245000,
+    "language_preference": "en",
+    "savings_balance": 125400,
+    "current_balance": 34200,
+    "recent_transactions": [
+      { "id": "txn_s001", "date": "2026-05-03", "description": "Keells Supermarket - Nugegoda",       "amount_lkr": -4200,  "type": "debit",  "bucket_id": null },
+      { "id": "txn_s002", "date": "2026-05-02", "description": "Salary Credit - Hayleys Group",        "amount_lkr": 185000, "type": "credit", "bucket_id": null },
+      { "id": "txn_s003", "date": "2026-05-01", "description": "Dialog Axiata - Bill Payment",         "amount_lkr": -2800,  "type": "debit",  "bucket_id": null },
+      { "id": "txn_s004", "date": "2026-04-30", "description": "Seylan Personal Loan - Instalment",    "amount_lkr": -22000, "type": "debit",  "bucket_id": null },
+      { "id": "txn_s005", "date": "2026-04-28", "description": "PickMe - Ride",                        "amount_lkr": -680,   "type": "debit",  "bucket_id": null }
+    ],
+    "loans": [
+      {
+        "id": "LN-2024-00421",
+        "type": "Personal Loan",
+        "disbursed_amount_lkr": 1200000,
+        "outstanding_lkr": 480000,
+        "monthly_installment_lkr": 22000,
+        "next_payment_date": "2026-05-25",
+        "next_payment_amount_lkr": 22000
+      }
+    ],
+    "fixed_deposits": [
+      {
+        "id": "FD-2025-00891",
+        "amount_lkr": 500000,
+        "maturity_date": "2026-11-01",
+        "interest_rate_pct": 11.5,
+        "term_months": 12
+      }
+    ]
+  },
+  "SEY-USR-003": {
+    "user_id": "SEY-USR-003",
+    "name": "Sunil Bandara",
+    "account_holder": "Sunil Bandara",
+    "accounts": ["SEY-BIZ-ACC-003"],
+    "balance_lkr": 42000,
+    "language_preference": "si",
+    "savings_balance": 18000,
+    "current_balance": 24000,
+    "recent_transactions": [
+      { "id": "txn_b001", "date": "2026-05-10", "description": "Seylan Business Loan - Instalment", "amount_lkr": -18500, "type": "debit",  "bucket_id": null },
+      { "id": "txn_b002", "date": "2026-05-08", "description": "Sales Revenue",                     "amount_lkr":  32000, "type": "credit", "bucket_id": null },
+      { "id": "txn_b003", "date": "2026-04-28", "description": "Seylan Business Loan - Instalment", "amount_lkr": -18500, "type": "debit",  "bucket_id": null }
+    ],
+    "loans": [
+      {
+        "id": "LN-2023-00892",
+        "type": "Business Loan",
+        "disbursed_amount_lkr": 2000000,
+        "outstanding_lkr": 1100000,
+        "monthly_installment_lkr": 18500,
+        "next_payment_date": "2026-06-08",
+        "next_payment_amount_lkr": 18500
+      }
+    ],
+    "fixed_deposits": []
+  }
+}

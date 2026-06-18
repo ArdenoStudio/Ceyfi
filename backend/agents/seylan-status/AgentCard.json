@@ -1,0 +1,28 @@
+{
+  "name": "seylan-status",
+  "description": "Real-time status monitor for the SeylanHub backend. Checks health of all API services including wallet, loans, chat, TTS, and business endpoints.",
+  "capabilities": [
+    "status_check",
+    "health_monitoring",
+    "service_status",
+    "uptime_check",
+    "backend_health"
+  ],
+  "tags": ["monitoring", "status", "health", "seylan", "uptime"],
+  "examples": [
+    "what's the status of the seylan backend?",
+    "check if the wallet service is up",
+    "is the loans API healthy?",
+    "show me the seylan service health",
+    "are all seylan services running?",
+    "check seylan health"
+  ],
+  "input_mode": "text",
+  "output_mode": "json",
+  "agent_protocol_version": "a2a-v1",
+  "endpoints": {
+    "/status": "Full status report for all SeylanHub services",
+    "/check/{service}": "Check a specific service: health, wallet, loans, mock",
+    "/health": "Agent health check"
+  }
+}

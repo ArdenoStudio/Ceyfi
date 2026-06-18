@@ -1,0 +1,89 @@
+{
+  "SEY-USR-001": {
+    "loans": [
+      {
+        "loan_id": "LN-2024-00421",
+        "user_id": "SEY-USR-001",
+        "type": "Personal Loan",
+        "purpose": "Home Renovation",
+        "disbursed_lkr": 1200000,
+        "outstanding_lkr": 480000,
+        "monthly_payment_lkr": 22000,
+        "payments_made": 24,
+        "total_payments": 36,
+        "next_payment_date": "2026-06-01",
+        "health_score": "ON_TRACK",
+        "interest_rate_pct": 14.5,
+        "missed_payments": 0,
+        "current_overdue_days": 0,
+        "projected_payoff_date": "2027-05-01",
+        "schedule": [
+      { "month": 1, "due_date": "2024-05-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 2, "due_date": "2024-06-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 3, "due_date": "2024-07-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 4, "due_date": "2024-08-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 5, "due_date": "2024-09-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 6, "due_date": "2024-10-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 7, "due_date": "2024-11-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 8, "due_date": "2025-12-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 9, "due_date": "2025-01-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 10, "due_date": "2025-02-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 11, "due_date": "2025-03-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 12, "due_date": "2025-04-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 13, "due_date": "2025-05-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 14, "due_date": "2025-06-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 15, "due_date": "2025-07-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 16, "due_date": "2025-08-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 17, "due_date": "2025-09-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 18, "due_date": "2025-10-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 19, "due_date": "2025-11-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 20, "due_date": "2026-12-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 21, "due_date": "2026-01-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 22, "due_date": "2026-02-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 23, "due_date": "2026-03-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 24, "due_date": "2026-04-01", "amount_lkr": 22000, "status": "PAID" },
+      { "month": 25, "due_date": "2026-05-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 26, "due_date": "2026-06-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 27, "due_date": "2026-07-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 28, "due_date": "2026-08-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 29, "due_date": "2026-09-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 30, "due_date": "2026-10-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 31, "due_date": "2026-11-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 32, "due_date": "2027-12-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 33, "due_date": "2027-01-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 34, "due_date": "2027-02-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 35, "due_date": "2027-03-01", "amount_lkr": 22000, "status": "DUE" },
+      { "month": 36, "due_date": "2027-04-01", "amount_lkr": 22000, "status": "DUE" }
+        ]
+      }
+    ]
+  },
+  "SEY-USR-003": {
+    "loans": [
+      {
+        "loan_id": "LN-2023-00892",
+        "user_id": "SEY-USR-003",
+        "type": "Business Loan",
+        "purpose": "Working Capital",
+        "disbursed_lkr": 2000000,
+        "outstanding_lkr": 1100000,
+        "monthly_payment_lkr": 18500,
+        "payments_made": 18,
+        "total_payments": 36,
+        "next_payment_date": "2026-06-08",
+        "health_score": "AT_RISK",
+        "interest_rate_pct": 16.5,
+        "missed_payments": 1,
+        "current_overdue_days": 12,
+        "projected_payoff_date": "2026-12-08",
+        "schedule": [
+          { "month": 1,  "due_date": "2023-10-08", "amount_lkr": 18500, "status": "PAID" },
+          { "month": 17, "due_date": "2025-02-08", "amount_lkr": 18500, "status": "PAID" },
+          { "month": 18, "due_date": "2025-03-08", "amount_lkr": 18500, "status": "MISSED" },
+          { "month": 19, "due_date": "2025-04-08", "amount_lkr": 18500, "status": "PAID" },
+          { "month": 36, "due_date": "2026-09-08", "amount_lkr": 18500, "status": "UPCOMING" }
+        ]
+      }
+    ]
+  }
+}
