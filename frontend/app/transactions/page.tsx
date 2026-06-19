@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -15,6 +15,8 @@ import {
 import { Search, Download, Receipt } from "lucide-react";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
+import { ErrorState } from "@/components/ErrorState";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CeyfiTooltip } from "@/components/charts/CeyfiTooltip";
 import { ChartContainer } from "@/components/charts/ChartContainer";
 import { Badge } from "@/components/ui/badge";
@@ -47,11 +49,17 @@ const TIME_BANDS = [
 ];
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+function formatNextDate(daysFromNow: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  return d.toLocaleDateString("en", { month: "short", day: "numeric" });
+}
+
 const RECURRING = [
-  { name: "Dialog bill", amount: 2800, freq: "monthly", color: "#2563EB", next: "Jul 15" },
-  { name: "Personal Loan EMI", amount: 22000, freq: "monthly", color: "#059669", next: "Jul 25" },
-  { name: "Netflix", amount: 1750, freq: "monthly", color: "#E11D48", next: "Jul 1" },
-  { name: "Keells delivery", amount: 3500, freq: "weekly", color: "#D97706", next: "Jun 21" },
+  { name: "Dialog bill", amount: 2800, freq: "monthly" as const, color: "#2563EB", nextDays: 25 },
+  { name: "Personal Loan EMI", amount: 22000, freq: "monthly" as const, color: "#059669", nextDays: 10 },
+  { name: "Netflix", amount: 1750, freq: "monthly" as const, color: "#E11D48", nextDays: 12 },
+  { name: "Keells delivery", amount: 3500, freq: "weekly" as const, color: "#D97706", nextDays: 3 },
 ];
 
 function weekLabel(dateStr: string) {
@@ -112,14 +120,15 @@ export default function TransactionsPage() {
     weekday: number;
   } | null>(null);
   const [anomalyTip, setAnomalyTip] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const perPage = 15;
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadTransactions = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
     getAccountContext(userId)
       .then((data) => {
-        if (cancelled) return;
         const ctx = data as { recent_transactions?: typeof FALLBACK_TRANSACTIONS };
         if (ctx.recent_transactions?.length) {
           setTransactions(enrichBasic(ctx.recent_transactions));
@@ -127,14 +136,17 @@ export default function TransactionsPage() {
         setLoadError(null);
       })
       .catch(() => {
-        if (!cancelled) {
-          setLoadError("Using demo transactions — live account data unavailable.");
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
+        setLoadError("Using demo transactions — live account data unavailable.");
+      })
+      .finally(() => setLoading(false));
   }, [userId]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      loadTransactions();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadTransactions]);
 
   const weeklyAmount = useMemo(() => {
     const map = new Map<string, number>();
@@ -271,6 +283,19 @@ export default function TransactionsPage() {
   return (
     <div className="stagger mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10">
       <BackToTopButton threshold={500} />
+      {loading ? (
+        <div className="space-y-6">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-10 w-72" />
+          <div className="grid gap-4 md:grid-cols-2">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+          </div>
+        </div>
+      ) : (
+        <>
       <header>
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
           Transaction analytics
@@ -282,9 +307,13 @@ export default function TransactionsPage() {
           Overview, analytics, and a filterable ledger — all offline-ready.
         </p>
         {loadError ? (
-          <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-            {loadError}
-          </p>
+          <div className="mt-4">
+            <ErrorState
+              title="Live data unavailable"
+              message={loadError}
+              onRetry={loadTransactions}
+            />
+          </div>
         ) : null}
       </header>
 
@@ -441,7 +470,7 @@ export default function TransactionsPage() {
                   <div className="mb-1 flex items-center justify-between text-xs">
                     <span className="font-medium text-ceyfi-ink">{item.name}</span>
                     <span className="font-mono text-ceyfi-muted">
-                      {formatters.currency({ number: item.amount, maxFractionDigits: 0 })} · {item.freq} · next {item.next}
+                      {formatters.currency({ number: item.amount, maxFractionDigits: 0 })} · {item.freq} · next {formatNextDate(item.nextDays)}
                     </span>
                   </div>
                   <div className="h-3 overflow-hidden rounded-full bg-ceyfi-canvas">
@@ -562,6 +591,8 @@ export default function TransactionsPage() {
           </div>
         </TabsContent>
       </Tabs>
+        </>
+      )}
     </div>
   );
 }

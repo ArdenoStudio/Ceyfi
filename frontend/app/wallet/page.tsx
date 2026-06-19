@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Transaction } from "@/types";
 import { saveAllocationRules, ApiError } from "@/lib/api";
 import { toast } from "sonner";
-import { type RemittanceCurrency } from "@/lib/remittance-fx";
+import { GBP_LKR_RATE, type RemittanceCurrency } from "@/lib/remittance-fx";
 import { ArrowRightLeft, Bot, PieChart, ShieldCheck } from "lucide-react";
 import { WalletBalanceHeader } from "@/components/wallet/WalletBalanceHeader";
 import { ErrorState } from "@/components/ErrorState";
@@ -45,6 +45,24 @@ export default function WalletPage() {
     sync();
     window.addEventListener("hashchange", sync);
     return () => window.removeEventListener("hashchange", sync);
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== "n" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setModalOpen(true);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const accountHolderRef = useRef("");
@@ -234,7 +252,7 @@ export default function WalletPage() {
               amount_lkr: amountLkr,
               date: new Date().toISOString().slice(0, 10),
               amount_gbp: amountGbp,
-              fx_rate: currency?.lkrRate ?? 408.3,
+              fx_rate: currency?.lkrRate ?? GBP_LKR_RATE,
               provider: "Seylan Hub",
               currency_code: currency?.code ?? "GBP",
               corridor: currency ? `${currency.code} → LKR` : "GBP → LKR",

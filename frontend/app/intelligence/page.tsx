@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -26,6 +26,9 @@ import { ChartContainer } from "@/components/charts/ChartContainer";
 import { PeriodBadge } from "@/components/charts/PeriodBadge";
 import { ProgressCircle } from "@/components/charts/OverviewCharts";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/EmptyState";
+import { ErrorState } from "@/components/ErrorState";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sheet,
   SheetContent,
@@ -49,22 +52,32 @@ const ICON_MAP = {
 export default function IntelligencePage() {
   const { user } = useAuth();
   const [snapshot, setSnapshot] = useState<FinancialSnapshot | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [improveTarget, setImproveTarget] = useState<FinancialSnapshot["health_components"][0] | null>(null);
 
-  useEffect(() => {
+  const loadSnapshot = useCallback(() => {
     if (!user) return;
+    setLoading(true);
+    setError(null);
     getFinancialSnapshot(user.user_id)
       .then(setSnapshot)
-      .catch(() => null);
+      .catch(() => setError("Could not load financial intelligence data."))
+      .finally(() => setLoading(false));
   }, [user]);
 
   useEffect(() => {
-    const onReset = () => {
-      if (user) getFinancialSnapshot(user.user_id).then(setSnapshot).catch(() => null);
-    };
+    const timer = window.setTimeout(() => {
+      loadSnapshot();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadSnapshot]);
+
+  useEffect(() => {
+    const onReset = () => loadSnapshot();
     window.addEventListener("seylan:demo-reset", onReset);
     return () => window.removeEventListener("seylan:demo-reset", onReset);
-  }, [user]);
+  }, [loadSnapshot]);
 
   const components = snapshot?.health_components ?? [];
   const anomalies = snapshot?.anomalies ?? [];
@@ -84,6 +97,20 @@ export default function IntelligencePage() {
 
   return (
     <div className="mx-auto w-full max-w-[1240px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10">
+      {loading ? (
+        <div className="space-y-6">
+          <Skeleton className="h-24 w-full" />
+          <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+          </div>
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      ) : error && !snapshot ? (
+        <ErrorState message={error} onRetry={loadSnapshot} />
+      ) : (
+        <>
       <header>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
           Financial intelligence
@@ -140,7 +167,11 @@ export default function IntelligencePage() {
       <ChartCard title="Anomaly feed" subtitle="AI-detected financial events">
         <div className="space-y-3">
           {anomalies.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No anomalies detected in recent transactions.</p>
+            <EmptyState
+              icon={CheckCircle2}
+              title="No anomalies detected"
+              description="Recent transactions look normal. CEYFI will flag unusual spending here."
+            />
           ) : (
             anomalies.map((a) => (
               <div key={a.id} className="interactive-card flex items-start gap-3 rounded-xl border border-border/60 p-4">
@@ -178,7 +209,14 @@ export default function IntelligencePage() {
 
       <ChartCard title="Financial opportunities" subtitle="Ranked by potential benefit">
         <div className="space-y-3">
-          {opportunities.map((o, i) => {
+          {opportunities.length === 0 ? (
+            <EmptyState
+              icon={Lightbulb}
+              title="No opportunities yet"
+              description="Run a scenario or connect live data to see ranked recommendations."
+            />
+          ) : (
+            opportunities.map((o, i) => {
             const Icon = ICON_MAP[o.icon as keyof typeof ICON_MAP] ?? Lightbulb;
             return (
               <div key={o.title} className="interactive-card flex items-center gap-4 rounded-xl border border-border/60 p-4">
@@ -199,7 +237,8 @@ export default function IntelligencePage() {
                 </Link>
               </div>
             );
-          })}
+          })
+          )}
         </div>
       </ChartCard>
 
@@ -218,6 +257,8 @@ export default function IntelligencePage() {
           </ul>
         </SheetContent>
       </Sheet>
+        </>
+      )}
     </div>
   );
 }

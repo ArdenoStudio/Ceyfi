@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Inbox,
   Zap,
 } from "lucide-react";
 import { PeriodBadge } from "@/components/charts/PeriodBadge";
+import { EmptyState } from "@/components/EmptyState";
+import { ErrorState } from "@/components/ErrorState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -44,26 +48,36 @@ export default function DecisionsPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"All" | Decision["category"]>("All");
   const [sort, setSort] = useState<"impact" | "urgency" | "confidence">("impact");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [executeTarget, setExecuteTarget] = useState<Decision | null>(null);
   const [executing, setExecuting] = useState(false);
 
-  useEffect(() => {
+  const loadDecisions = useCallback(() => {
     if (!user) return;
+    setLoading(true);
+    setError(null);
     getFinancialSnapshot(user.user_id)
       .then((s) => setDecisions(s.decisions))
-      .catch(() => setDecisions([]));
+      .catch(() => setError("Could not load financial recommendations."))
+      .finally(() => setLoading(false));
   }, [user]);
 
   useEffect(() => {
-    const onReset = () => {
-      if (user) getFinancialSnapshot(user.user_id).then((s) => setDecisions(s.decisions)).catch(() => null);
-    };
+    const timer = window.setTimeout(() => {
+      loadDecisions();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadDecisions]);
+
+  useEffect(() => {
+    const onReset = () => loadDecisions();
     window.addEventListener("seylan:demo-reset", onReset);
     return () => window.removeEventListener("seylan:demo-reset", onReset);
-  }, [user]);
+  }, [loadDecisions]);
 
   const filtered = useMemo(() => {
     let list = filter === "All" ? decisions : decisions.filter((d) => d.category === filter);
@@ -106,6 +120,21 @@ export default function DecisionsPage() {
 
   return (
     <div className="mx-auto w-full max-w-[900px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10">
+      {loading ? (
+        <div className="space-y-6">
+          <Skeleton className="h-24 w-full" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Skeleton className="h-20" />
+            <Skeleton className="h-20" />
+            <Skeleton className="h-20" />
+          </div>
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      ) : error && decisions.length === 0 ? (
+        <ErrorState message={error} onRetry={loadDecisions} />
+      ) : (
+        <>
       <header>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
           <Zap className="h-3.5 w-3.5" />
@@ -160,7 +189,18 @@ export default function DecisionsPage() {
       </div>
 
       <div className="space-y-3">
-        {filtered.map((d) => {
+        {filtered.length === 0 ? (
+          <EmptyState
+            icon={Inbox}
+            title={decisions.length === 0 ? "No recommendations yet" : "No decisions match this filter"}
+            description={
+              decisions.length === 0
+                ? "Connect live data or run the demo to see ranked financial actions."
+                : "Try a different category or reset filters to see all recommendations."
+            }
+          />
+        ) : (
+        filtered.map((d) => {
           const isOpen = expanded === d.id;
           return (
             <article key={d.id} className="interactive-card rounded-xl border border-border/70 bg-card">
@@ -235,7 +275,8 @@ export default function DecisionsPage() {
               )}
             </article>
           );
-        })}
+        })
+        )}
       </div>
 
       <Dialog open={!!executeTarget} onOpenChange={(o) => !o && setExecuteTarget(null)}>
@@ -254,6 +295,8 @@ export default function DecisionsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </>
+      )}
     </div>
   );
 }

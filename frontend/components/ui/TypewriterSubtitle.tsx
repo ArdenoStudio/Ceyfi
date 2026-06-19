@@ -35,8 +35,10 @@ export function TypewriterSubtitle({
         setDisplayed(displayed.slice(0, -1));
       }, typingSpeed / 2);
     } else if (isDeleting && displayed.length === 0) {
-      setIsDeleting(false);
-      setPromptIndex((i) => (i + 1) % prompts.length);
+      timer = setTimeout(() => {
+        setIsDeleting(false);
+        setPromptIndex((i) => (i + 1) % prompts.length);
+      }, typingSpeed / 2);
     }
 
     return () => clearTimeout(timer);

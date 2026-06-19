@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ErrorState";
+import { EmptyState } from "@/components/EmptyState";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getProfileData } from "@/lib/api";
@@ -39,18 +40,21 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadProfile = () => {
+  const loadProfile = useCallback(() => {
     setLoading(true);
     setError(null);
     getProfileData(userId)
       .then(setProfile)
       .catch(() => setError("Could not load profile data."))
       .finally(() => setLoading(false));
-  };
+  }, [userId]);
 
   useEffect(() => {
-    loadProfile();
-  }, [userId]);
+    const timer = window.setTimeout(() => {
+      loadProfile();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadProfile]);
 
   if (loading) {
     return (
@@ -266,7 +270,15 @@ export default function ProfilePage() {
             Recent Transactions
           </h3>
           <div className="divide-y divide-border dark:divide-white/[0.06]">
-            {profile.recent_transactions.map((tx) => (
+            {profile.recent_transactions.length === 0 ? (
+              <EmptyState
+                icon={Receipt}
+                title="No recent transactions"
+                description="Your latest account activity will appear here once transactions are recorded."
+                className="py-8"
+              />
+            ) : (
+            profile.recent_transactions.map((tx) => (
               <div
                 key={tx.id}
                 className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
@@ -305,7 +317,8 @@ export default function ProfilePage() {
                   {formatLKR(tx.amount_lkr)}
                 </span>
               </div>
-            ))}
+            ))
+            )}
           </div>
         </div>
       </div>

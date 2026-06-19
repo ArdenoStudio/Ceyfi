@@ -20,7 +20,7 @@ import {
   seriesColor,
   type ChartVariant,
 } from "@/lib/chartUtils";
-import { cn, formatters } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export interface AreaChartSeries {
   key: string;

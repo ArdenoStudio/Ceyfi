@@ -1,36 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { getCfoBrief, type CfoBrief } from "@/lib/api";
 import { ChartCard } from "@/components/ui/ChartCard";
+import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatters } from "@/lib/utils";
 
 export function CfoBriefPanel({ userId }: { userId: string }) {
   const [brief, setBrief] = useState<CfoBrief | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    getCfoBrief(userId)
+      .then((b) => setBrief(b))
+      .catch(() => setError("Could not load the daily CFO brief."))
+      .finally(() => setLoading(false));
+  }, [userId]);
 
   useEffect(() => {
-    let cancelled = false;
-    getCfoBrief(userId)
-      .then((b) => {
-        if (!cancelled) setBrief(b);
-      })
-      .catch(() => {
-        if (!cancelled) setBrief(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+    const timer = window.setTimeout(() => {
+      load();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
 
   if (loading) {
     return <Skeleton className="h-40 w-full rounded-xl" />;
+  }
+  if (error && !brief) {
+    return <ErrorState message={error} onRetry={load} />;
   }
   if (!brief) return null;
 

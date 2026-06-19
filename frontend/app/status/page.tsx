@@ -1,4 +1,5 @@
 import { getSummary, getRecentIncidents, overallStatus, REPO_URL } from "@/lib/upptime";
+import { APP_URL } from "@/lib/config";
 import { StatusBanner } from "./components/StatusBanner";
 import { ServiceCard } from "./components/ServiceCard";
 import { Incidents } from "./components/Incidents";
@@ -33,10 +34,10 @@ export default async function StatusPage() {
             <span className="font-semibold tracking-tight">CEYFI Status</span>
           </div>
           <a
-            href={process.env.NEXT_PUBLIC_APP_URL ?? "https://seylan-hub.vercel.app"}
+            href={APP_URL}
             className="text-sm text-neutral-500 hover:text-blue-600 transition-colors"
           >
-            seylan-hub.vercel.app →
+            {new URL(APP_URL).host} →
           </a>
         </header>
 
