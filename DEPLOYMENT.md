@@ -46,13 +46,13 @@ ELEVENLABS_API_KEY=...
 DEMO_SESSION_SECRET=...
 DEMO_ADMIN_KEY=...
 DEMO_AUTH_REQUIRED=true
-CORS_ORIGINS=http://localhost:3000,https://frontend-taupe-three-96.vercel.app,https://ceyfi.app
+CORS_ORIGINS=https://frontend-taupe-three-96.vercel.app,https://frontend-cookie-cat21s-projects.vercel.app
 USE_SEYLAN_REAL=false
 SEYLAN_API_KEY=...
 MPGS_ENABLE=false
 ```
 
-`CORS_ORIGINS` must include every frontend origin that calls the API (production domain, `ceyfi.app` if used, and Vercel preview URLs for PR testing). Code defaults cover local dev ports `3000`/`3003`/`3005` plus production URLs; add preview origins via Cloud Run env.
+`CORS_ORIGINS` must include every frontend origin that calls the API. The Cloud Run value should contain only production aliases. Code defaults also cover local dev ports `3000`/`3003`/`3005`; add a specific preview origin temporarily only when browser testing that preview against the production API.
 
 ## Local dev
 

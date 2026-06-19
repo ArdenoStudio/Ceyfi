@@ -168,6 +168,13 @@ def test_notify_hash_formula():
     assert _notify_hash("1212345", "ORD-1", "99.00", "LKR", "2", secret) == expected
 
 
+def test_default_cors_origins_only_include_live_frontends():
+    assert "https://frontend-taupe-three-96.vercel.app" in settings.cors_list
+    assert "https://frontend-cookie-cat21s-projects.vercel.app" in settings.cors_list
+    assert "https://ceyfi.app" not in settings.cors_list
+    assert all("seylan-hub" not in origin for origin in settings.cors_list)
+
+
 @pytest.mark.asyncio
 async def test_mock_routes_require_auth_when_enabled(client, monkeypatch):
     monkeypatch.setattr(settings, "demo_auth_required", True)

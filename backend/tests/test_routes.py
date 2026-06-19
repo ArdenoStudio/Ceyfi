@@ -1,7 +1,9 @@
 """Tests for backend API routes using FastAPI TestClient."""
 import pytest
 from httpx import AsyncClient, ASGITransport
+from app.config import settings
 from app.main import app
+from app.services import supabase_client
 
 
 @pytest.fixture
@@ -40,6 +42,29 @@ async def test_family_wallet(client):
     data = resp.json()
     assert "buckets" in data
     assert "Kumari" in data.get("account_holder", "")
+
+
+@pytest.mark.asyncio
+async def test_family_wallet_skips_database_in_fixture_mode(client, monkeypatch):
+    monkeypatch.setattr(settings, "database_url", "")
+
+    def unexpected_database_call(*args, **kwargs):
+        raise AssertionError("database should not be queried in fixture-only mode")
+
+    monkeypatch.setattr(
+        supabase_client,
+        "get_recent_transactions",
+        unexpected_database_call,
+    )
+    monkeypatch.setattr(
+        supabase_client,
+        "get_allocation_rules",
+        unexpected_database_call,
+    )
+
+    resp = await client.get("/mock/family-wallet/SEY-ACC-002")
+    assert resp.status_code == 200
+    assert resp.json()["account_id"] == "SEY-ACC-002"
 
 
 @pytest.mark.asyncio

@@ -22,7 +22,7 @@
         { "name": "PORT", "value": "8000" },
         { "name": "PYTHONUNBUFFERED", "value": "1" },
         { "name": "USE_SEYLAN_REAL", "value": "false" },
-        { "name": "CORS_ORIGINS", "value": "http://localhost:3000,http://localhost:3003,http://localhost:3005,https://frontend-taupe-three-96.vercel.app,https://ceyfi.app" }
+        { "name": "CORS_ORIGINS", "value": "http://localhost:3000,http://localhost:3003,http://localhost:3005,https://frontend-taupe-three-96.vercel.app,https://frontend-cookie-cat21s-projects.vercel.app" }
       ],
       "secrets": [
         {
