@@ -1,16 +1,10 @@
 "use client";
 
-import type React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { GraduationCap, Home, PiggyBank } from "lucide-react";
+import { IconWell } from "@/components/ui/IconWell";
+import { WalletBucketIcon } from "@/components/icons/CeyfiIconSet";
 import { Bucket } from "@/types";
 import { formatLKR } from "@/lib/utils";
-
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  school: GraduationCap,
-  household: Home,
-  savings: PiggyBank,
-};
 
 const COLOUR_MAP: Record<
   string,
@@ -88,7 +82,6 @@ interface BucketCardProps {
 }
 
 export function BucketCard({ bucket, onClick }: BucketCardProps) {
-  const Icon = ICON_MAP[bucket.icon] ?? PiggyBank;
   const colours = COLOUR_MAP[bucket.icon] ?? FALLBACK_COLOUR;
   const spentPct =
     bucket.balance_lkr + bucket.spent_lkr > 0
@@ -109,11 +102,13 @@ export function BucketCard({ bucket, onClick }: BucketCardProps) {
         <div className="flex items-start justify-between mb-4">
           <div className="relative h-12 w-12 shrink-0">
             <RingProgress pct={spentPct} stroke={colours.ring} />
-            <div
-              className={`absolute inset-[6px] flex items-center justify-center rounded-full ${colours.surface}`}
+            <IconWell
+              size="auto"
+              shape="circle"
+              className={`absolute inset-[6px] [&_svg]:size-4 ${colours.surface} ${colours.icon}`}
             >
-              <Icon className={`h-4 w-4 ${colours.icon}`} />
-            </div>
+              <WalletBucketIcon />
+            </IconWell>
           </div>
 
           <div className="min-w-0 flex-1 text-right">

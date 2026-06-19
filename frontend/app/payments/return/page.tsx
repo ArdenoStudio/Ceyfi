@@ -4,8 +4,31 @@ import { useEffect, useRef, useState, Suspense } from "react";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getPaymentStatus } from "@/lib/api";
+import { Steps, type StepItem } from "@/components/daisyui-style";
 
 type PollState = "polling" | "success" | "failed";
+
+function paymentSteps(state: PollState): StepItem[] {
+  if (state === "polling") {
+    return [
+      { label: "Checkout", status: "complete", tone: "success" },
+      { label: "Verify payment", status: "active", tone: "primary" },
+      { label: "Complete", status: "pending", tone: "neutral" },
+    ];
+  }
+  if (state === "success") {
+    return [
+      { label: "Checkout", status: "complete", tone: "success" },
+      { label: "Verify payment", status: "complete", tone: "success" },
+      { label: "Complete", status: "complete", tone: "success" },
+    ];
+  }
+  return [
+    { label: "Checkout", status: "complete", tone: "success" },
+    { label: "Verify payment", status: "error", tone: "error" },
+    { label: "Complete", status: "error", tone: "error" },
+  ];
+}
 
 function PaymentReturnPoller({
   orderId,
@@ -74,14 +97,19 @@ function PaymentReturnPoller({
     shop_sale: "Sale recorded. Redirecting.",
   };
 
+  const steps = paymentSteps(state);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-ceyfi-canvas px-4 dark:bg-ceyfi-deep">
-      <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-5 border border-ceyfi-line dark:border-white/10">
+      <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-md w-full text-center space-y-5 border border-ceyfi-line dark:border-white/10">
         <Image src="/ceyfi-logo.svg" alt="CEYFI" width={40} height={40} className="mx-auto dark:brightness-0 dark:invert" />
+
+        <Steps steps={steps} className="px-1" />
+
         {state === "polling" && (
           <>
             <div className="mx-auto h-12 w-12 rounded-full border-4 border-ceyfi-deep border-t-transparent animate-spin" />
-            <h1 className="text-lg font-semibold text-ceyfi-ink">Confirming payment&hellip;</h1>
+            <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">Confirming payment&hellip;</h1>
             <p className="text-sm text-muted-foreground">
               Please wait while we verify your transaction with Mastercard.
             </p>
@@ -90,12 +118,12 @@ function PaymentReturnPoller({
 
         {state === "success" && (
           <>
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <svg className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-emerald-900/40">
+              <svg className="h-7 w-7 text-green-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-lg font-semibold text-ceyfi-ink">Payment successful</h1>
+            <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">Payment successful</h1>
             <p className="text-sm text-muted-foreground">
               {successCopy[purpose] ?? "Redirecting\u2026"}
             </p>
@@ -104,12 +132,12 @@ function PaymentReturnPoller({
 
         {state === "failed" && (
           <>
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <svg className="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+              <svg className="h-7 w-7 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h1 className="text-lg font-semibold text-ceyfi-ink">Payment failed</h1>
+            <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">Payment failed</h1>
             <p className="text-sm text-muted-foreground">{failReason}</p>
             <button
               onClick={() => {
@@ -135,14 +163,22 @@ function PaymentReturnContent() {
   if (!orderId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ceyfi-canvas px-4 dark:bg-ceyfi-deep">
-        <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-5 border border-ceyfi-line dark:border-white/10">
+        <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-md w-full text-center space-y-5 border border-ceyfi-line dark:border-white/10">
           <Image src="/ceyfi-logo.svg" alt="CEYFI" width={40} height={40} className="mx-auto dark:brightness-0 dark:invert" />
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-            <svg className="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <Steps
+            steps={[
+              { label: "Checkout", status: "complete", tone: "success" },
+              { label: "Verify payment", status: "error", tone: "error" },
+              { label: "Complete", status: "error", tone: "error" },
+            ]}
+            className="px-1"
+          />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+            <svg className="h-7 w-7 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-lg font-semibold text-ceyfi-ink">Payment failed</h1>
+          <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">Payment failed</h1>
           <p className="text-sm text-muted-foreground">No order ID in URL.</p>
           <button
             type="button"

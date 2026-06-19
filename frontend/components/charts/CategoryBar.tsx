@@ -16,7 +16,7 @@ interface CategoryBarProps {
   showLabels?: boolean;
 }
 
-export function CategoryBar({
+export function SimpleCategoryBar({
   items,
   className,
   height = 12,

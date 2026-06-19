@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { BarList } from "@/components/charts/BarList";
+import { CategoryBar } from "@/components/charts/TremorStyle";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ErrorState";
@@ -86,6 +87,12 @@ export function ExpenseBreakdown({ userId }: ExpenseBreakdownProps) {
       color: CATEGORY_COLORS[category] ?? seriesColor(index),
     }));
 
+  const categoryValues = barListData.map((item) => item.value);
+  const categoryColors = barListData.map((item) => item.color);
+  const categoryLabels = barListData.map((item) => item.name);
+  const totalSpend = categoryValues.reduce((sum, value) => sum + value, 0);
+  const topCategorySpend = categoryValues[0] ?? 0;
+
   return (
     <Card className="card-glass shadow-brand border-0">
       <CardContent className="p-5">
@@ -95,10 +102,31 @@ export function ExpenseBreakdown({ userId }: ExpenseBreakdownProps) {
         <h3 className="mb-4 font-heading text-lg font-semibold text-ceyfi-ink dark:text-white">
           Expense Breakdown
         </h3>
+
+        <CategoryBar
+          values={categoryValues}
+          colors={categoryColors}
+          labels={categoryLabels}
+          marker={{
+            value: topCategorySpend,
+            tooltip: `${categoryLabels[0] ?? "Top"} — ${formatLKR(topCategorySpend)}`,
+            showAnimation: true,
+          }}
+          valueFormatter={(value) => formatLKR(value)}
+          className="mb-5"
+        />
+
         <BarList
           data={barListData}
           valueFormatter={(value) => formatLKR(value)}
         />
+
+        <p className="mt-4 text-[11px] text-ceyfi-faint dark:text-white/35">
+          Total weekly spend{" "}
+          <span className="font-mono font-semibold text-ceyfi-ink dark:text-white/70">
+            {formatLKR(totalSpend)}
+          </span>
+        </p>
       </CardContent>
     </Card>
   );

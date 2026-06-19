@@ -6,6 +6,7 @@ import { MobileNav } from "./MobileNav";
 import { DemoModeBadge } from "./DemoModeBadge";
 import { PageEnter } from "@/components/motion/PageEnter";
 import { SeylanBankHandoffBanner } from "@/components/seylan/SeylanBankHandoffBanner";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { usePathname } from "next/navigation";
 
 interface AppShellProps {
@@ -44,6 +45,7 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </PageEnter>
         {showSeylanHandoff ? <SeylanBankHandoffBanner /> : null}
+        <SiteFooter />
       </main>
       <MobileNav />
       <DemoModeBadge />

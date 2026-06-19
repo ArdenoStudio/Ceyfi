@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { SparklineArea } from "@/components/charts/AreaChart";
+import { IconWell } from "@/components/ui/IconWell";
 import { CHART_BRAND } from "@/lib/chartUtils";
 import { cn } from "@/lib/utils";
 
@@ -50,9 +51,9 @@ export function KpiCard({
           {title}
         </div>
         {icon ? (
-          <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-ceyfi-sprout text-ceyfi-green transition-all duration-200 group-hover:bg-ceyfi-green group-hover:text-white group-hover:shadow-[0_4px_16px_rgba(5,150,105,0.30)]">
+          <IconWell size="md" tone="sprout" interactive>
             {icon}
-          </div>
+          </IconWell>
         ) : null}
       </div>
       <div className="mt-4 font-heading text-[1.65rem] font-semibold leading-none tracking-[-0.04em] text-ceyfi-ink tabular-nums">

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarClock } from "lucide-react";
+import { LoanIcon } from "@/components/icons/CeyfiIconSet";
+import { IconWell } from "@/components/ui/IconWell";
 import { ProgressCircle } from "@/components/charts/ProgressCircle";
 import { Loan } from "@/types";
 import { formatLKR } from "@/lib/utils";
@@ -29,7 +31,11 @@ export function LoanSummaryCard({ loan, onPaymentSuccess }: LoanSummaryCardProps
       <Card className="card-glass shadow-brand-lg border-0">
         <CardContent className="p-5">
           <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
+            <div className="flex gap-3">
+              <IconWell size="lg" tone="sprout" className="mt-0.5">
+                <LoanIcon />
+              </IconWell>
+              <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
                 Current loan
               </p>
@@ -40,6 +46,7 @@ export function LoanSummaryCard({ loan, onPaymentSuccess }: LoanSummaryCardProps
                 <CalendarClock className="h-3.5 w-3.5 text-ceyfi-green" />
                 {daysUntil} days until next payment
               </span>
+              </div>
             </div>
             <div className="flex flex-col items-center gap-2">
               <ProgressCircle value={progressPct} size={88} strokeWidth={8}>

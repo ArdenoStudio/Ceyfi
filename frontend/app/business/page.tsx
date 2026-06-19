@@ -242,6 +242,8 @@ export default function BusinessPage() {
           <TaxJarPanel
             userId={BUSINESS_USER_ID}
             initialBalance={taxJarBalance}
+            projectedTaxNeed={projectedTaxNeed}
+            coveragePct={taxCoveragePct}
             onNewTransaction={handleNewTransaction}
           />
         </div>

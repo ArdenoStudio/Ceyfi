@@ -3,12 +3,51 @@
 import { useState, useEffect, useCallback } from "react";
 import { RefreshCw, Zap, CheckCircle, XCircle, Activity, Clock, PhoneCall, AlertCircle } from "lucide-react";
 import { StatHeaderStrip } from "@/components/blocks/AnimatedStatCard";
+import {
+  CategoryBar,
+  CEYFI_COLORS,
+  Metric,
+  Tracker,
+  type TrackerBlock,
+} from "@/components/charts/TremorStyle";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ErrorState";
 import { AgentCard } from "./components/AgentCard";
 import { ResponseTimeChart } from "./components/ResponseTimeChart";
 import { SuccessErrorChart } from "./components/SuccessErrorChart";
 import type { AgentMetric, MetricsData } from "./types";
+
+function buildHealthTracker(agents: AgentMetric[]): TrackerBlock[] {
+  const hourCount = agents[0]?.series.length ?? 0;
+  const blocks: TrackerBlock[] = [];
+
+  for (let i = 0; i < hourCount; i++) {
+    let success = 0;
+    let errors = 0;
+    for (const agent of agents) {
+      success += agent.series[i]?.success ?? 0;
+      errors += agent.series[i]?.error ?? 0;
+    }
+    const total = success + errors;
+    const errorRate = total > 0 ? errors / total : 0;
+    const hour = agents[0]?.series[i]?.hour ?? `H${i}`;
+
+    let color: string = CEYFI_COLORS.green;
+    let tooltip = `${hour}: ${success.toLocaleString()} success · ${errors} errors`;
+    if (errorRate > 0.1) {
+      color = CEYFI_COLORS.warn;
+      tooltip = `${hour}: elevated errors (${Math.round(errorRate * 100)}%)`;
+    }
+    if (errorRate > 0.25) {
+      color = CEYFI_COLORS.error;
+      tooltip = `${hour}: degraded (${Math.round(errorRate * 100)}% errors)`;
+    }
+
+    blocks.push({ key: hour, color, tooltip });
+  }
+
+  return blocks;
+}
 
 const REFRESH_INTERVAL = 30_000;
 
@@ -155,6 +194,74 @@ export default function MetricsPage() {
             {upAgents}/{agents.length} agents operational
           </span>
         </div>
+
+        {/* Tremor-style KPI strip */}
+        {!loading && agents.length > 0 ? (
+          <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 backdrop-blur">
+            <div className="mb-5 grid grid-cols-2 gap-5 sm:grid-cols-4">
+              <Metric
+                label="Avg uptime"
+                value={`${overallUptime}%`}
+                delta={
+                  parseFloat(overallUptime) >= 99
+                    ? 0.8
+                    : parseFloat(overallUptime) >= 95
+                      ? -1.2
+                      : -4.5
+                }
+                isIncreasePositive
+              />
+              <Metric
+                label="Avg latency"
+                value={`${avgLatency}ms`}
+                delta={avgLatency <= 200 ? -3.2 : 6.1}
+                isIncreasePositive={false}
+              />
+              <Metric
+                label="Total calls"
+                value={(totalSuccess + totalErrors).toLocaleString()}
+                delta={5.4}
+                deltaLabel="24h volume"
+                isIncreasePositive
+              />
+              <Metric
+                label="Error rate"
+                value={
+                  totalSuccess + totalErrors > 0
+                    ? `${((totalErrors / (totalSuccess + totalErrors)) * 100).toFixed(1)}%`
+                    : "0%"
+                }
+                delta={
+                  totalErrors > 0
+                    ? (totalErrors / Math.max(totalSuccess, 1)) * 100
+                    : 0
+                }
+                isIncreasePositive={false}
+              />
+            </div>
+
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ceyfi-mint">
+              24-hour health timeline
+            </p>
+            <Tracker
+              data={buildHealthTracker(agents)}
+              hoverEffect
+              className="mb-4"
+            />
+
+            <CategoryBar
+              values={[totalSuccess, totalErrors]}
+              colors={[CEYFI_COLORS.green, CEYFI_COLORS.error]}
+              labels={["Success", "Errors"]}
+              marker={{
+                value: totalSuccess,
+                tooltip: `${totalSuccess.toLocaleString()} successful calls`,
+                showAnimation: true,
+              }}
+              showLabels={false}
+            />
+          </div>
+        ) : null}
 
         {/* Overall stats */}
         <StatHeaderStrip

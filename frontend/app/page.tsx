@@ -14,6 +14,12 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
+import {
+  LoanIcon,
+  RemittanceIcon,
+  TaxJarIcon,
+  WalletBucketIcon,
+} from "@/components/icons/CeyfiIconSet";
 import { PeriodBadge } from "@/components/charts/PeriodBadge";
 import { TimeRiver } from "@/components/charts/TimeRiver";
 import {
@@ -424,7 +430,7 @@ export default function OverviewPage() {
           change="+2.4% this month"
           changeType="positive"
           subtitle="Current and savings"
-          icon={<Wallet className="h-4.5 w-4.5" />}
+          icon={<WalletBucketIcon />}
           sparkline={buildSparkline(balance / 1000)}
         />
         <KpiCard
@@ -436,7 +442,7 @@ export default function OverviewPage() {
           change="+LKR 12,400"
           changeType="positive"
           subtitle="Added this month"
-          icon={<Landmark className="h-4.5 w-4.5" />}
+          icon={<TaxJarIcon />}
           sparkline={buildSparkline(savings / 1000)}
         />
         <KpiCard
@@ -445,7 +451,7 @@ export default function OverviewPage() {
           change={loanHealth >= 75 ? "Good standing" : "Needs attention"}
           changeType={loanHealth >= 75 ? "positive" : "negative"}
           subtitle="Across active facilities"
-          icon={<ShieldCheck className="h-4.5 w-4.5" />}
+          icon={<LoanIcon />}
           sparkline={buildSparkline(loanHealth)}
         />
         <KpiCard
@@ -457,7 +463,7 @@ export default function OverviewPage() {
           change="+6% vs May"
           changeType="negative"
           subtitle="Bills and daily spending"
-          icon={<ReceiptText className="h-4.5 w-4.5" />}
+          icon={<RemittanceIcon />}
           sparkline={buildSparkline(spentThisMonth / 10000)}
         />
       </section>

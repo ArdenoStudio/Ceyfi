@@ -12,6 +12,7 @@ import { RepaymentTimeline } from "@/components/loans/RepaymentTimeline";
 import { LoanIntelligenceCharts } from "@/components/loans/LoanIntelligenceCharts";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { HeroColorPanels } from "@/components/blocks/HeroColorPanels";
+import { LoanProductsCarousel } from "@/components/blocks/AppleCardsCarousel";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -125,6 +126,8 @@ export default function LoansPage() {
           },
         ]}
       />
+
+      <LoanProductsCarousel />
 
       <StatGrid columns={4}>
         <StatCard

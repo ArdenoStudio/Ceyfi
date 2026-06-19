@@ -17,16 +17,25 @@ import { toast } from "sonner";
 import { Transaction } from "@/types";
 import { PaymentModeToggle } from "@/components/payments/PaymentModeToggle";
 import { CreditCard, Loader2, CircleCheck } from "lucide-react";
+import {
+  CategoryBar,
+  CEYFI_COLORS,
+  Metric,
+} from "@/components/charts/TremorStyle";
 
 interface TaxJarPanelProps {
   userId: string;
   initialBalance: number;
+  projectedTaxNeed?: number;
+  coveragePct?: number;
   onNewTransaction?: (tx: Transaction) => void;
 }
 
 export function TaxJarPanel({
   userId,
   initialBalance,
+  projectedTaxNeed = 0,
+  coveragePct = 0,
   onNewTransaction,
 }: TaxJarPanelProps) {
   const [displayBalance, setDisplayBalance] = useState(initialBalance);
@@ -128,17 +137,46 @@ export function TaxJarPanel({
           </span>
         </div>
 
-        <div className="text-4xl font-semibold text-ceyfi-ink dark:text-white mb-1">
-          {formatLKR(displayBalance)}
-        </div>
+        <Metric
+          label="Tax jar balance"
+          value={formatLKR(displayBalance)}
+          deltaType={coveragePct >= 60 ? "moderateIncrease" : coveragePct >= 30 ? "unchanged" : "moderateDecrease"}
+          deltaLabel={
+            projectedTaxNeed > 0
+              ? `${coveragePct}% of projected need`
+              : "10% auto-save active"
+          }
+          isIncreasePositive
+          className="mb-3"
+          valueClassName="text-3xl sm:text-4xl"
+        />
 
-        <div className="text-xs text-muted-foreground dark:text-white/40 mb-2">
+        <div className="text-xs text-muted-foreground dark:text-white/40 mb-4">
           Rule: 10% of every incoming payment
         </div>
 
-        <div className="mb-4 h-2 overflow-hidden rounded-full bg-white dark:bg-white/10">
-          <div className="h-full w-3/5 rounded-full bg-ceyfi-mint" />
-        </div>
+        {projectedTaxNeed > 0 ? (
+          <CategoryBar
+            values={[displayBalance, Math.max(0, projectedTaxNeed - displayBalance)]}
+            colors={[CEYFI_COLORS.green, CEYFI_COLORS.muted]}
+            labels={["Saved", "Remaining need"]}
+            marker={{
+              value: displayBalance,
+              tooltip: `${coveragePct}% coverage · ${formatLKR(displayBalance)} saved`,
+              showAnimation: true,
+            }}
+            valueFormatter={(value) => formatLKR(value)}
+            showLabels={false}
+            className="mb-4"
+          />
+        ) : (
+          <div className="mb-4 h-2 overflow-hidden rounded-full bg-white dark:bg-white/10">
+            <div
+              className="h-full rounded-full bg-ceyfi-mint transition-[width] duration-700"
+              style={{ width: `${Math.min(100, Math.max(0, coveragePct))}%` }}
+            />
+          </div>
+        )}
 
         <Button
           className="w-full rounded-full bg-ceyfi-green hover:bg-ceyfi-green/90 text-white font-semibold"
