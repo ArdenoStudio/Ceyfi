@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import json
@@ -99,13 +100,14 @@ def authorize_resource(session: dict[str, Any], resource_type: str, resource_id:
 
 
 def _sign(payload: dict[str, Any]) -> str:
-    body = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    body = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    encoded_body = base64.urlsafe_b64encode(body).rstrip(b"=").decode()
     sig = hmac.new(
         settings.demo_session_secret.encode(),
-        body.encode(),
+        encoded_body.encode(),
         hashlib.sha256,
     ).hexdigest()
-    return f"{body}.{sig}"
+    return f"{encoded_body}.{sig}"
 
 
 def _verify(token: str) -> dict[str, Any] | None:
@@ -113,17 +115,24 @@ def _verify(token: str) -> dict[str, Any] | None:
         return None
     if "." not in token:
         return None
-    body, sig = token.rsplit(".", 1)
+    encoded_body, sig = token.rsplit(".", 1)
     expected = hmac.new(
         settings.demo_session_secret.encode(),
-        body.encode(),
+        encoded_body.encode(),
         hashlib.sha256,
     ).hexdigest()
     if not hmac.compare_digest(sig, expected):
         return None
+
     try:
+        if encoded_body.startswith("{"):
+            # Accept sessions issued before tokens became header-safe.
+            body = encoded_body
+        else:
+            padding = "=" * (-len(encoded_body) % 4)
+            body = base64.urlsafe_b64decode(encoded_body + padding).decode()
         payload = json.loads(body)
-    except json.JSONDecodeError:
+    except (UnicodeDecodeError, ValueError, json.JSONDecodeError):
         return None
     if payload.get("exp", 0) < time.time():
         return None

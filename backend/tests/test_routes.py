@@ -247,6 +247,9 @@ async def test_auth_login(client):
     assert resp.status_code == 200
     data = resp.json()
     assert "token" in data
+    assert set(data["token"]) <= set(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_."
+    )
     assert data["user"]["name"] == "Nimal Fernando"
 
 
