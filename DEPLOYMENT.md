@@ -6,29 +6,31 @@ Single source of truth for live URLs and environment setup.
 
 | Surface | URL | Git repo branch |
 |---------|-----|-----------------|
-| **Frontend** | https://seylan-hub1.vercel.app | `ArdenoStudio/seylan-hub` `main` |
-| **Backend API** | https://seylan-hub-backend.vercel.app | same monorepo `backend/` |
-| **Status** | https://seylanhub-www.vercel.app | `status-site/` |
+| **Frontend** | https://frontend-taupe-three-96.vercel.app | `ArdenoStudio/Ceyfi` `main` |
+| **Backend API** | https://ceyfi-backend-98470559362.asia-southeast1.run.app | Cloud Run service `ceyfi-backend` |
+| **Status** | https://frontend-taupe-three-96.vercel.app/status | frontend status route |
 
-> **Vercel:** Project `seylan-hub1` auto-deploys from `ArdenoStudio/seylan-hub` on push to `main`. Root directory: `frontend/`.
+> **Vercel:** Project `frontend` serves the Next.js app. The FastAPI backend is deployed separately to Google Cloud Run in `asia-southeast1`.
 
 ## Vercel (monorepo)
 
-Root `vercel.json` uses experimental services:
+Root `vercel.json` uses experimental services for monorepo builds:
 
 - `frontend/` → `/`
-- `backend/` → `/_/backend` (or deploy backend as separate Vercel project at `seylan-hub-backend.vercel.app`)
+- `backend/` → `/_/backend`
+
+Production frontend traffic calls the canonical Cloud Run backend above.
 
 ### Frontend env
 
 ```env
-NEXT_PUBLIC_API_BASE=https://seylan-hub-backend.vercel.app
-NEXT_PUBLIC_SITE_URL=https://ceyfi.vercel.app
+NEXT_PUBLIC_API_BASE=https://ceyfi-backend-98470559362.asia-southeast1.run.app
+NEXT_PUBLIC_SITE_URL=https://frontend-taupe-three-96.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 # Server-only (Vercel → Settings → Environment Variables, NOT exposed to browser):
 DEMO_ADMIN_KEY=...
-BACKEND_URL=https://seylan-hub-backend.vercel.app
+BACKEND_URL=https://ceyfi-backend-98470559362.asia-southeast1.run.app
 ```
 
 ### Backend env
