@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import uuid
@@ -136,47 +137,60 @@ async def family_wallet(account_id: str):
     log.info("mock_call family-wallet account_id=%s", account_id)
     wallet = dict(data[account_id])
 
-    # Merge live Supabase transactions on top of fixture
-    try:
-        live_rows = supabase_client.get_recent_transactions(account_id, limit=20)
-        if live_rows:
-            fixture_txns = {t["id"]: t for t in wallet.get("recent_transactions", [])}
-            for row in live_rows:
-                row_id = row.get("id", row.get("transaction_id", ""))
-                fixture_txns[row_id] = {
-                    "id": row_id,
-                    "date": row.get("timestamp") or row.get("created_at"),
-                    "merchant": row.get("merchant", ""),
-                    "amount_lkr": row.get("amount_lkr", 0),
-                    "type": row.get("type", "debit"),
-                    "bucket_id": row.get("bucket_id"),
-                    "bucket_label": row.get("bucket_label"),
-                }
-            merged = sorted(fixture_txns.values(),
-                            key=lambda t: t.get("date") or "", reverse=True)
-            wallet["recent_transactions"] = merged[:10]
-            _apply_live_rows_to_wallet_buckets(wallet, live_rows)
-    except Exception as exc:
-        log.warning("Could not merge Supabase transactions: %s", exc)
+    if settings.database_url:
+        # Keep synchronous psycopg work off the event loop and skip it entirely
+        # when the app is running in fixture-only mode.
+        try:
+            live_rows = await asyncio.to_thread(
+                supabase_client.get_recent_transactions,
+                account_id,
+                limit=20,
+            )
+            if live_rows:
+                fixture_txns = {t["id"]: t for t in wallet.get("recent_transactions", [])}
+                for row in live_rows:
+                    row_id = row.get("id", row.get("transaction_id", ""))
+                    fixture_txns[row_id] = {
+                        "id": row_id,
+                        "date": row.get("timestamp") or row.get("created_at"),
+                        "merchant": row.get("merchant", ""),
+                        "amount_lkr": row.get("amount_lkr", 0),
+                        "type": row.get("type", "debit"),
+                        "bucket_id": row.get("bucket_id"),
+                        "bucket_label": row.get("bucket_label"),
+                    }
+                merged = sorted(
+                    fixture_txns.values(),
+                    key=lambda t: t.get("date") or "",
+                    reverse=True,
+                )
+                wallet["recent_transactions"] = merged[:10]
+                _apply_live_rows_to_wallet_buckets(wallet, live_rows)
+        except Exception as exc:
+            log.warning("Could not merge database transactions: %s", exc)
 
-    # Apply saved allocation rule percentages (sender → this family account)
-    try:
-        rule = supabase_client.get_allocation_rules("SEY-USR-001", account_id)
-        if rule and rule.get("buckets"):
-            total_bal = float(wallet.get("total_balance_lkr", 0))
-            for br in rule["buckets"]:
-                bid = br.get("id")
-                pct = float(br.get("pct", 0))
-                if not bid:
-                    continue
-                for b in wallet.get("buckets", []):
-                    rbid = b.get("id") or b.get("bucket_id")
-                    if rbid == bid:
-                        b["allocated_pct"] = pct
-                        b["allocated_lkr"] = round(total_bal * pct / 100.0, 2)
-                        break
-    except Exception as exc:
-        log.warning("merge allocation_rules into wallet failed: %s", exc)
+        # Apply saved allocation rule percentages (sender → this family account)
+        try:
+            rule = await asyncio.to_thread(
+                supabase_client.get_allocation_rules,
+                "SEY-USR-001",
+                account_id,
+            )
+            if rule and rule.get("buckets"):
+                total_bal = float(wallet.get("total_balance_lkr", 0))
+                for br in rule["buckets"]:
+                    bid = br.get("id")
+                    pct = float(br.get("pct", 0))
+                    if not bid:
+                        continue
+                    for b in wallet.get("buckets", []):
+                        rbid = b.get("id") or b.get("bucket_id")
+                        if rbid == bid:
+                            b["allocated_pct"] = pct
+                            b["allocated_lkr"] = round(total_bal * pct / 100.0, 2)
+                            break
+        except Exception as exc:
+            log.warning("Could not merge database allocation rules: %s", exc)
 
     return wallet
 

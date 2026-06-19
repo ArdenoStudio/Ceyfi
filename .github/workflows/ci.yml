@@ -43,6 +43,9 @@ jobs:
       - run: npm run test:e2e
         env:
           CI: true
+      - run: npm run test:e2e:auth
+        env:
+          CI: true
       - run: npm run test:e2e:persona
         env:
           CI: true

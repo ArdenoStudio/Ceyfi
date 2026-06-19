@@ -70,7 +70,7 @@ class Settings(BaseSettings):
         "http://localhost:3003,"
         "http://localhost:3005,"
         "https://frontend-taupe-three-96.vercel.app,"
-        "https://ceyfi.app"
+        "https://frontend-cookie-cat21s-projects.vercel.app"
     )
     frontend_base_url: str = "https://frontend-taupe-three-96.vercel.app"
     backend_base_url: str = "http://localhost:8000"
