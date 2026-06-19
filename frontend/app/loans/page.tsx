@@ -15,7 +15,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { AlertTriangle, Bot, CalendarCheck, Gauge, WalletCards } from "lucide-react";
+import { StatCard, StatGrid } from "@/components/hyperui";
+import { AlertTriangle, Bot, CalendarCheck, Gauge, Wallet, WalletCards } from "lucide-react";
 
 const ASSISTANT_PROMPT =
   "Show me repayment scenarios for my current loan: paying today, paying three days late, and making a partial payment.";
@@ -106,6 +107,45 @@ export default function LoansPage() {
         description="A calmer loan dashboard that explains what is due next, how much is complete, and which action keeps the account healthy."
         
       />
+
+      <StatGrid columns={4}>
+        <StatCard
+          label="Outstanding"
+          value={`LKR ${loan.outstanding_lkr.toLocaleString()}`}
+          icon={Wallet}
+          iconTone="green"
+          trend="down"
+          trendValue={`${loan.interest_rate_pct}% APR`}
+          trendLabel="current rate"
+        />
+        <StatCard
+          label="Monthly payment"
+          value={`LKR ${loan.monthly_payment_lkr.toLocaleString()}`}
+          icon={CalendarCheck}
+          iconTone="blue"
+          trend="neutral"
+          trendValue={`${daysUntil} days`}
+          trendLabel="until next due"
+        />
+        <StatCard
+          label="Repayment progress"
+          value={`${progressPct}%`}
+          icon={Gauge}
+          iconTone="violet"
+          trend="up"
+          trendValue={`${loan.payments_made}/${loan.total_payments}`}
+          trendLabel="instalments paid"
+        />
+        <StatCard
+          label="Health"
+          value={riskCopy}
+          icon={AlertTriangle}
+          iconTone={loan.health_score === "ON_TRACK" ? "green" : "amber"}
+          trend={loan.health_score === "ON_TRACK" ? "up" : "down"}
+          trendValue={loan.health_score.replace("_", " ")}
+          trendLabel="account status"
+        />
+      </StatGrid>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
         <LoanSummaryCard loan={loan} onPaymentSuccess={fetchLoan} />

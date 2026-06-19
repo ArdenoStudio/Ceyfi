@@ -17,7 +17,9 @@ import { Transaction } from "@/types";
 import { saveAllocationRules, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { GBP_LKR_RATE, type RemittanceCurrency } from "@/lib/remittance-fx";
-import { ArrowRightLeft, Bot, PieChart, ShieldCheck } from "lucide-react";
+import { formatLKR } from "@/lib/utils";
+import { AlertBanner } from "@/components/hyperui";
+import { ArrowRightLeft, Bot, PieChart, ShieldCheck, Send, TrendingUp } from "lucide-react";
 import { WalletBalanceHeader } from "@/components/wallet/WalletBalanceHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSections";
@@ -118,6 +120,15 @@ export default function WalletPage() {
     return bPct - aPct;
   })[0];
   const latestSpend = transactions.find((tx) => tx.type === "debit");
+  const bucketUtilPct = mostUsedBucket
+    ? Math.round(
+        (mostUsedBucket.spent_lkr /
+          (mostUsedBucket.balance_lkr + mostUsedBucket.spent_lkr || 1)) *
+          100
+      )
+    : 0;
+  const showSpendAlert = bucketUtilPct >= 60 && mostUsedBucket != null;
+  const showRemittanceAlert = remittanceOverride != null;
 
   return (
     <div data-module="wallet" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
@@ -146,6 +157,30 @@ export default function WalletPage() {
             : wallet}
           onSendAgain={() => setModalOpen(true)}
         />
+
+          {showRemittanceAlert ? (
+            <AlertBanner
+              tone="success"
+              icon={Send}
+              title="Remittance delivered to the family wallet"
+              description={`${formatLKR(remittanceOverride.amount_lkr)} landed via ${remittanceOverride.provider}. Buckets were split using your saved allocation rules.`}
+              actionLabel="Send again"
+              onAction={() => setModalOpen(true)}
+            />
+          ) : showSpendAlert ? (
+            <AlertBanner
+              tone="warning"
+              icon={TrendingUp}
+              title={`${mostUsedBucket.label} is ${bucketUtilPct}% used this cycle`}
+              description={
+                latestSpend
+                  ? `Latest spend at ${latestSpend.merchant}. Review the split before your next transfer.`
+                  : "This bucket is moving faster than the others. Consider tuning your allocation."
+              }
+              actionLabel="Tune split"
+              href="#allocation-editor"
+            />
+          ) : null}
         </>
       )}
 

@@ -19,6 +19,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CeyfiTooltip } from "@/components/charts/CeyfiTooltip";
 import { ChartContainer } from "@/components/charts/ChartContainer";
+import { FilterPill, FilterPillGroup } from "@/components/hyperui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -380,16 +381,12 @@ export default function TransactionsPage() {
           <ChartCard title="When do you spend?" subtitle="Tap a cell to filter the transactions table">
             {heatmapFilter ? (
               <div className="mb-3 flex items-center gap-2">
-                <span className="rounded-full bg-ceyfi-sprout px-2.5 py-1 text-[10px] font-semibold text-ceyfi-green">
-                  Filter: {WEEKDAYS[heatmapFilter.weekday]} · {TIME_BANDS[heatmapFilter.band].label}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setHeatmapFilter(null)}
-                  className="text-[10px] font-semibold text-ceyfi-muted hover:text-ceyfi-ink"
-                >
-                  Clear
-                </button>
+                <FilterPill
+                  label={`${WEEKDAYS[heatmapFilter.weekday]} · ${TIME_BANDS[heatmapFilter.band].label}`}
+                  active
+                  variant="outline"
+                  onDismiss={() => setHeatmapFilter(null)}
+                />
               </div>
             ) : null}
             <div className="overflow-x-auto">
@@ -487,21 +484,19 @@ export default function TransactionsPage() {
 
         <TabsContent value="transactions" className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 rounded-[22px] border border-ceyfi-line/70 bg-ceyfi-canvas p-4">
-            <div className="flex rounded-lg border border-ceyfi-line bg-ceyfi-paper p-0.5">
+            <FilterPillGroup>
               {(["all", "credit", "debit"] as const).map((t) => (
-                <button
+                <FilterPill
                   key={t}
-                  type="button"
-                  onClick={() => { setTypeFilter(t); setPage(1); }}
-                  className={cn(
-                    "rounded-md px-3 py-1.5 text-[11px] font-semibold",
-                    typeFilter === t ? "bg-ceyfi-green text-white shadow-sm" : "text-ceyfi-muted"
-                  )}
-                >
-                  {t === "all" ? "All" : t === "credit" ? "Credits" : "Debits"}
-                </button>
+                  label={t === "all" ? "All" : t === "credit" ? "Credits" : "Debits"}
+                  active={typeFilter === t}
+                  onClick={() => {
+                    setTypeFilter(t);
+                    setPage(1);
+                  }}
+                />
               ))}
-            </div>
+            </FilterPillGroup>
             <Select value={category} onValueChange={(v) => { setCategory(v ?? "all"); setPage(1); }}>
               <SelectTrigger className="w-[160px] bg-ceyfi-paper"><SelectValue placeholder="Category" /></SelectTrigger>
               <SelectContent>
