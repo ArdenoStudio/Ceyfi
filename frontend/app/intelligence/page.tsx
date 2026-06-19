@@ -7,7 +7,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Lightbulb,
+  Radar,
   Sparkles,
+  Target,
   TrendingUp,
 } from "lucide-react";
 import {
@@ -21,6 +23,8 @@ import {
   YAxis,
 } from "recharts";
 import { ChartCard } from "@/components/ui/ChartCard";
+import { BentoGridShowcase } from "@/components/blocks/BentoGridShowcase";
+import { GradientBorder } from "@/components/blocks/GradientBorder";
 import { CeyfiTooltip } from "@/components/charts/CeyfiTooltip";
 import { ChartContainer } from "@/components/charts/ChartContainer";
 import { PeriodBadge } from "@/components/charts/PeriodBadge";
@@ -84,12 +88,6 @@ export default function IntelligencePage() {
   const opportunities = snapshot?.opportunities ?? [];
   const forecast = snapshot?.forecast ?? [];
   const totalScore = snapshot?.health_score ?? 0;
-  const scoreColor =
-    totalScore >= 80
-      ? "text-emerald-700 dark:text-emerald-300 dark:text-emerald-300"
-      : totalScore >= 60
-        ? "text-amber-700 dark:text-amber-300"
-        : "text-rose-700 dark:text-rose-300";
 
   const forecastError = forecast.length > 1
     ? Math.abs((forecast[forecast.length - 1].actual - forecast[forecast.length - 1].predicted) / forecast[forecast.length - 1].actual * 100)
@@ -126,19 +124,136 @@ export default function IntelligencePage() {
         </p>
       </header>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <div className="flex flex-col items-center justify-center rounded-[22px] border border-border/75 bg-card p-8 interactive-card">
-          <ProgressCircle value={totalScore} size={160} strokeWidth={12}>
-            <div className="text-center">
-              <div className={cn("font-heading text-5xl font-semibold tracking-[-0.05em]", scoreColor)}>
-                {totalScore || "—"}
+      <BentoGridShowcase
+        integrations={
+          <GradientBorder animationMode="rotate-on-hover" className="h-full">
+            <div className="flex h-full flex-col justify-between rounded-2xl bg-ceyfi-paper p-5 dark:bg-white/[0.04]">
+              <div className="flex items-center gap-2">
+                <Radar className="h-5 w-5 text-ceyfi-green" />
+                <span className="text-sm font-semibold text-foreground">Data feed</span>
               </div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Health score</div>
+              <div>
+                <p className="font-mono text-2xl font-semibold text-ceyfi-green">
+                  {snapshot?.data_source === "live" ? "Live" : "Demo"}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {snapshot?.updated_at
+                    ? `Updated ${new Date(snapshot.updated_at).toLocaleDateString()}`
+                    : "Snapshot ready"}
+                </p>
+              </div>
             </div>
-          </ProgressCircle>
-        </div>
+          </GradientBorder>
+        }
+        featureTags={
+          <div className="flex h-full flex-col rounded-[20px] border border-ceyfi-line/75 bg-ceyfi-paper p-5 dark:border-white/10 dark:bg-white/[0.04]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ceyfi-green">
+              Score drivers
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {components.slice(0, 4).map((c) => (
+                <span
+                  key={c.name}
+                  className="rounded-full bg-ceyfi-sprout px-2.5 py-1 text-[11px] font-medium text-ceyfi-deep dark:bg-ceyfi-green/15 dark:text-ceyfi-mint"
+                >
+                  {c.name} · {c.score}
+                </span>
+              ))}
+            </div>
+          </div>
+        }
+        mainFeature={
+          <GradientBorder animationMode="auto-rotate" animationSpeed={8} className="h-full">
+            <div className="flex h-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-ceyfi-deep to-[#0a4424] p-8 text-white">
+              <ProgressCircle value={totalScore} size={160} strokeWidth={12}>
+                <div className="text-center">
+                  <div
+                    className={cn(
+                      "font-heading text-5xl font-semibold tracking-[-0.05em]",
+                      totalScore >= 80
+                        ? "text-ceyfi-mint"
+                        : totalScore >= 60
+                          ? "text-amber-300"
+                          : "text-rose-300"
+                    )}
+                  >
+                    {totalScore || "—"}
+                  </div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
+                    Health score
+                  </div>
+                </div>
+              </ProgressCircle>
+              <p className="mt-4 text-center text-xs text-white/70">
+                Weighted across {components.length} financial dimensions
+              </p>
+            </div>
+          </GradientBorder>
+        }
+        secondaryFeature={
+          <div className="flex h-full flex-col justify-between rounded-[20px] border border-border/75 bg-card p-5 interactive-card">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-semibold">Anomalies</span>
+            </div>
+            <div>
+              <p className="font-heading text-4xl font-semibold text-foreground">
+                {anomalies.filter((a) => !a.resolved).length}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {anomalies.length === 0
+                  ? "All clear — no flags"
+                  : `${anomalies.filter((a) => a.resolved).length} resolved`}
+              </p>
+            </div>
+          </div>
+        }
+        statistic={
+          <div className="flex h-full flex-col justify-between rounded-[20px] bg-ceyfi-sprout p-6 dark:bg-ceyfi-green/10">
+            <Target className="h-7 w-7 text-ceyfi-green" />
+            <div>
+              <p className="font-heading text-5xl font-bold tracking-tight text-ceyfi-deep dark:text-white">
+                ±{forecastError.toFixed(1)}%
+              </p>
+              <p className="mt-2 text-sm text-ceyfi-muted dark:text-white/60">
+                Forecast accuracy — actual vs CEYFI prediction from day −7
+              </p>
+            </div>
+          </div>
+        }
+        journey={
+          opportunities[0] ? (
+            <Link
+              href="/scenarios"
+              className="group flex h-full flex-col justify-between rounded-[20px] border border-ceyfi-green/20 bg-gradient-to-br from-ceyfi-paper to-ceyfi-sprout p-5 transition hover:border-ceyfi-green/40 dark:from-white/[0.06] dark:to-ceyfi-green/10"
+            >
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-ceyfi-green" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ceyfi-green">
+                  Top opportunity
+                </span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground line-clamp-2">{opportunities[0].title}</p>
+                {opportunities[0].benefit > 0 && (
+                  <p className="mt-1 font-mono text-sm font-semibold text-ceyfi-green">
+                    +{formatters.currency({ number: opportunities[0].benefit, maxFractionDigits: 0 })}
+                  </p>
+                )}
+              </div>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ceyfi-green group-hover:gap-2 transition-all">
+                Simulate <ArrowRight className="h-3 w-3" />
+              </span>
+            </Link>
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-[20px] border border-dashed border-ceyfi-line/60 p-5 text-xs text-muted-foreground">
+              No opportunities yet
+            </div>
+          )
+        }
+      />
 
-        <ChartCard title="Score components" subtitle="Weighted breakdown with improve actions">
+      <ChartCard title="Score components" subtitle="Weighted breakdown with improve actions">
           <ChartContainer height={240}>
             <BarChart layout="vertical" data={components} margin={{ top: 4, right: 80, left: 4, bottom: 0 }}>
               <CartesianGrid horizontal={false} stroke="#D8E8DC" strokeDasharray="3 3" />
@@ -162,7 +277,6 @@ export default function IntelligencePage() {
             ))}
           </div>
         </ChartCard>
-      </section>
 
       <ChartCard title="Anomaly feed" subtitle="AI-detected financial events">
         <div className="space-y-3">

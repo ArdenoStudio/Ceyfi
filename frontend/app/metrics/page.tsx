@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { RefreshCw, Zap, CheckCircle, XCircle, Activity } from "lucide-react";
+import { RefreshCw, Zap, CheckCircle, XCircle, Activity, Clock, PhoneCall, AlertCircle } from "lucide-react";
+import { StatHeaderStrip } from "@/components/blocks/AnimatedStatCard";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ErrorState";
 import { AgentCard } from "./components/AgentCard";
@@ -10,37 +11,6 @@ import { SuccessErrorChart } from "./components/SuccessErrorChart";
 import type { AgentMetric, MetricsData } from "./types";
 
 const REFRESH_INTERVAL = 30_000;
-
-function OverallStat({
-  label,
-  value,
-  sub,
-  tone,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  tone?: "success" | "error" | "neutral";
-}) {
-  return (
-    <div className="flex flex-col rounded-2xl border border-border bg-card/80 p-4 backdrop-blur dark:border-white/8 dark:bg-white/[0.04]">
-      <span className="text-[10px] uppercase tracking-widest text-muted-foreground dark:text-white/40 mb-1">{label}</span>
-      <span
-        className={cn(
-          "text-2xl font-semibold font-mono tabular-nums",
-          tone === "error"
-            ? "text-red-600 dark:text-red-400"
-            : tone === "success"
-              ? "text-emerald-700 dark:text-emerald-400"
-              : "text-foreground dark:text-white"
-        )}
-      >
-        {value}
-      </span>
-      {sub && <span className="text-[11px] text-muted-foreground/80 dark:text-white/30 mt-0.5">{sub}</span>}
-    </div>
-  );
-}
 
 export default function MetricsPage() {
   const [data, setData] = useState<MetricsData | null>(null);
@@ -187,37 +157,42 @@ export default function MetricsPage() {
         </div>
 
         {/* Overall stats */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <OverallStat
-            label="Avg Uptime"
-            value={`${overallUptime}%`}
-            sub="across all agents"
-            tone={
-              parseFloat(overallUptime) >= 99
-                ? "success"
-                : parseFloat(overallUptime) >= 95
-                ? "neutral"
-                : "error"
-            }
-          />
-          <OverallStat
-            label="Avg Latency"
-            value={`${avgLatency}ms`}
-            sub="p50 response time"
-          />
-          <OverallStat
-            label="Total Calls"
-            value={(totalSuccess + totalErrors).toLocaleString()}
-            sub="last 24 hours"
-            tone="success"
-          />
-          <OverallStat
-            label="Total Errors"
-            value={totalErrors.toLocaleString()}
-            sub="last 24 hours"
-            tone={totalErrors > 0 ? "error" : "neutral"}
-          />
-        </div>
+        <StatHeaderStrip
+          stats={[
+            {
+              label: "Avg Uptime",
+              value: `${overallUptime}%`,
+              sub: "across all agents",
+              tone:
+                parseFloat(overallUptime) >= 99
+                  ? "success"
+                  : parseFloat(overallUptime) >= 95
+                    ? "neutral"
+                    : "error",
+              icon: Activity,
+            },
+            {
+              label: "Avg Latency",
+              value: `${avgLatency}ms`,
+              sub: "p50 response time",
+              icon: Clock,
+            },
+            {
+              label: "Total Calls",
+              value: (totalSuccess + totalErrors).toLocaleString(),
+              sub: "last 24 hours",
+              tone: "success",
+              icon: PhoneCall,
+            },
+            {
+              label: "Total Errors",
+              value: totalErrors.toLocaleString(),
+              sub: "last 24 hours",
+              tone: totalErrors > 0 ? "error" : "neutral",
+              icon: AlertCircle,
+            },
+          ]}
+        />
 
         {/* Agent cards */}
         {loading ? (
