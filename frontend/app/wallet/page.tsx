@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useLayoutEffect, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useWalletRealtime } from "@/hooks/useWalletRealtime";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { BucketGrid } from "@/components/wallet/BucketGrid";
@@ -31,7 +32,8 @@ const ASSISTANT_PROMPT =
   "Explain the latest family wallet activity and tell me whether any bucket needs attention before the next transfer.";
 
 export default function WalletPage() {
-  const { walletAccountId, userId } = useCurrentUser();
+  const { walletAccountId, userId, defaultRoute, loading: authLoading } = useCurrentUser();
+  const router = useRouter();
   const { offline } = useNetworkStatus();
   const [modalOpen, setModalOpen] = useState(false);
   const [allocationFromHash, setAllocationFromHash] = useState(false);
@@ -44,6 +46,12 @@ export default function WalletPage() {
     currency_code?: string;
     corridor?: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && walletAccountId === null) {
+      router.replace(defaultRoute);
+    }
+  }, [authLoading, walletAccountId, defaultRoute, router]);
 
   useEffect(() => {
     const sync = () => setAllocationFromHash(window.location.hash === "#allocation-editor");
@@ -75,15 +83,30 @@ export default function WalletPage() {
     fireSpendToast(tx, newBalance, { accountHolder: accountHolderRef.current });
   }, []);
 
+  const accountId = walletAccountId ?? "";
   const { wallet, transactions, buckets, loading, error, realtimeConnected, refetch } =
     useWalletRealtime({
-      accountId: walletAccountId,
+      accountId,
       onSpend: handleSpend,
     });
 
   useLayoutEffect(() => {
     accountHolderRef.current = wallet?.account_holder ?? "";
   }, [wallet?.account_holder]);
+
+  if (authLoading || walletAccountId === null) {
+    return (
+      <div
+        className="flex min-h-[50vh] items-center justify-center"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <p className="text-sm text-muted-foreground">
+          {authLoading ? "Loading CEYFI…" : "Opening your dashboard…"}
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -242,7 +265,7 @@ export default function WalletPage() {
           {
             label: "Ask Assistant",
             icon: Bot,
-            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}&context=wallet&accountId=${encodeURIComponent(walletAccountId)}`,
+            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}&context=wallet&accountId=${encodeURIComponent(accountId)}`,
           },
           { label: "Tune split", icon: PieChart, href: "#allocation-editor" },
         ]}
@@ -267,7 +290,7 @@ export default function WalletPage() {
               await saveAllocationRules(
                 userId,
                 newAllocations,
-                walletAccountId
+                accountId
               );
               toast.success("Allocation rules saved for your next transfer.");
               await refetch(true);
@@ -290,7 +313,7 @@ export default function WalletPage() {
 
       <SendMoneyModal
         senderId={userId}
-        recipientId={walletAccountId}
+        recipientId={accountId}
         recipientAccountHolder={wallet?.account_holder ?? ""}
         allocations={allocations}
         onSuccess={(amountLkr?: number, amountGbp?: number, currency?: RemittanceCurrency) => {
