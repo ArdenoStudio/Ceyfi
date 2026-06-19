@@ -59,7 +59,7 @@ export const CEYFI_JSON_LD = {
       "@id": `${SITE_URL}/#organization`,
       name: SITE_NAME,
       url: SITE_URL,
-      logo: `${SITE_URL}/seylan-bank-icon.png`,
+      logo: `${SITE_URL}/ceyfi-icon.svg`,
       description: DEFAULT_DESCRIPTION,
       areaServed: {
         "@type": "Country",

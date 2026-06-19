@@ -177,7 +177,7 @@ function AssistantPageContent() {
           <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-border/80 px-4 py-3 backdrop-blur-sm dark:border-white/[0.08]">
             <div className="flex items-center gap-3">
               <Image
-                src="/ceyfi-logo.svg"
+                src="/ceyfi-icon.svg"
                 alt="CEYFI"
                 width={28}
                 height={28}

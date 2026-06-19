@@ -83,8 +83,8 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   icons: {
-    icon: "/seylan-bank-icon.png",
-    apple: "/seylan-bank-icon.png",
+    icon: "/ceyfi-icon.svg",
+    apple: "/ceyfi-icon.svg",
   },
   openGraph: {
     title: DEFAULT_TITLE,

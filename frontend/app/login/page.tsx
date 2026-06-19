@@ -9,6 +9,7 @@ import type { DemoPersona } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
+import { CeyfiLogoIcon } from "@/components/brand/CeyfiLogoIcon";
 
 const FALLBACK_PERSONAS: DemoPersona[] = [
   {
@@ -101,9 +102,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="inline-grid h-14 w-14 place-items-center rounded-2xl bg-primary text-2xl font-bold text-primary-foreground shadow-brand-lg">
-            C
-          </span>
+          <CeyfiLogoIcon size={56} priority className="mx-auto shadow-brand-lg" />
           <h1 className="mt-4 font-heading text-3xl font-semibold tracking-tight text-foreground">
             CEYFI
           </h1>

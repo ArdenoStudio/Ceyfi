@@ -63,7 +63,7 @@ function ReturnShell({
     >
       <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-md w-full text-center space-y-5 border border-ceyfi-line dark:border-white/10">
         <Image
-          src="/ceyfi-logo.svg"
+          src="/ceyfi-icon.svg"
           alt="CEYFI"
           width={40}
           height={40}
