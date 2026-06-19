@@ -11,6 +11,7 @@ import { AIAdvisorPanel } from "@/components/loans/AIAdvisorPanel";
 import { RepaymentTimeline } from "@/components/loans/RepaymentTimeline";
 import { LoanIntelligenceCharts } from "@/components/loans/LoanIntelligenceCharts";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
+import { HeroColorPanels } from "@/components/blocks/HeroColorPanels";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -101,11 +102,28 @@ export default function LoansPage() {
 
   return (
     <div data-module="loans" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-      <PageHeader
+      <HeroColorPanels
         eyebrow="Loan health"
-        title="Understand your repayment position at a glance"
+        title="Understand your repayment position"
+        subtitle="at a glance"
         description="A calmer loan dashboard that explains what is due next, how much is complete, and which action keeps the account healthy."
-        
+        badges={[
+          {
+            label: "Outstanding",
+            value: `LKR ${loan.outstanding_lkr.toLocaleString()}`,
+            icon: Wallet,
+          },
+          {
+            label: "Progress",
+            value: `${progressPct}%`,
+            icon: Gauge,
+          },
+          {
+            label: "Health",
+            value: riskCopy,
+            icon: AlertTriangle,
+          },
+        ]}
       />
 
       <StatGrid columns={4}>

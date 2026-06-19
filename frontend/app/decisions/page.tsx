@@ -10,6 +10,7 @@ import {
   Inbox,
   Zap,
 } from "lucide-react";
+import { HeroColorPanels } from "@/components/blocks/HeroColorPanels";
 import { PeriodBadge } from "@/components/charts/PeriodBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
@@ -135,31 +136,29 @@ export default function DecisionsPage() {
         <ErrorState message={error} onRetry={loadDecisions} />
       ) : (
         <>
-      <header>
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-          <Zap className="h-3.5 w-3.5" />
-          Decision room
-        </div>
-        <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-foreground">
-          Ranked financial recommendations
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Evidence-backed decisions with trade-offs and one-click execution.
-        </p>
-      </header>
-
-      <section className="grid gap-3 sm:grid-cols-3">
-        {[
-          { label: "Total potential benefit", value: formatters.currency({ number: totalBenefit, maxFractionDigits: 0 }) },
-          { label: "High urgency", value: `${highUrgency}` },
-          { label: "Pending decisions", value: `${decisions.length}` },
-        ].map((s) => (
-          <div key={s.label} className="interactive-card rounded-xl border border-border/70 bg-card p-4">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</div>
-            <div className="mt-2 font-heading text-xl font-semibold text-foreground">{s.value}</div>
-          </div>
-        ))}
-      </section>
+      <HeroColorPanels
+        variant="strip"
+        eyebrow="Decision room"
+        title="Ranked financial recommendations"
+        description="Evidence-backed decisions with trade-offs and one-click execution."
+        badges={[
+          {
+            label: "Potential benefit",
+            value: formatters.currency({ number: totalBenefit, maxFractionDigits: 0 }),
+            icon: Zap,
+          },
+          {
+            label: "High urgency",
+            value: `${highUrgency}`,
+            icon: AlertTriangle,
+          },
+          {
+            label: "Pending",
+            value: `${decisions.length}`,
+            icon: Inbox,
+          },
+        ]}
+      />
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap gap-1.5">
