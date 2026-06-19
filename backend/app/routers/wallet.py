@@ -13,7 +13,7 @@ from app.models.schemas import (
     WalletTransferRequest,
     WalletTransferResponse,
 )
-from app.services import supabase_client
+from app.services import fx_service, supabase_client
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["wallet"])
@@ -46,18 +46,12 @@ async def sandbox_transfer_accounts():
 
 @router.get("/fx")
 async def get_fx_rate(from_currency: str = "GBP", to_currency: str = "LKR"):
-    rates = {
-        ("GBP", "LKR"): 408.30,
-        ("USD", "LKR"): 323.50,
-        ("EUR", "LKR"): 351.20,
-        ("AUD", "LKR"): 211.40,
-    }
-    rate = rates.get((from_currency.upper(), to_currency.upper()), 0)
+    rate, source = await fx_service.get_rate(from_currency, to_currency)
     return {
         "from": from_currency.upper(),
         "to": to_currency.upper(),
         "rate": rate,
-        "source": "demo_fixture",
+        "source": source,
     }
 
 

@@ -9,19 +9,12 @@ from pathlib import Path
 from typing import Any
 
 from app.services import auth as auth_service
-from app.services import business_intelligence, chat_tools
+from app.services import business_intelligence, chat_tools, fx_service
 from app.services.financial_snapshot import build_financial_snapshot
 from app.mcp.registry import PROMPT_CATALOG, RESOURCE_CATALOG, TOOL_CATALOG
 
 _FX = Path(__file__).resolve().parents[2] / "fixtures"
 _fixture_cache: dict[str, dict] = {}
-
-_FX_RATES = {
-    ("GBP", "LKR"): 408.30,
-    ("USD", "LKR"): 323.50,
-    ("EUR", "LKR"): 351.20,
-    ("AUD", "LKR"): 211.40,
-}
 
 
 def _load(name: str) -> dict:
@@ -230,8 +223,8 @@ def _get_family_wallet(arguments: dict[str, Any]) -> dict[str, Any]:
 def _get_fx_rate(arguments: dict[str, Any]) -> dict[str, Any]:
     fr = arguments.get("from_currency", "GBP").upper()
     to = arguments.get("to_currency", "LKR").upper()
-    rate = _FX_RATES.get((fr, to), 0)
-    return {"from": fr, "to": to, "rate": rate, "source": "ceyfi_demo"}
+    rate, source = fx_service.get_rate_sync(fr, to)
+    return {"from": fr, "to": to, "rate": rate, "source": source}
 
 
 def _check_loan_status(arguments: dict[str, Any]) -> str:
@@ -474,11 +467,7 @@ def read_resource(uri: str) -> tuple[str, str]:
             business_intelligence.list_receivables_with_trust(), indent=2
         )
     if uri == "ceyfi://fx/rates":
-        rates = [
-            {"from": fr, "to": to, "rate": rate}
-            for (fr, to), rate in _FX_RATES.items()
-        ]
-        return "application/json", json.dumps({"rates": rates, "base": "LKR"}, indent=2)
+        return "application/json", json.dumps({"rates": fx_service.all_rates(), "base": "LKR"}, indent=2)
 
     wallet_match = re.match(r"ceyfi://wallet/(.+)", uri)
     if wallet_match:
