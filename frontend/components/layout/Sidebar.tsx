@@ -66,7 +66,7 @@ function NavLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm outline-none transition-colors duration-200",
+        "group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm outline-none transition-colors duration-200",
         "focus-visible:ring-2 focus-visible:ring-sidebar-ring/60",
         active
           ? "text-sidebar-accent-foreground"
@@ -89,7 +89,7 @@ function NavLink({
         <motion.span
           {...(animate ? { layoutId: "sidebar-active-bar" } : {})}
           transition={{ type: "spring", stiffness: 520, damping: 42, mass: 0.7 }}
-          className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-sidebar-ring shadow-[0_0_12px_rgba(52,211,153,0.75)] dark:shadow-[0_0_12px_rgba(224,175,73,0.75)]"
+          className="absolute left-[calc(0.75rem+1rem)] top-1/2 h-5 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sidebar-ring shadow-[0_0_12px_rgba(52,211,153,0.75)] dark:shadow-[0_0_12px_rgba(224,175,73,0.75)]"
         />
       ) : null}
 
@@ -170,10 +170,19 @@ export function Sidebar() {
       </div>
 
       <LayoutGroup>
-        <nav aria-label="Main navigation" className="relative flex-1 overflow-y-auto px-4 py-5">
-          <div className="absolute bottom-8 left-[2.05rem] top-8 w-px bg-gradient-to-b from-sidebar-ring/35 via-sidebar-border to-transparent" />
-          {NAV_GROUPS.map((group) => (
-            <div key={group.label} className="mb-5">
+        <nav
+          aria-label="Main navigation"
+          className="relative flex-1 overflow-y-auto px-4 py-5 [--nav-icon-rail:2.75rem]"
+        >
+          <div
+            aria-hidden
+            className="absolute bottom-8 left-[var(--nav-icon-rail)] top-8 w-px -translate-x-1/2 bg-gradient-to-b from-sidebar-ring/35 via-sidebar-border to-transparent"
+          />
+          {NAV_GROUPS.map((group, groupIndex) => (
+            <div
+              key={group.label}
+              className={cn("mb-6", groupIndex === NAV_GROUPS.length - 1 && "mb-5")}
+            >
               <div className="mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/28">
                 {group.label}
               </div>
@@ -212,8 +221,8 @@ export function Sidebar() {
         </nav>
       </LayoutGroup>
 
-      <div className="relative border-t border-sidebar-border px-6 py-5">
-        <div className="mb-3 flex items-center justify-between">
+      <div className="relative border-t border-sidebar-border px-4 py-5">
+        <div className="mb-3 flex items-center justify-between px-2">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">Theme</span>
           <ThemeToggle />
         </div>
@@ -222,17 +231,17 @@ export function Sidebar() {
           onClick={logout}
           className="interactive-press mb-3 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] text-sidebar-foreground/45 transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
-          <LogOut className="h-3.5 w-3.5" />
+          <LogOut className="h-3.5 w-3.5" aria-hidden />
           Switch persona
         </button>
-        <div className="flex items-center gap-2 text-[11px] text-sidebar-foreground/32">
+        <div className="flex items-center gap-2 px-2 text-[11px] leading-none text-sidebar-foreground/32">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sidebar-ring/70" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sidebar-ring" />
           </span>
           Demo data connected
         </div>
-        <div className="mt-1 text-[10px] text-sidebar-foreground/20">
+        <div className="mt-1 px-2 text-[10px] text-sidebar-foreground/20">
           CEYFI · Powered by Seylan
         </div>
       </div>
