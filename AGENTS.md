@@ -17,14 +17,16 @@
 
 ### Lint / test / build
 
-- **Frontend lint:** `cd frontend && npm run lint` — ESLint 9 with next config. 3 pre-existing errors in `app/status/page.tsx` and `lib/api.ts`.
+- **Frontend lint:** `cd frontend && npm run lint` — ESLint 9 with next config. Currently passes clean (0 errors).
 - **Frontend smoke test:** `cd frontend && npm run test:smoke` — checks demo-critical files exist.
 - **Frontend build:** `cd frontend && npm run build`
 - **Backend smoke test:** `cd backend && bash scripts/smoke.sh http://localhost:8000` — requires running backend. 13 endpoint checks.
-- No unit test suites exist for either frontend or backend (only smoke tests).
+- **Backend unit tests:** `cd backend && python3 -m pytest tests/ -q` — full pytest suite (~565 tests, all pass). Needs `pytest` + `pytest-asyncio` (installed by the update script; not in `requirements.txt`).
+- No frontend unit test suite exists (only the smoke check above).
 
 ### Gotchas
 
+- `uvicorn` and `pytest` install to `~/.local/bin`, which is **not on PATH**. Run them as `python3 -m uvicorn ...` / `python3 -m pytest ...`.
 - The frontend uses Next.js **16** (not 15 as some docs say). Read `node_modules/next/dist/docs/` before making changes.
 - Backend `requirements.txt` uses `supabase>=2.5.0` which pulls in many transitive deps; `pip install` can take ~30s.
 - The backend global exception handler (`app/main.py`) returns raw `str(exc)` — be careful not to leak secrets in error paths.
