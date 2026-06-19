@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 @contextmanager
 def _cursor():
-    conn = psycopg2.connect(settings.database_url, cursor_factory=psycopg2.extras.RealDictCursor)
+    conn = psycopg2.connect(settings.database_url, connect_timeout=15, cursor_factory=psycopg2.extras.RealDictCursor)
     try:
         cur = conn.cursor()
         yield cur
