@@ -4,12 +4,6 @@
 
 Built for **Cursor Buildathon Colombo 2026** by Ardeno Studio.
 
-## Live Demo
-
-🌐 **Frontend:** [seylan-hub1.vercel.app](https://seylan-hub1.vercel.app) _(Vercel — auto-deploy from `ArdenoStudio/seylan-hub`)_
-
-**Backend:** [seylan-hub-backend.vercel.app](https://seylan-hub-backend.vercel.app) _(Vercel)_
-
 ## Architecture
 
 | Layer | Tech | Notes |
