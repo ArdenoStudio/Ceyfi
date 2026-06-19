@@ -1,10 +1,13 @@
+import asyncio
 import logging
+import os
 import time
 import uuid
 from collections import defaultdict
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from telegram import Update
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -12,9 +15,12 @@ from app.services import metrics_store
 
 from app.config import settings
 from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot, banking_tools
+from telegram_bot.bot import build_application as build_telegram_app
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 log = logging.getLogger(__name__)
+
+telegram_app = None
 
 
 # --- Simple in-memory rate limiter ---
@@ -78,8 +84,8 @@ async def _prewarm():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global telegram_app
     log.info("SEYLAN HUB API STARTING — USE_SEYLAN_REAL=%s", settings.use_seylan_real)
-    import asyncio
     if settings.database_url:
         try:
             from app.services import supabase_client
@@ -87,7 +93,31 @@ async def lifespan(app: FastAPI):
         except Exception as exc:
             log.error("DB migration failed: %s", exc)
     asyncio.create_task(_prewarm())
+
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if token:
+        try:
+            telegram_app = build_telegram_app(token)
+            await telegram_app.initialize()
+            await telegram_app.start()
+            await telegram_app.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+            log.info("Telegram bot started")
+        except Exception as exc:
+            log.error("Telegram bot failed to start: %s", exc)
+            telegram_app = None
+    else:
+        log.info("TELEGRAM_BOT_TOKEN not set — Telegram bot disabled")
+
     yield
+
+    if telegram_app:
+        try:
+            await telegram_app.updater.stop()
+            await telegram_app.stop()
+            await telegram_app.shutdown()
+            log.info("Telegram bot stopped")
+        except Exception as exc:
+            log.warning("Telegram bot shutdown error: %s", exc)
     log.info("shutdown")
 
 
@@ -154,7 +184,7 @@ async def global_error(request: Request, exc: Exception):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.2.0"}
+    return {"status": "ok", "service": "ceyfi-backend"}
 
 
 @app.get("/api/metrics")
