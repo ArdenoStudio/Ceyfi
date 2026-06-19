@@ -1,10 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ErrorState";
-import { EmptyState } from "@/components/EmptyState";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
+import {
+  ActivityFeedBlock,
+  type ActivityFeedItem,
+} from "@/components/blocks/ActivityFeedBlock";
+import {
+  DashboardMetricGrid,
+} from "@/components/blocks/DashboardMetricCard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getProfileData } from "@/lib/api";
 import {
@@ -17,7 +24,6 @@ import {
   Calendar,
   Percent,
   Clock,
-  Receipt,
 } from "lucide-react";
 
 function formatLKR(amount: number) {
@@ -35,6 +41,7 @@ function formatDate(dateStr: string) {
 type ProfileData = Awaited<ReturnType<typeof getProfileData>>;
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { userId, user } = useCurrentUser();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -131,24 +138,31 @@ export default function ProfilePage() {
         </header>
 
         {/* Balance cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <BalanceCard
-            icon={Wallet}
-            label="Total Balance"
-            value={formatLKR(totalBalance)}
-            accent
-          />
-          <BalanceCard
-            icon={Landmark}
-            label="Savings Account"
-            value={formatLKR(profile.savings_balance)}
-          />
-          <BalanceCard
-            icon={CreditCard}
-            label="Current Account"
-            value={formatLKR(profile.current_balance)}
-          />
-        </div>
+        <DashboardMetricGrid
+          items={[
+            {
+              label: "Total Balance",
+              metric: formatLKR(totalBalance),
+              subLabel: "Combined account value",
+              icon: Wallet,
+              accent: "seylan",
+            },
+            {
+              label: "Savings Account",
+              metric: formatLKR(profile.savings_balance),
+              subLabel: "Primary savings",
+              icon: Landmark,
+              accent: "ceyfi",
+            },
+            {
+              label: "Current Account",
+              metric: formatLKR(profile.current_balance),
+              subLabel: "Everyday spending",
+              icon: CreditCard,
+              accent: "neutral",
+            },
+          ]}
+        />
 
         {/* Loan & FD row */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -262,112 +276,35 @@ export default function ProfilePage() {
         </div>
 
         {/* Recent transactions */}
-        <div className="rounded-2xl border-border bg-card/80 dark:border-white/[0.08] dark:bg-white/[0.04] p-5 backdrop-blur-sm">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground dark:text-white/70 mb-4">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted/60 dark:bg-white/10">
-              <Receipt className="h-4 w-4 text-muted-foreground dark:text-white/60" />
-            </span>
-            Recent Transactions
-          </h3>
-          <div className="divide-y divide-border dark:divide-white/[0.06]">
-            {profile.recent_transactions.length === 0 ? (
-              <EmptyState
-                icon={Receipt}
-                title="No recent transactions"
-                description="Your latest account activity will appear here once transactions are recorded."
-                className="py-8"
-              />
-            ) : (
-            profile.recent_transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                      tx.type === "credit"
-                        ? "bg-emerald-500/15"
-                        : "bg-red-500/10"
-                    }`}
-                  >
-                    {tx.type === "credit" ? (
-                      <ArrowDownLeft className="h-4 w-4 text-emerald-400" />
-                    ) : (
-                      <ArrowUpRight className="h-4 w-4 text-red-400" />
-                    )}
-                  </span>
-                  <div>
-                    <p className="text-sm font-medium text-foreground dark:text-white/90">
-                      {tx.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground dark:text-white/40">
-                      {formatDate(tx.date)}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={`text-sm font-semibold ${
-                    tx.type === "credit"
-                      ? "text-emerald-400"
-                      : "text-foreground dark:text-white/80"
-                  }`}
-                >
-                  {tx.type === "credit" ? "+" : "-"}{" "}
-                  {formatLKR(tx.amount_lkr)}
-                </span>
-              </div>
-            ))
-            )}
-          </div>
-        </div>
+        <ActivityFeedBlock
+          items={profile.recent_transactions.map((tx) => toActivityFeedItem(tx))}
+          onFooterClick={() => router.push("/transactions")}
+        />
       </div>
     </div>
   );
 }
 
-function BalanceCard({
-  icon: Icon,
-  label,
-  value,
-  accent,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  accent?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-2xl border p-5 backdrop-blur-sm ${
-        accent
-          ? "border-seylan-red/20 bg-seylan-red/[0.08]"
-          : "border-white/[0.08] bg-white/[0.04]"
-      }`}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-            accent ? "bg-seylan-red/20" : "bg-muted/60 dark:bg-white/10"
-          }`}
-        >
-          <Icon
-            className={`h-4 w-4 ${
-              accent ? "text-seylan-red" : "text-muted-foreground dark:text-white/60"
-            }`}
-          />
-        </span>
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-white/50">
-          {label}
-        </span>
-      </div>
-      <p
-        className={`text-2xl font-bold ${
-          accent ? "text-foreground dark:text-white" : "text-foreground dark:text-white/90"
-        }`}
-      >
-        {value}
-      </p>
-    </div>
-  );
+function toActivityFeedItem(tx: ProfileData["recent_transactions"][number]): ActivityFeedItem {
+  const txDate = new Date(tx.date);
+  return {
+    id: tx.id,
+    icon:
+      tx.type === "credit" ? (
+        <ArrowDownLeft className="h-4 w-4 text-emerald-400" />
+      ) : (
+        <ArrowUpRight className="h-4 w-4 text-red-400" />
+      ),
+    title: tx.description,
+    subtitle: formatDate(tx.date),
+    amount: `${tx.type === "credit" ? "+" : "-"} ${formatLKR(tx.amount_lkr)}`,
+    amountTone: tx.type === "credit" ? "credit" : "debit",
+    date: formatDate(tx.date),
+    time: txDate.toLocaleTimeString("en-LK", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    transactionId: tx.id,
+    paymentMethod: "Seylan Bank",
+  };
 }

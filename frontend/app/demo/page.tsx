@@ -2,10 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Play, RefreshCw, Sparkles, WalletCards } from "lucide-react";
+import { CheckCircle2, Play, RefreshCw, Sparkles, WalletCards, Zap, Timer, Keyboard } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  ActivityFeedBlock,
+  type ActivityFeedItem,
+} from "@/components/blocks/ActivityFeedBlock";
+import { DashboardMetricGrid } from "@/components/blocks/DashboardMetricCard";
 import {
   postDemoReset,
   postTaxJarTrigger,
@@ -13,6 +18,7 @@ import {
   prewarmDemoData,
 } from "@/lib/api";
 import { formatLKR } from "@/lib/utils";
+import { FaqSection } from "@/components/blocks/FaqSection";
 
 type Action = "spend" | "tax" | "reset" | "prewarm";
 
@@ -110,6 +116,61 @@ export default function DemoControlPage() {
           Presenter panel for the 90-second CEYFI walkthrough. Shortcuts: 1 spend · 2 tax · 3 reset · 4 prewarm · S script
         </p>
       </div>
+
+      <DashboardMetricGrid
+        columns={4}
+        items={[
+          {
+            label: "Demo script",
+            metric: "90s",
+            subLabel: "5-step narrative",
+            description: "Overview → spend → assistant → decisions → reset",
+            icon: Timer,
+            accent: "ceyfi",
+          },
+          {
+            label: "Quick actions",
+            metric: "4",
+            subLabel: "Keyboard shortcuts",
+            description: "Press 1–4 for spend, tax, reset, and prewarm triggers",
+            icon: Keyboard,
+            accent: "neutral",
+          },
+          {
+            label: "Wallet spend",
+            metric: formatLKR(12400),
+            subLabel: "Household bucket",
+            description: "Softlogic Glomark — press 1 to trigger live spend",
+            icon: WalletCards,
+            accent: "seylan",
+          },
+          {
+            label: "Tax jar",
+            metric: formatLKR(820),
+            subLabel: "Auto-saved",
+            description: `From incoming ${formatLKR(8200)} sale — press 2`,
+            icon: Zap,
+            accent: "amber",
+          },
+        ]}
+      />
+
+      <ActivityFeedBlock
+        eyebrow="Demo timeline"
+        title="Script steps"
+        footerLabel=""
+        items={DEMO_SCRIPT.map(
+          (step): ActivityFeedItem => ({
+            id: String(step.step),
+            icon: <Play className="size-4 text-ceyfi-green" />,
+            title: step.label,
+            subtitle: step.hint,
+            amount: `Step ${step.step}`,
+            amountTone: "neutral",
+            date: step.path ?? step.action ?? "Action",
+          })
+        )}
+      />
 
       <Card className="border-ceyfi-green/30 bg-ceyfi-surface">
         <CardContent className="space-y-4 p-5">
@@ -227,6 +288,12 @@ export default function DemoControlPage() {
           </CardContent>
         </Card>
       </div>
+
+      <FaqSection
+        eyebrow="Presenter help"
+        heading="Demo FAQ"
+        description="Talking points for the 90-second CEYFI walkthrough."
+      />
     </div>
   );
 }
