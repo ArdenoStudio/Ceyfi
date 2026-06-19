@@ -63,21 +63,21 @@ export function PlSummaryCard({ userId }: PlSummaryCardProps) {
       <CardContent className="p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-seylan-red">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
               Profit & loss
             </p>
-            <h3 className="font-heading text-lg font-semibold text-seylan-charcoal dark:text-white">
+            <h3 className="font-heading text-lg font-semibold text-ceyfi-ink dark:text-white">
               This week
             </h3>
           </div>
-          <div className="rounded-full bg-seylan-mist dark:bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground dark:text-white/40">
+          <div className="rounded-full bg-ceyfi-sprout dark:bg-white/[0.06] px-3 py-1 text-xs text-muted-foreground dark:text-white/40">
             {data.week_label}
           </div>
         </div>
         <div className="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-3">
-          <div className="rounded-2xl bg-seylan-mist/70 dark:bg-white/[0.06] p-4">
+          <div className="rounded-2xl bg-ceyfi-sprout/70 dark:bg-white/[0.06] p-4">
             <div className="text-xs text-muted-foreground dark:text-white/40">Revenue</div>
-            <div className="text-xl font-semibold text-seylan-charcoal dark:text-white">
+            <div className="text-xl font-semibold text-ceyfi-ink dark:text-white">
               {formatLKR(data.revenue_lkr)}
             </div>
           </div>
@@ -95,7 +95,7 @@ export function PlSummaryCard({ userId }: PlSummaryCardProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-3xl font-semibold text-seylan-charcoal dark:text-white">
+          <span className="text-3xl font-semibold text-ceyfi-ink dark:text-white">
             {data.margin_pct}%
           </span>
           <span className={`text-sm ${isUp ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
@@ -126,7 +126,7 @@ export function PlSummaryCard({ userId }: PlSummaryCardProps) {
               <polyline
                 points={coords}
                 fill="none"
-                stroke="#E31821"
+                stroke="#059669"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"

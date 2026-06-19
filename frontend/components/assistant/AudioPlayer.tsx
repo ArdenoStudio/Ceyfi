@@ -60,7 +60,7 @@ export function AudioPlayer({ text, language }: AudioPlayerProps) {
       size="xs"
       onClick={handlePlay}
       disabled={loading || !text.trim()}
-      className="mt-2 gap-1 px-0 text-xs text-muted-foreground hover:text-seylan-red"
+      className="mt-2 gap-1 px-0 text-xs text-muted-foreground hover:text-ceyfi-green"
       aria-label="Play assistant response"
     >
       {loading ? (

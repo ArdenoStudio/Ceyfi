@@ -56,9 +56,9 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
         amount_lkr: amount,
       });
       toast.custom(() => (
-        <div className="flex items-start gap-3 rounded-xl border border-[#E31821]/30 bg-[#0c0407] px-4 py-3.5 shadow-[0_8px_32px_rgba(227,24,33,0.25)] w-[356px]">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E31821]/15">
-            <CircleCheck className="h-4 w-4 text-[#E31821]" />
+        <div className="flex items-start gap-3 rounded-xl border border-[#059669]/30 bg-[#04241a] px-4 py-3.5 shadow-[0_8px_32px_rgba(5,150,105,0.25)] w-[356px]">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#059669]/15">
+            <CircleCheck className="h-4 w-4 text-[#059669]" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-white">Payment simulated</p>
@@ -93,18 +93,18 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
           <PaymentModeToggle value={paymentMode} onChange={setPaymentMode} />
 
           {/* Loan summary */}
-          <div className="rounded-lg border border-seylan-border bg-seylan-mist/60 p-4 space-y-2 text-sm">
+          <div className="rounded-lg border border-ceyfi-line bg-ceyfi-sprout/60 p-4 space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Loan</span>
-              <span className="font-mono font-medium text-seylan-charcoal">{loan.loan_id}</span>
+              <span className="font-mono font-medium text-ceyfi-ink">{loan.loan_id}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Outstanding</span>
-              <span className="font-semibold text-seylan-charcoal">{formatLKR(loan.outstanding_lkr)}</span>
+              <span className="font-semibold text-ceyfi-ink">{formatLKR(loan.outstanding_lkr)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Monthly instalment</span>
-              <span className="font-semibold text-seylan-charcoal">{formatLKR(loan.monthly_payment_lkr)}</span>
+              <span className="font-semibold text-ceyfi-ink">{formatLKR(loan.monthly_payment_lkr)}</span>
             </div>
           </div>
 
@@ -134,9 +134,9 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
           {paymentMode === "card" ? (
             <p className="text-[11px] leading-relaxed text-muted-foreground">
               Mastercard test gateway. Approved test card:{" "}
-              <span className="font-mono font-semibold text-seylan-charcoal">5123 4500 0000 0008</span>
-              , expiry <span className="font-mono font-semibold text-seylan-charcoal">01/39</span>,
-              CVV <span className="font-mono font-semibold text-seylan-charcoal">100</span>.
+              <span className="font-mono font-semibold text-ceyfi-ink">5123 4500 0000 0008</span>
+              , expiry <span className="font-mono font-semibold text-ceyfi-ink">01/39</span>,
+              CVV <span className="font-mono font-semibold text-ceyfi-ink">100</span>.
               Real cards are not accepted on this test gateway.
             </p>
           ) : (
@@ -155,7 +155,7 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-seylan-red hover:bg-seylan-red/90 text-white"
+              className="flex-1 bg-ceyfi-green hover:bg-ceyfi-green/90 text-white"
               disabled={submitting || !amount || amount <= 0}
               onClick={handleSubmit}
             >

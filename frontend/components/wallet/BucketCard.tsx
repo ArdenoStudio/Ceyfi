@@ -66,7 +66,7 @@ function RingProgress({ pct, stroke }: { pct: number; stroke: string }) {
         fill="none"
         stroke="currentColor"
         strokeWidth="2.5"
-        className="text-seylan-border opacity-40"
+        className="text-ceyfi-line opacity-40"
       />
       <circle
         cx="24" cy="24" r={r}
@@ -117,7 +117,7 @@ export function BucketCard({ bucket, onClick }: BucketCardProps) {
           </div>
 
           <div className="text-right">
-            <span className="text-xs font-semibold text-seylan-charcoal dark:text-white">
+            <span className="text-xs font-semibold text-ceyfi-ink dark:text-white">
               {bucket.label}
             </span>
             <p className="text-[10px] text-muted-foreground dark:text-white/40 mt-0.5">
@@ -128,7 +128,7 @@ export function BucketCard({ bucket, onClick }: BucketCardProps) {
 
         {/* Balance */}
         <div className="mb-4">
-          <div className="font-heading text-2xl font-bold text-seylan-charcoal dark:text-white tabular-nums leading-none">
+          <div className="font-heading text-2xl font-bold text-ceyfi-ink dark:text-white tabular-nums leading-none">
             {formatLKR(bucket.balance_lkr)}
           </div>
           <p className="mt-1 text-xs text-muted-foreground dark:text-white/40">available balance</p>
@@ -136,7 +136,7 @@ export function BucketCard({ bucket, onClick }: BucketCardProps) {
 
         {/* Progress bar */}
         <div className="space-y-1.5">
-          <div className="h-1.5 overflow-hidden rounded-full bg-seylan-mist dark:bg-white/[0.08]">
+          <div className="h-1.5 overflow-hidden rounded-full bg-ceyfi-sprout dark:bg-white/[0.08]">
             <div
               className={`h-full rounded-full bg-gradient-to-r ${colours.bar} transition-all duration-700`}
               style={{ width: `${Math.min(spentPct, 100)}%` }}

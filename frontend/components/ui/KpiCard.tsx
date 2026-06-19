@@ -31,17 +31,17 @@ export function KpiCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-[20px] border border-ceyfi-line/75 bg-ceyfi-paper p-5 transition duration-200 hover:-translate-y-0.5 hover:border-ceyfi-green/20",
+        "group relative overflow-hidden rounded-[20px] border border-ceyfi-line/75 bg-ceyfi-paper p-5 transition-all duration-200 hover:-translate-y-1 hover:border-ceyfi-green/25 hover:shadow-[0_8px_32px_rgba(5,150,105,0.10)]",
         className
       )}
     >
-      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-ceyfi-mint/45 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-ceyfi-mint/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start justify-between gap-3">
         <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ceyfi-muted">
           {title}
         </div>
         {icon ? (
-          <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-ceyfi-sprout text-ceyfi-green">
+          <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-ceyfi-sprout text-ceyfi-green transition-all duration-200 group-hover:bg-ceyfi-green group-hover:text-white group-hover:shadow-[0_4px_16px_rgba(5,150,105,0.30)]">
             {icon}
           </div>
         ) : null}

@@ -58,7 +58,7 @@ export function ChatThread({ messages, isStreaming }: ChatThreadProps) {
                 />
               ))}
             </span>
-            <ShiningText text="Seylan AI is thinking…" />
+            <ShiningText text="CEYFI AI is thinking…" />
           </div>
         </div>
       )}

@@ -16,10 +16,10 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <Card className="border-seylan-border">
+    <Card className="border-ceyfi-line">
       <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-        <AlertTriangle className="mb-3 h-8 w-8 text-seylan-red" />
-        <h2 className="mb-1 text-lg font-semibold text-seylan-charcoal">
+        <AlertTriangle className="mb-3 h-8 w-8 text-destructive" />
+        <h2 className="mb-1 text-lg font-semibold text-ceyfi-ink">
           {title}
         </h2>
         <p className="mb-4 max-w-md text-sm text-muted-foreground">

@@ -8,7 +8,7 @@ interface FluidParticlesBackgroundProps {
   particleCount?: number;
   noiseIntensity?: number;
   particleSize?: { min: number; max: number };
-  /** RGB string e.g. "227,24,33" */
+  /** RGB string e.g. "5,150,105" */
   particleColor?: string;
   className?: string;
 }
@@ -71,7 +71,7 @@ export function FluidParticlesBackground({
   particleCount = 2000,
   noiseIntensity = 0.003,
   particleSize = { min: 0.5, max: 2 },
-  particleColor = "227,24,33",
+  particleColor = "5,150,105",
   className,
 }: FluidParticlesBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);

@@ -48,7 +48,7 @@ function MiniTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#1a0a0b] px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-xl border border-white/10 bg-[#06231a] px-3 py-2 text-xs shadow-lg">
       <p className="text-white/40">{label}</p>
       <p className="font-semibold text-white">{formatLKR(payload[0].value)}</p>
     </div>
@@ -79,10 +79,10 @@ export function RepaymentTimeline({ schedule }: RepaymentTimelineProps) {
     <Card className="card-glass shadow-brand border-0">
       <CardContent className="p-5">
         <div className="mb-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-seylan-red">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
             Repayment history
           </p>
-          <h3 className="font-heading text-lg font-semibold text-seylan-charcoal dark:text-white">
+          <h3 className="font-heading text-lg font-semibold text-ceyfi-ink dark:text-white">
             Payment timeline
           </h3>
         </div>
@@ -98,8 +98,8 @@ export function RepaymentTimeline({ schedule }: RepaymentTimelineProps) {
                 <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="totalGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#E31821" stopOpacity={0.12} />
-                <stop offset="95%" stopColor="#E31821" stopOpacity={0} />
+                <stop offset="5%" stopColor="#059669" stopOpacity={0.12} />
+                <stop offset="95%" stopColor="#059669" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
@@ -113,7 +113,7 @@ export function RepaymentTimeline({ schedule }: RepaymentTimelineProps) {
             <Area
               type="monotone"
               dataKey="amount"
-              stroke="#E31821"
+              stroke="#059669"
               strokeWidth={1.5}
               fill="url(#totalGrad)"
               dot={false}
@@ -144,13 +144,13 @@ export function RepaymentTimeline({ schedule }: RepaymentTimelineProps) {
                 return (
                   <div
                     key={`${entry.month}-${entry.due_date}`}
-                    className="flex items-center justify-between py-2 border-b border-seylan-border dark:border-white/[0.08] last:border-0"
+                    className="flex items-center justify-between py-2 border-b border-ceyfi-line dark:border-white/[0.08] last:border-0"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-muted-foreground dark:text-white/30 w-8">
                         #{entry.month}
                       </span>
-                      <span className="text-sm text-seylan-charcoal dark:text-white/80">
+                      <span className="text-sm text-ceyfi-ink dark:text-white/80">
                         {new Date(entry.due_date).toLocaleDateString("en-LK", {
                           day: "numeric",
                           month: "short",

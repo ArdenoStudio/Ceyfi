@@ -16,10 +16,10 @@ export function PaymentCountdown({ loan }: PaymentCountdownProps) {
   const daysUntil = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 
   return (
-    <Card className="border-seylan-border bg-[linear-gradient(135deg,#721c24_0%,#3c0d13_100%)] text-white shadow-lg shadow-seylan-plum/20">
+    <Card className="border-ceyfi-line bg-[linear-gradient(135deg,#064e3b_0%,#03130c_100%)] text-white shadow-lg shadow-ceyfi-deep/20">
       <CardContent className="p-5">
         <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-          <CalendarClock className="h-5 w-5 text-seylan-gold" />
+          <CalendarClock className="h-5 w-5 text-ceyfi-green" />
         </div>
         <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
           Next payment
@@ -27,7 +27,7 @@ export function PaymentCountdown({ loan }: PaymentCountdownProps) {
         <div className="mt-1 text-3xl font-semibold">
           {formatLKR(loan.monthly_payment_lkr)}
         </div>
-        <div className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-seylan-plum">
+        <div className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-ceyfi-deep">
           due in {daysUntil} days
         </div>
         <div className="mt-3 text-xs text-white/60">

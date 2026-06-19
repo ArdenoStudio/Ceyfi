@@ -132,7 +132,7 @@ export function CategorisedTransactionFeed({
 
   if (loading) {
     return (
-      <Card className="border-seylan-border">
+      <Card className="border-ceyfi-line">
         <CardContent className="p-5 space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-12 w-full" />
@@ -150,10 +150,10 @@ export function CategorisedTransactionFeed({
     <Card className="card-glass shadow-brand border-0">
       <CardContent className="p-5">
         <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-seylan-red">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
             AI categorised feed
           </p>
-          <h3 className="font-heading text-lg font-semibold text-seylan-charcoal dark:text-white">
+          <h3 className="font-heading text-lg font-semibold text-ceyfi-ink dark:text-white">
             Transactions needing review
           </h3>
         </div>
@@ -173,8 +173,8 @@ export function CategorisedTransactionFeed({
                 );
                 return (
                   <div key={day} className="mb-4">
-                    <div className="sticky top-0 bg-white/95 dark:bg-[#0c0407]/95 z-10 flex justify-between items-center py-2 border-b border-seylan-border dark:border-white/[0.08] mb-2 backdrop-blur">
-                      <span className="text-xs font-medium text-seylan-charcoal dark:text-white/70">
+                    <div className="sticky top-0 bg-white/95 dark:bg-[#04241a]/95 z-10 flex justify-between items-center py-2 border-b border-ceyfi-line dark:border-white/[0.08] mb-2 backdrop-blur">
+                      <span className="text-xs font-medium text-ceyfi-ink dark:text-white/70">
                         {day}
                       </span>
                       <span
@@ -189,10 +189,10 @@ export function CategorisedTransactionFeed({
                     {txs.map((tx) => (
                       <div
                         key={tx.transaction_id}
-                        className="flex items-center justify-between py-2 border-b border-seylan-border/50 dark:border-white/[0.06] last:border-0"
+                        className="flex items-center justify-between py-2 border-b border-ceyfi-line/50 dark:border-white/[0.06] last:border-0"
                       >
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm text-seylan-charcoal dark:text-white/80 truncate">
+                          <div className="text-sm text-ceyfi-ink dark:text-white/80 truncate">
                             {tx.description ?? tx.merchant}
                           </div>
                           {tx.category_en && (

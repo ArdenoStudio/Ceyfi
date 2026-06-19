@@ -1,4 +1,4 @@
-# Seylan Hub — Frontend
+# CEYFI — Frontend
 
 AI banking platform for Sri Lanka: diaspora wallets, voice assistant, loan health, and bookkeeping for SMEs. Built for **Cursor Buildathon Colombo 2026**.
 

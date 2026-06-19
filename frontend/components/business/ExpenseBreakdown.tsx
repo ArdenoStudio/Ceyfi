@@ -26,14 +26,14 @@ interface ExpenseBreakdownProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  INVENTORY: "#E31821",
-  UTILITIES: "#D9A441",
-  WAGES: "#721C24",
-  TRANSPORT: "#10B981",
+  INVENTORY: "#059669",
+  UTILITIES: "#D97706",
+  WAGES: "#2563EB",
+  TRANSPORT: "#34D399",
   MISC: "#94A3B8",
 };
 
-const DEFAULT_COLOR = "#EAD7C2";
+const DEFAULT_COLOR = "#D8E8DC";
 
 interface TooltipPayloadEntry {
   value: number;
@@ -49,11 +49,11 @@ function CustomTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#1a0a0b] px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-xl border border-white/10 bg-[#06231a] px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold capitalize text-white">
         {payload[0].name.toLowerCase()}
       </p>
-      <p className="text-seylan-red">{formatLKR(payload[0].value)}</p>
+      <p className="text-ceyfi-mint">{formatLKR(payload[0].value)}</p>
     </div>
   );
 }
@@ -117,10 +117,10 @@ export function ExpenseBreakdown({ userId }: ExpenseBreakdownProps) {
   return (
     <Card className="card-glass shadow-brand border-0">
       <CardContent className="p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-seylan-red">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
           Spend categories
         </p>
-        <h3 className="mb-4 font-heading text-lg font-semibold text-seylan-charcoal dark:text-white">
+        <h3 className="mb-4 font-heading text-lg font-semibold text-ceyfi-ink dark:text-white">
           Expense Breakdown
         </h3>
         <ResponsiveContainer width="100%" height={180}>

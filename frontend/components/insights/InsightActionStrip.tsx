@@ -49,16 +49,16 @@ const toneConfig: Record<
     iconBg: "bg-blue-100 dark:bg-blue-800/40",
   },
   neutral: {
-    card: "border-seylan-border bg-gradient-to-br from-seylan-mist to-white/60 text-seylan-plum dark:border-white/[0.10] dark:from-white/[0.07] dark:to-transparent dark:text-white/80",
-    icon: "text-seylan-plum dark:text-white/70",
-    iconBg: "bg-seylan-border/50 dark:bg-white/[0.10]",
+    card: "border-ceyfi-line bg-gradient-to-br from-ceyfi-sprout to-white/60 text-ceyfi-deep dark:border-white/[0.10] dark:from-white/[0.07] dark:to-transparent dark:text-white/80",
+    icon: "text-ceyfi-deep dark:text-white/70",
+    iconBg: "bg-ceyfi-line/50 dark:bg-white/[0.10]",
   },
 };
 
 const actionIconColors = [
-  "text-seylan-red bg-red-50 hover:bg-red-100",
+  "text-ceyfi-green bg-emerald-50 hover:bg-emerald-100",
   "text-violet-600 bg-violet-50 hover:bg-violet-100",
-  "text-seylan-gold bg-amber-50 hover:bg-amber-100",
+  "text-amber-600 bg-amber-50 hover:bg-amber-100",
 ];
 
 export function InsightActionStrip({
@@ -72,10 +72,10 @@ export function InsightActionStrip({
       {/* Header row */}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-seylan-red">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
             {eyebrow}
           </p>
-          <h2 className="mt-1 font-heading text-xl font-semibold text-seylan-charcoal dark:text-white sm:text-2xl">
+          <h2 className="mt-1 font-heading text-xl font-semibold text-ceyfi-ink dark:text-white sm:text-2xl">
             {title}
           </h2>
         </div>
@@ -95,14 +95,14 @@ export function InsightActionStrip({
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </span>
-                  <span className="text-sm font-medium text-seylan-charcoal dark:text-white/80">
+                  <span className="text-sm font-medium text-ceyfi-ink dark:text-white/80">
                     {action.label}
                   </span>
                 </>
               );
 
               const sharedCls =
-                "inline-flex items-center gap-2 rounded-full border border-seylan-border bg-white/80 px-3 py-1.5 shadow-sm transition-all hover:shadow-brand hover:-translate-y-px dark:border-white/[0.10] dark:bg-white/[0.06] dark:hover:bg-white/[0.10]";
+                "inline-flex items-center gap-2 rounded-full border border-ceyfi-line bg-white/80 px-3 py-1.5 shadow-sm transition-all hover:shadow-brand hover:-translate-y-px dark:border-white/[0.10] dark:bg-white/[0.06] dark:hover:bg-white/[0.10]";
 
               if (action.href) {
                 return (

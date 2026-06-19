@@ -20,7 +20,7 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
   const dotColour = BUCKET_DOT[bucketKey] ?? "bg-slate-400";
 
   return (
-    <div className="group flex items-center gap-3 py-3 border-b border-seylan-border/60 last:border-0 transition-colors hover:bg-seylan-mist/50 dark:border-white/[0.06] dark:hover:bg-white/[0.04] -mx-1 px-1 rounded-xl">
+    <div className="group flex items-center gap-3 py-3 border-b border-ceyfi-line/60 last:border-0 transition-colors hover:bg-ceyfi-sprout/50 dark:border-white/[0.06] dark:hover:bg-white/[0.04] -mx-1 px-1 rounded-xl">
       {/* Direction icon */}
       <div
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
@@ -36,7 +36,7 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
 
       {/* Details */}
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-seylan-charcoal dark:text-white truncate">
+        <div className="text-sm font-medium text-ceyfi-ink dark:text-white truncate">
           {transaction.merchant}
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
