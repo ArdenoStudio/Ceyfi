@@ -40,7 +40,7 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar />
       <main className="flex min-w-0 flex-1 flex-col pb-24 md:ml-[17.5rem] md:pb-0">
         <AppTopbar />
-        <PageEnter key={pathname} className="flex-1">
+        <PageEnter className="flex-1">
           {children}
         </PageEnter>
         {showSeylanHandoff ? <SeylanBankHandoffBanner /> : null}

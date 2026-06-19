@@ -23,7 +23,11 @@ export function getStoredSession(): DemoPersona | null {
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function storeSession(persona: DemoPersona, token: string) {
@@ -41,7 +45,3 @@ export function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export function adminHeaders(): Record<string, string> {
-  const key = process.env.NEXT_PUBLIC_DEMO_ADMIN_KEY ?? "ceyfi-demo-admin";
-  return { "X-Demo-Admin-Key": key };
-}

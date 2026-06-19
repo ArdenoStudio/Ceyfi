@@ -1,5 +1,5 @@
 /** Backend URL: env override, else Vercel API in production builds, else local dev. */
-import { adminHeaders, authHeaders } from "@/lib/auth";
+import { authHeaders } from "@/lib/auth";
 
 function jsonHeaders(extra?: Record<string, string>): Record<string, string> {
   return {
@@ -31,7 +31,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       ...authHeaders(),
       ...(options?.headers as Record<string, string> | undefined),
     },
-    signal: AbortSignal.timeout(5000),
+    signal: options?.signal ?? AbortSignal.timeout(5000),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "Unknown error");
@@ -205,6 +205,7 @@ export async function createPaymentSession(args: {
     method: "POST",
     headers: jsonHeaders(),
     body: JSON.stringify(args),
+    signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -215,7 +216,9 @@ export async function createPaymentSession(args: {
 }
 
 export async function getPaymentStatus(orderId: string) {
-  const res = await fetch(`${API_BASE}/api/payments/${orderId}`);
+  const res = await fetch(`${API_BASE}/api/payments/${orderId}`, {
+    signal: AbortSignal.timeout(10000),
+  });
   if (!res.ok) throw new Error("Failed to fetch payment status");
   return res.json();
 }
@@ -239,7 +242,7 @@ export async function getSandboxTransferAccounts() {
 export async function saveAllocationRules(
   senderId: string,
   allocations: Record<string, number>,
-  accountId = "SEY-ACC-002"
+  accountId: string
 ) {
   return request(`/api/wallet/rules/${senderId}`, {
     method: "POST",
@@ -420,10 +423,12 @@ export async function prewarmDemoData() {
 }
 
 export async function postDemoReset() {
-  const result = await request("/mock/reset-demo", {
+  const res = await fetch("/api/admin/reset", {
     method: "POST",
-    headers: adminHeaders(),
+    signal: AbortSignal.timeout(10000),
   });
+  if (!res.ok) throw new Error("Demo reset failed");
+  const result = await res.json();
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("seylan:demo-reset"));
   }

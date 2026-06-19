@@ -19,7 +19,7 @@ function AssistantPageContent() {
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt");
   const context = searchParams.get("context");
-  const accountId = searchParams.get("accountId") ?? walletAccountId;
+  const accountId = searchParams.get("accountId") ?? walletAccountId ?? "";
   const promptSentRef = useRef(false);
   const { messages, isStreaming, language, setLanguage, send } = useChat(userId);
 
