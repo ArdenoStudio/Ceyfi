@@ -69,7 +69,8 @@ class Settings(BaseSettings):
         "http://localhost:3000,"
         "https://seylan-hub.vercel.app,"
         "https://seylan-hub1.vercel.app,"
-        "https://seylan-hub-frontend.netlify.app"
+        "https://seylan-hub-frontend.netlify.app,"
+        "https://frontend-taupe-three-96.vercel.app"
     )
     frontend_base_url: str = "https://seylan-hub-frontend.netlify.app"
     backend_base_url: str = "http://localhost:8000"
