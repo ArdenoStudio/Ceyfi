@@ -7,12 +7,13 @@ import { TaxJarPanel } from "@/components/business/TaxJarPanel";
 import { CategorisedTransactionFeed } from "@/components/business/CategorisedTransactionFeed";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { ErrorState } from "@/components/ErrorState";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { BusinessHeroStats } from "@/components/blocks/BusinessHeroStats";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getPlSummary, getBusinessAccount, getFinancialSnapshot } from "@/lib/api";
 import { PlSummary, Transaction } from "@/types";
-import { Bot, PiggyBank, ReceiptText, TrendingUp } from "lucide-react";
+import { Bot, PiggyBank, ReceiptText, TrendingUp, Wallet } from "lucide-react";
+import { formatters } from "@/lib/utils";
 import { CfoBriefPanel } from "@/components/business/CfoBriefPanel";
 import { BusinessAnalyticsSections } from "@/components/business/BusinessAnalyticsSections";
 import { toast } from "sonner";
@@ -137,18 +138,54 @@ export default function BusinessPage() {
 
   return (
     <div data-module="business" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-      <div className="hero-grid-pattern relative overflow-hidden rounded-[2rem]">
-        <PageHeader
-          eyebrow="SME bookkeeper"
-          title={user?.persona === "sme" ? "Silva Hardware & Electricals" : "Business cockpit"}
-          description="A weekly finance cockpit for revenue, spending, tax savings, and AI-assisted transaction categories."
-          meta={
-            <span className="inline-flex rounded-full border border-ceyfi-line bg-ceyfi-canvas px-3 py-1 text-xs font-medium text-ceyfi-muted dark:border-white/10 dark:bg-white/5 dark:text-white/50">
-              Gampaha
-            </span>
-          }
-        />
-      </div>
+      <BusinessHeroStats
+        eyebrow="SME bookkeeper"
+        title={
+          user?.persona === "sme"
+            ? "Silva Hardware & Electricals"
+            : "Business cockpit"
+        }
+        description="A weekly finance cockpit for revenue, spending, tax savings, and AI-assisted transaction categories."
+        meta={
+          <span className="inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
+            Gampaha
+          </span>
+        }
+        stats={[
+          {
+            title: "Weekly revenue",
+            value: formatters.currency({
+              number: revenue,
+              maxFractionDigits: 0,
+            }),
+            change: 8.2,
+            changeLabel: "vs last week",
+            icon: TrendingUp,
+          },
+          {
+            title: "Net margin",
+            value: formatters.currency({ number: net, maxFractionDigits: 0 }),
+            change: net >= 0 ? 4.1 : -2.3,
+            changeLabel: "after expenses",
+            icon: Wallet,
+          },
+          {
+            title: "Tax jar coverage",
+            value: `${taxCoveragePct}%`,
+            changeLabel: `${formatters.currency({
+              number: taxJarBalance,
+              maxFractionDigits: 0,
+            })} saved`,
+            icon: PiggyBank,
+          },
+          {
+            title: "Cash runway",
+            value: `${cashRunwayDays} days`,
+            changeLabel: "at current burn rate",
+            icon: ReceiptText,
+          },
+        ]}
+      />
 
       <InsightActionStrip
         eyebrow="SME command center"

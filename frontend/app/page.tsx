@@ -21,8 +21,12 @@ import {
   ProgressCircle,
 } from "@/components/charts/OverviewCharts";
 import { RotatingInsightsCard } from "@/components/insights/RotatingInsightsCard";
+import { GradientText } from "@/components/motion/GradientText";
+import { ShinyText } from "@/components/motion/ShinyText";
+import { SpotlightCard } from "@/components/motion/SpotlightCard";
 import { ParallaxTilt } from "@/components/ui/ParallaxTilt";
 import { ChartCard } from "@/components/ui/ChartCard";
+import { FeatureQuickLinksGrid } from "@/components/blocks/FeatureQuickLinksGrid";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getAccountContext, getFamilyWallet, getLoans } from "@/lib/api";
@@ -274,11 +278,17 @@ export default function OverviewPage() {
           </div>
           <Link
             href="/assistant"
-            className="btn-shimmer inline-flex w-fit items-center gap-2 rounded-xl bg-ceyfi-deep px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0a4424] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30 will-change-transform"
+            className="btn-shimmer inline-flex w-fit items-center gap-2 rounded-xl bg-ceyfi-deep px-4 py-2.5 text-xs font-semibold transition hover:bg-[#0a4424] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30 will-change-transform"
           >
             <Sparkles className="h-4 w-4 text-ceyfi-mint" />
-            Ask CEYFI
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ShinyText
+              text="Ask CEYFI"
+              color="rgba(255,255,255,0.85)"
+              shineColor="#34D399"
+              speed={2.4}
+              className="font-semibold"
+            />
+            <ArrowRight className="h-3.5 w-3.5 text-white/80" />
           </Link>
         </div>
 
@@ -309,6 +319,10 @@ export default function OverviewPage() {
 
       {/* Dark hero banner */}
       <ParallaxTilt className="relative overflow-hidden rounded-[26px]">
+        <SpotlightCard
+          className="rounded-[26px] border border-white/8"
+          spotlightColor="rgba(52, 211, 153, 0.28)"
+        >
         <section className="relative overflow-hidden rounded-[26px] bg-ceyfi-deep p-5 text-white sm:p-7 lg:p-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(52,211,153,0.20),transparent_30rem)]" />
         <div className="absolute -right-12 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-white/5" />
@@ -318,6 +332,13 @@ export default function OverviewPage() {
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
               Total financial position
             </div>
+            <GradientText
+              className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.18em]"
+              colors={["#34D399", "#059669", "#F4F8F3"]}
+              animationSpeed={6}
+            >
+              Live balance overview
+            </GradientText>
             <div className="mt-3 font-heading text-4xl font-semibold tracking-[-0.055em] tabular-nums sm:text-5xl">
               {formatters.currency({
                 number: balance,
@@ -373,6 +394,7 @@ export default function OverviewPage() {
           </div>
         </div>
         </section>
+        </SpotlightCard>
       </ParallaxTilt>
 
       {/* Section 2: Time River hero */}
@@ -545,47 +567,31 @@ export default function OverviewPage() {
       </section>
 
       {/* Section 6: Quick links */}
-      <section className="grid gap-3 sm:grid-cols-3">
-        {[
+      <FeatureQuickLinksGrid
+        eyebrow="Quick actions"
+        heading="Jump to what matters"
+        links={[
           {
             href: "/loans",
             icon: CalendarClock,
             title: "Next loan payment",
-            detail: "LKR 22,000 · due May 25",
+            description: "LKR 22,000 · due May 25",
+            badge: "Due soon",
           },
           {
             href: "/wallet",
             icon: ShieldCheck,
             title: "Family wallet",
-            detail: "3 buckets · all within limits",
+            description: "3 buckets · all within limits",
           },
           {
             href: "/assistant",
             icon: Bot,
             title: "Ask CEYFI",
-            detail: "Account-aware financial guidance",
+            description: "Account-aware financial guidance",
           },
-        ].map((item) => (
-          <Link
-            key={item.title}
-            href={item.href}
-            className="group flex items-center gap-3 rounded-[18px] border border-ceyfi-line/70 bg-ceyfi-paper p-4 transition hover:border-ceyfi-green/20"
-          >
-            <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-canvas text-ceyfi-green transition group-hover:bg-ceyfi-sprout">
-              <item.icon className="h-4.5 w-4.5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-xs font-semibold text-ceyfi-ink">
-                {item.title}
-              </span>
-              <span className="mt-1 block truncate text-[10px] text-ceyfi-faint">
-                {item.detail}
-              </span>
-            </span>
-            <ArrowRight className="h-4 w-4 text-ceyfi-faint transition group-hover:translate-x-0.5 group-hover:text-ceyfi-green" />
-          </Link>
-        ))}
-      </section>
+        ]}
+      />
     </div>
   );
 }
