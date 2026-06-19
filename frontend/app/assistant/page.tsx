@@ -15,6 +15,7 @@ import { GradientText } from "@/components/motion/GradientText";
 import { ShinyText } from "@/components/motion/ShinyText";
 import { TypewriterSubtitle } from "@/components/ui/TypewriterSubtitle";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FaqSection } from "@/components/blocks/FaqSection";
 import { getFamilyWallet } from "@/lib/api";
 import { WalletState } from "@/types";
 
@@ -151,6 +152,11 @@ function AssistantPageContent() {
           <div className="mt-5 w-full max-w-2xl">
             <SuggestedQuestions language={language} onSelect={send} />
           </div>
+
+          <FaqSection
+            variant="compact"
+            className="mt-8 mb-6 w-full max-w-2xl"
+          />
         </div>
       ) : (
         <>
@@ -183,12 +189,15 @@ function AssistantPageContent() {
             onSuggestedSelect={send}
           />
 
-          <ChatInput
-            ref={chatInputRef}
-            onSend={send}
-            disabled={isStreaming}
-            language={language}
-          />
+          <div className="relative z-10 mx-auto w-full max-w-2xl space-y-3 px-4 pb-2">
+            <FaqSection variant="collapsible" />
+            <ChatInput
+              ref={chatInputRef}
+              onSend={send}
+              disabled={isStreaming}
+              language={language}
+            />
+          </div>
         </>
       )}
     </div>
