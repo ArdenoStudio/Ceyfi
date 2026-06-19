@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { RefreshCw, Zap, CheckCircle, XCircle, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorState } from "@/components/ErrorState";
 import { AgentCard } from "./components/AgentCard";
 import { ResponseTimeChart } from "./components/ResponseTimeChart";
 import { SuccessErrorChart } from "./components/SuccessErrorChart";
@@ -45,6 +46,7 @@ export default function MetricsPage() {
   const [data, setData] = useState<MetricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
 
@@ -57,8 +59,9 @@ export default function MetricsPage() {
       setData(json);
       setLastUpdated(new Date());
       setCountdown(REFRESH_INTERVAL / 1000);
+      setFetchError(null);
     } catch {
-      // keep stale data on error
+      setFetchError("Could not refresh metrics. Showing last known data.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -132,7 +135,7 @@ export default function MetricsPage() {
         }}
       />
 
-      <div className="relative z-10 space-y-6 p-4 sm:space-y-7 sm:p-6 lg:p-8">
+      <div className="relative z-10 stagger space-y-6 p-4 sm:space-y-7 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -172,6 +175,9 @@ export default function MetricsPage() {
         </div>
 
         {/* Status banner */}
+        {fetchError ? (
+          <ErrorState message={fetchError} onRetry={() => fetchMetrics(true)} />
+        ) : null}
         <div className={cn("flex items-center gap-3 rounded-2xl border px-4 py-3", banner.bg)}>
           <Activity className={cn("h-4 w-4 shrink-0", banner.color)} />
           <span className={cn("text-sm font-medium", banner.color)}>{banner.label}</span>
@@ -223,6 +229,12 @@ export default function MetricsPage() {
               />
             ))}
           </div>
+        ) : agents.length === 0 ? (
+          <ErrorState
+            title="No agent metrics yet"
+            message="Metrics will appear once agents start reporting to Phoenix."
+            onRetry={() => fetchMetrics(true)}
+          />
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {agents.map((agent) => (

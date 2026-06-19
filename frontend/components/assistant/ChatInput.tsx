@@ -1,6 +1,14 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, KeyboardEvent } from "react";
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  KeyboardEvent,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowUp } from "lucide-react";
 import { VoiceButton } from "./VoiceButton";
@@ -13,9 +21,20 @@ interface ChatInputProps {
   language: Language;
 }
 
-export function ChatInput({ onSend, disabled, language }: ChatInputProps) {
+export interface ChatInputHandle {
+  focus: () => void;
+}
+
+export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function ChatInput(
+  { onSend, disabled, language },
+  ref
+) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => textareaRef.current?.focus(),
+  }));
 
   function adjustHeight() {
     const el = textareaRef.current;
@@ -102,9 +121,9 @@ export function ChatInput({ onSend, disabled, language }: ChatInputProps) {
         </div>
 
         <p className="mt-2 text-center text-[10px] text-muted-foreground/70 dark:text-white/15">
-          Enter to send · Shift + Enter for new line
+          Enter to send · Shift + Enter for new line · <kbd className="rounded border border-border/60 px-1 py-0.5 font-mono text-[9px] dark:border-white/10">/</kbd> to focus
         </p>
       </div>
     </div>
   );
-}
+});

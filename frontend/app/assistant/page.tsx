@@ -2,17 +2,24 @@
 
 import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useChat } from "@/hooks/useChat";
 import { ChatThread } from "@/components/assistant/ChatThread";
-import { ChatInput } from "@/components/assistant/ChatInput";
+import { ChatInput, type ChatInputHandle } from "@/components/assistant/ChatInput";
 import { LanguageToggle } from "@/components/assistant/LanguageToggle";
 import { SuggestedQuestions } from "@/components/assistant/SuggestedQuestions";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { TypewriterSubtitle } from "@/components/ui/TypewriterSubtitle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFamilyWallet } from "@/lib/api";
 import { WalletState } from "@/types";
-import Image from "next/image";
+
+const TYPEWRITER_PROMPTS = [
+  "How much can I safely move to savings this week?",
+  "Explain my latest grocery spending trend",
+  "When is my next loan payment due?",
+];
 
 function AssistantPageContent() {
   const { userId, walletAccountId } = useCurrentUser();
@@ -21,11 +28,30 @@ function AssistantPageContent() {
   const context = searchParams.get("context");
   const accountId = searchParams.get("accountId") ?? walletAccountId;
   const promptSentRef = useRef(false);
+  const chatInputRef = useRef<ChatInputHandle>(null);
   const { messages, isStreaming, language, setLanguage, send } = useChat(userId);
 
   useEffect(() => {
     promptSentRef.current = false;
   }, [prompt, context, accountId]);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();
+      chatInputRef.current?.focus();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!prompt || promptSentRef.current || isStreaming) return;
@@ -67,8 +93,8 @@ function AssistantPageContent() {
       className="relative flex min-h-[100dvh] flex-col overflow-hidden text-foreground dark:text-white"
     >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(227,24,33,0.08),transparent)] dark:bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(227,24,33,0.12),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(114,28,36,0.06),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(114,28,36,0.10),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(5,150,105,0.08),transparent)] dark:bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(52,211,153,0.12),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(5,46,22,0.06),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(5,46,22,0.12),transparent)]" />
       </div>
 
       <div
@@ -81,33 +107,36 @@ function AssistantPageContent() {
       />
 
       {isEmpty ? (
-        <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4">
+        <div className="stagger relative z-10 flex flex-1 flex-col items-center justify-center px-4">
           <div className="absolute right-4 top-4 flex items-center gap-2 sm:right-6">
             <ThemeToggle variant="standalone" />
             <LanguageToggle language={language} onChange={setLanguage} />
           </div>
 
           <div className="mb-10 text-center">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-card/90 p-2.5 shadow-brand-lg ring-1 ring-border/60 dark:border-white/15 dark:bg-white/10 dark:shadow-black/30 dark:ring-white/15">
+            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-ceyfi-line bg-ceyfi-paper p-2.5 shadow-brand-lg ring-1 ring-ceyfi-green/15 dark:border-white/15 dark:bg-white/10 dark:shadow-black/30 dark:ring-white/15">
               <Image
-                src="/seylan-bank-icon.png"
-                alt="Seylan Bank"
+                src="/ceyfi-logo.svg"
+                alt="CEYFI"
                 width={48}
                 height={48}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain dark:brightness-0 dark:invert"
                 priority
               />
             </div>
-            <h1 className="font-heading text-4xl font-semibold sm:text-5xl">
-              Seylan AI
+            <h1 className="font-heading text-4xl font-semibold text-ceyfi-ink dark:text-white sm:text-5xl">
+              CEYFI Assistant
             </h1>
-            <p className="mt-3 max-w-sm text-sm text-muted-foreground dark:text-white/40">
-              Ask anything about your finances — in English or Sinhala
-            </p>
+            <TypewriterSubtitle prompts={TYPEWRITER_PROMPTS} />
           </div>
 
           <div className="w-full max-w-2xl">
-            <ChatInput onSend={send} disabled={isStreaming} language={language} />
+            <ChatInput
+              ref={chatInputRef}
+              onSend={send}
+              disabled={isStreaming}
+              language={language}
+            />
           </div>
 
           <div className="mt-5 w-full max-w-2xl">
@@ -117,11 +146,20 @@ function AssistantPageContent() {
       ) : (
         <>
           <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-border/80 px-4 py-3 backdrop-blur-sm dark:border-white/[0.08]">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red/80 dark:text-seylan-red/60">
-                Bilingual banking AI
-              </p>
-              <h1 className="font-heading text-lg font-semibold">Seylan AI</h1>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/ceyfi-logo.svg"
+                alt="CEYFI"
+                width={28}
+                height={28}
+                className="h-7 w-7 dark:brightness-0 dark:invert"
+              />
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
+                  Bilingual financial AI
+                </p>
+                <h1 className="font-heading text-lg font-semibold">CEYFI Assistant</h1>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle variant="standalone" />
@@ -136,7 +174,12 @@ function AssistantPageContent() {
             onSuggestedSelect={send}
           />
 
-          <ChatInput onSend={send} disabled={isStreaming} language={language} />
+          <ChatInput
+            ref={chatInputRef}
+            onSend={send}
+            disabled={isStreaming}
+            language={language}
+          />
         </>
       )}
     </div>

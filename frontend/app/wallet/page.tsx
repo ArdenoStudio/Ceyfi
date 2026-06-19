@@ -18,7 +18,10 @@ import { saveAllocationRules, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { type RemittanceCurrency } from "@/lib/remittance-fx";
 import { ArrowRightLeft, Bot, PieChart, ShieldCheck } from "lucide-react";
+import { WalletBalanceHeader } from "@/components/wallet/WalletBalanceHeader";
+import { ErrorState } from "@/components/ErrorState";
 import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSections";
+import { WalletBalanceHistory } from "@/components/wallet/WalletBalanceHistory";
 
 const ASSISTANT_PROMPT =
   "Explain the latest family wallet activity and tell me whether any bucket needs attention before the next transfer.";
@@ -49,7 +52,7 @@ export default function WalletPage() {
     fireSpendToast(tx, newBalance, { accountHolder: accountHolderRef.current });
   }, []);
 
-  const { wallet, transactions, buckets, loading, refetch } =
+  const { wallet, transactions, buckets, loading, error, realtimeConnected, refetch } =
     useWalletRealtime({
       accountId: walletAccountId,
       onSpend: handleSpend,
@@ -61,14 +64,23 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
+      <div data-module="wallet" className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
         <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-20 w-full" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
         </div>
         <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
+
+  if (error && !wallet) {
+    return (
+      <div data-module="wallet" className="mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
+        <ErrorState message={error} onRetry={() => void refetch()} />
       </div>
     );
   }
@@ -90,7 +102,7 @@ export default function WalletPage() {
   const latestSpend = transactions.find((tx) => tx.type === "debit");
 
   return (
-    <div data-module="wallet" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+    <div data-module="wallet" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <PageHeader
         eyebrow="Diaspora family wallet"
         title="Track money sent home with confidence"
@@ -104,12 +116,19 @@ export default function WalletPage() {
       />
 
       {wallet && (
-        <LastRemittanceBanner
+        <>
+          <WalletBalanceHeader
+            totalBalance={wallet.total_balance_lkr}
+            accountHolder={wallet.account_holder}
+            isLive={realtimeConnected || !error}
+          />
+          <LastRemittanceBanner
           wallet={remittanceOverride
             ? { ...wallet, last_remittance: { ...wallet.last_remittance, ...remittanceOverride } }
             : wallet}
           onSendAgain={() => setModalOpen(true)}
         />
+        </>
       )}
 
       <InsightActionStrip
@@ -162,6 +181,13 @@ export default function WalletPage() {
           },
           { label: "Tune split", icon: PieChart, href: "#allocation-editor" },
         ]}
+      />
+
+      <WalletBalanceHistory
+        currentBalance={
+          wallet?.total_balance_lkr ??
+          buckets.reduce((sum, bucket) => sum + bucket.balance_lkr, 0)
+        }
       />
 
       <BucketGrid buckets={buckets} />

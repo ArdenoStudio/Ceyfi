@@ -19,7 +19,12 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
   const isThinking = isStreaming && !!message.thinking && !message.content;
 
   return (
-    <div className={cn("flex flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
+    <div
+      className={cn(
+        "message-slide-in flex flex-col gap-1.5 will-change-[transform,opacity]",
+        isUser ? "items-end" : "items-start"
+      )}
+    >
       {/* Thinking block — shown for assistant messages only */}
       {!isUser && message.thinking && (
         <button

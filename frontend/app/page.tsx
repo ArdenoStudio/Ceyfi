@@ -20,11 +20,13 @@ import {
   CashflowChart,
   ProgressCircle,
 } from "@/components/charts/OverviewCharts";
+import { RotatingInsightsCard } from "@/components/insights/RotatingInsightsCard";
+import { ParallaxTilt } from "@/components/ui/ParallaxTilt";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getAccountContext, getFamilyWallet, getLoans } from "@/lib/api";
-import { periodDelta } from "@/lib/chartUtils";
+import { buildSparkline, periodDelta } from "@/lib/chartUtils";
 import { cn, formatters } from "@/lib/utils";
 import type { AccountContext, Loan, WalletState } from "@/types";
 
@@ -61,7 +63,7 @@ const FALLBACK_CONTEXT: AccountContext = {
     },
     {
       id: "txn_s004",
-      date: "2026-04-30",
+      date: "2026-06-15",
       description: "Personal Loan · Instalment",
       amount_lkr: -22000,
       type: "debit",
@@ -236,7 +238,7 @@ export default function OverviewPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1540px] space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8 xl:p-10">
+    <div className="stagger mx-auto w-full max-w-[1540px] space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8 xl:p-10">
       {/* Section 1: Page header + safe-to-spend strip */}
       <header className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -272,7 +274,7 @@ export default function OverviewPage() {
           </div>
           <Link
             href="/assistant"
-            className="inline-flex w-fit items-center gap-2 rounded-xl bg-ceyfi-deep px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0a4424] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30"
+            className="btn-shimmer inline-flex w-fit items-center gap-2 rounded-xl bg-ceyfi-deep px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0a4424] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30 will-change-transform"
           >
             <Sparkles className="h-4 w-4 text-ceyfi-mint" />
             Ask CEYFI
@@ -306,7 +308,8 @@ export default function OverviewPage() {
       </header>
 
       {/* Dark hero banner */}
-      <section className="relative overflow-hidden rounded-[26px] bg-ceyfi-deep p-5 text-white sm:p-7 lg:p-8">
+      <ParallaxTilt className="relative overflow-hidden rounded-[26px]">
+        <section className="relative overflow-hidden rounded-[26px] bg-ceyfi-deep p-5 text-white sm:p-7 lg:p-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(52,211,153,0.20),transparent_30rem)]" />
         <div className="absolute -right-12 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-white/5" />
         <div className="absolute -right-3 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full border border-white/5" />
@@ -369,7 +372,8 @@ export default function OverviewPage() {
             ))}
           </div>
         </div>
-      </section>
+        </section>
+      </ParallaxTilt>
 
       {/* Section 2: Time River hero */}
       <ChartCard
@@ -399,6 +403,7 @@ export default function OverviewPage() {
           changeType="positive"
           subtitle="Current and savings"
           icon={<Wallet className="h-4.5 w-4.5" />}
+          sparkline={buildSparkline(balance / 1000)}
         />
         <KpiCard
           title="Savings"
@@ -410,6 +415,7 @@ export default function OverviewPage() {
           changeType="positive"
           subtitle="Added this month"
           icon={<Landmark className="h-4.5 w-4.5" />}
+          sparkline={buildSparkline(savings / 1000)}
         />
         <KpiCard
           title="Loan health"
@@ -418,6 +424,7 @@ export default function OverviewPage() {
           changeType={loanHealth >= 75 ? "positive" : "negative"}
           subtitle="Across active facilities"
           icon={<ShieldCheck className="h-4.5 w-4.5" />}
+          sparkline={buildSparkline(loanHealth)}
         />
         <KpiCard
           title="Spent in June"
@@ -429,6 +436,7 @@ export default function OverviewPage() {
           changeType="negative"
           subtitle="Bills and daily spending"
           icon={<ReceiptText className="h-4.5 w-4.5" />}
+          sparkline={buildSparkline(spentThisMonth / 10000)}
         />
       </section>
 
@@ -533,39 +541,7 @@ export default function OverviewPage() {
           </div>
         </ChartCard>
 
-        <section className="relative min-w-0 overflow-hidden rounded-[22px] border border-ceyfi-green/15 bg-ceyfi-sprout p-5 sm:p-6">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border border-ceyfi-green/10" />
-          <div className="relative">
-            <div className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-green text-white">
-              <Bot className="h-5 w-5" />
-            </div>
-            <div className="mt-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-ceyfi-green">
-              CEYFI signal
-            </div>
-            <h2 className="mt-2 font-heading text-xl font-semibold tracking-[-0.03em] text-ceyfi-ink">
-              You can move LKR 18,000 to savings safely this week.
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-ceyfi-muted">
-              Your next loan instalment and normal household spend remain
-              covered after the transfer.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <Link
-                href="/assistant?prompt=Explain%20why%20I%20can%20move%20LKR%2018%2C000%20to%20savings"
-                className="inline-flex items-center gap-2 rounded-xl bg-ceyfi-deep px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#0a4424]"
-              >
-                Explain this
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-              <Link
-                href="/wallet"
-                className="inline-flex items-center gap-2 rounded-xl border border-ceyfi-green/20 bg-white/60 px-3.5 py-2 text-xs font-semibold text-ceyfi-deep transition hover:bg-white"
-              >
-                Open wallet
-              </Link>
-            </div>
-          </div>
-        </section>
+        <RotatingInsightsCard />
       </section>
 
       {/* Section 6: Quick links */}

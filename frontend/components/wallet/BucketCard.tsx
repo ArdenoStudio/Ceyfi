@@ -116,12 +116,18 @@ export function BucketCard({ bucket, onClick }: BucketCardProps) {
             </div>
           </div>
 
-          <div className="text-right">
+          <div className="min-w-0 flex-1 text-right">
             <span className="text-xs font-semibold text-ceyfi-ink dark:text-white">
               {bucket.label}
             </span>
-            <p className="text-[10px] text-muted-foreground dark:text-white/40 mt-0.5">
-              {bucket.allocation_pct}% allocation
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-ceyfi-sprout dark:bg-white/[0.08]">
+              <div
+                className={`progress-bar-animate h-full rounded-full bg-gradient-to-r ${colours.bar}`}
+                style={{ width: `${Math.min(spentPct, 100)}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground dark:text-white/40">
+              {bucket.allocation_pct}% allocation · {Math.round(spentPct)}% used
             </p>
           </div>
         </div>

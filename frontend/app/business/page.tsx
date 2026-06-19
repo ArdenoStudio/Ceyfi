@@ -6,6 +6,7 @@ import { ExpenseBreakdown } from "@/components/business/ExpenseBreakdown";
 import { TaxJarPanel } from "@/components/business/TaxJarPanel";
 import { CategorisedTransactionFeed } from "@/components/business/CategorisedTransactionFeed";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
+import { ErrorState } from "@/components/ErrorState";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -26,6 +27,7 @@ export default function BusinessPage() {
   const [pl, setPl] = useState<PlSummary | null>(null);
   const [taxJarBalance, setTaxJarBalance] = useState(15070);
   const [plLoading, setPlLoading] = useState(true);
+  const [plError, setPlError] = useState<string | null>(null);
   const [anomalyCount, setAnomalyCount] = useState(0);
   const paidToastFired = useRef(false);
 
@@ -67,8 +69,10 @@ export default function BusinessPage() {
       const [plRes, bizRes, snapRes] = results;
       if (plRes.status === "fulfilled") {
         setPl(plRes.value as PlSummary);
+        setPlError(null);
       } else {
         setPl(null);
+        setPlError("Could not load profit & loss summary.");
       }
       if (bizRes.status === "fulfilled") {
         const raw = bizRes.value as { tax_jar_balance?: number };
@@ -95,9 +99,21 @@ export default function BusinessPage() {
 
   if (plLoading) {
     return (
-      <div className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
+      <div data-module="business" className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (plError && !pl) {
+    return (
+      <div data-module="business" className="mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
+        <ErrorState
+          message={plError}
+          onRetry={() => window.location.reload()}
+        />
       </div>
     );
   }
@@ -120,17 +136,19 @@ export default function BusinessPage() {
   const reviewCount = misc > 0 ? extraTransactions.length + 1 : extraTransactions.length;
 
   return (
-    <div data-module="business" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-      <PageHeader
-        eyebrow="SME bookkeeper"
-        title={user?.persona === "sme" ? "Silva Hardware & Electricals" : "Business cockpit"}
-        description="A weekly finance cockpit for revenue, spending, tax savings, and AI-assisted transaction categories."
-        meta={
-          <span className="inline-flex rounded-full border border-ceyfi-line bg-ceyfi-canvas px-3 py-1 text-xs font-medium text-ceyfi-muted">
-            Gampaha
-          </span>
-        }
-      />
+    <div data-module="business" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+      <div className="hero-grid-pattern relative overflow-hidden rounded-[2rem]">
+        <PageHeader
+          eyebrow="SME bookkeeper"
+          title={user?.persona === "sme" ? "Silva Hardware & Electricals" : "Business cockpit"}
+          description="A weekly finance cockpit for revenue, spending, tax savings, and AI-assisted transaction categories."
+          meta={
+            <span className="inline-flex rounded-full border border-ceyfi-line bg-ceyfi-canvas px-3 py-1 text-xs font-medium text-ceyfi-muted dark:border-white/10 dark:bg-white/5 dark:text-white/50">
+              Gampaha
+            </span>
+          }
+        />
+      </div>
 
       <InsightActionStrip
         eyebrow="SME command center"

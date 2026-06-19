@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, Suspense } from "react";
+import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getPaymentStatus } from "@/lib/api";
 
@@ -74,8 +75,9 @@ function PaymentReturnPoller({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ceyfi-sprout px-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-5">
+    <div className="min-h-screen flex items-center justify-center bg-ceyfi-canvas px-4 dark:bg-ceyfi-deep">
+      <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-5 border border-ceyfi-line dark:border-white/10">
+        <Image src="/ceyfi-logo.svg" alt="CEYFI" width={40} height={40} className="mx-auto dark:brightness-0 dark:invert" />
         {state === "polling" && (
           <>
             <div className="mx-auto h-12 w-12 rounded-full border-4 border-ceyfi-deep border-t-transparent animate-spin" />
@@ -132,8 +134,9 @@ function PaymentReturnContent() {
 
   if (!orderId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ceyfi-sprout px-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-5">
+      <div className="min-h-screen flex items-center justify-center bg-ceyfi-canvas px-4 dark:bg-ceyfi-deep">
+        <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-5 border border-ceyfi-line dark:border-white/10">
+          <Image src="/ceyfi-logo.svg" alt="CEYFI" width={40} height={40} className="mx-auto dark:brightness-0 dark:invert" />
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <svg className="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

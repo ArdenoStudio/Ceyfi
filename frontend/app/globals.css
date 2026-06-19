@@ -18,10 +18,124 @@
 .stagger > *:nth-child(4) { animation-delay: 220ms; }
 .stagger > *:nth-child(5) { animation-delay: 280ms; }
 .stagger > *:nth-child(6) { animation-delay: 340ms; }
+.stagger > *:nth-child(7) { animation-delay: 400ms; }
+.stagger > *:nth-child(8) { animation-delay: 460ms; }
+.stagger > *:nth-child(9) { animation-delay: 520ms; }
+.stagger > *:nth-child(10) { animation-delay: 580ms; }
 
 @media (prefers-reduced-motion: reduce) {
   .stagger > * { opacity: 1; animation: none; }
 }
+
+/* Shimmer CTA */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+}
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgb(255 255 255 / 22%) 50%,
+    transparent 65%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Rotating AI insight fade */
+@keyframes insightFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes insightFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-6px); }
+}
+.insight-fade-in { animation: insightFadeIn 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.insight-fade-out { animation: insightFadeOut 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+/* Green gradient border + glow for insight card */
+.insight-card-glow {
+  background: linear-gradient(135deg, #059669, #34d399, #059669);
+  box-shadow:
+    0 0 0 1px rgb(5 150 105 / 12%),
+    0 8px 32px rgb(5 150 105 / 14%);
+  will-change: transform;
+}
+.dark .insight-card-glow {
+  box-shadow:
+    0 0 0 1px rgb(52 211 153 / 18%),
+    0 8px 40px rgb(5 150 105 / 22%);
+}
+
+/* Message bubble slide-in */
+@keyframes messageSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.message-slide-in {
+  animation: messageSlideIn 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Live pulsing dot */
+@keyframes livePulse {
+  0%, 100% { transform: scale(1); opacity: 0.75; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
+.live-pulse-ring {
+  animation: livePulse 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Animated bucket progress fill */
+@keyframes progressFill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.progress-bar-animate {
+  transform-origin: left center;
+  animation: progressFill 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+}
+
+/* Hero grid pattern */
+.hero-grid-pattern {
+  background-image:
+    linear-gradient(rgb(5 150 105 / 6%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(5 150 105 / 6%) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.dark .hero-grid-pattern {
+  background-image:
+    linear-gradient(rgb(52 211 153 / 8%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(52 211 153 / 8%) 1px, transparent 1px);
+}
+
+/* Typewriter cursor */
+.typewriter-cursor {
+  height: 1em;
+  width: 2px;
+}
+
+/* P&L profit / loss tints */
+.pl-profit { color: #059669; }
+.pl-loss { color: #dc2626; }
+.dark .pl-profit { color: #34d399; }
+.dark .pl-loss { color: #f87171; }
+.pl-card-profit { background: rgb(5 150 105 / 8%); }
+.pl-card-loss { background: rgb(220 38 38 / 8%); }
+.dark .pl-card-profit { background: rgb(52 211 153 / 12%); }
+.dark .pl-card-loss { background: rgb(248 113 113 / 12%); }
 
 @custom-variant dark (&:is(.dark *));
 
@@ -128,37 +242,37 @@
 
 .dark {
   --ceyfi-surface: rgb(255 255 255 / 4%);
-  --background: #2A0B0F;
-  --foreground: #FFF8F1;
-  --card: #3A1016;
-  --card-foreground: #FFF8F1;
-  --popover: #3A1016;
-  --popover-foreground: #FFF8F1;
-  --primary: #E31821;
-  --primary-foreground: #FFFFFF;
-  --secondary: #721C24;
-  --secondary-foreground: #FFF8F1;
-  --muted: #721C24;
-  --muted-foreground: #F1D8C9;
-  --accent: #E0AF49;
-  --accent-foreground: #2A0B0F;
+  --background: #071510;
+  --foreground: #e8f5ec;
+  --card: rgb(255 255 255 / 5%);
+  --card-foreground: #e8f5ec;
+  --popover: #0a1f14;
+  --popover-foreground: #e8f5ec;
+  --primary: #059669;
+  --primary-foreground: #ffffff;
+  --secondary: #0a4424;
+  --secondary-foreground: #d1fae5;
+  --muted: rgb(255 255 255 / 6%);
+  --muted-foreground: rgb(232 245 236 / 55%);
+  --accent: rgb(52 211 153 / 14%);
+  --accent-foreground: #a7f3d0;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: rgb(241 216 201 / 18%);
-  --input: rgb(241 216 201 / 24%);
-  --ring: #E0AF49;
-  --chart-1: #E31821;
-  --chart-2: #E0AF49;
-  --chart-3: #FFF8F1;
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: #721C24;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #E31821;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #8A2730;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #8A2730;
-  --sidebar-ring: #E0AF49;
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 12%);
+  --ring: #34d399;
+  --chart-1: #059669;
+  --chart-2: #34d399;
+  --chart-3: #6ee7b7;
+  --chart-4: #2563eb;
+  --chart-5: #d97706;
+  --sidebar: #052e16;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #059669;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0a4424;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #174d2c;
+  --sidebar-ring: #34d399;
 }
 
 @layer base {
@@ -174,8 +288,8 @@
   }
   .dark body {
     background:
-      radial-gradient(circle at 16% 0%, rgb(227 24 33 / 10%), transparent 28rem),
-      linear-gradient(180deg, #2a0b0f 0%, #241316 46%, #1a090c 100%);
+      radial-gradient(circle at 16% 0%, rgb(52 211 153 / 10%), transparent 28rem),
+      linear-gradient(180deg, #071510 0%, #052e16 46%, #031a0f 100%);
   }
   html {
     @apply font-sans;
@@ -451,4 +565,10 @@ html.theme-transition *::after {
   .interactive-card:hover { transform: none; }
   .interactive-press:active { transform: none; }
   .animate-pulse-soft { animation: none; }
+  .btn-shimmer::after { animation: none; }
+  .insight-fade-in,
+  .insight-fade-out,
+  .message-slide-in,
+  .progress-bar-animate { animation: none; opacity: 1; transform: none; }
+  .live-pulse-ring { animation: none; }
 }

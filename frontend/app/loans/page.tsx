@@ -12,6 +12,7 @@ import { RepaymentTimeline } from "@/components/loans/RepaymentTimeline";
 import { LoanIntelligenceCharts } from "@/components/loans/LoanIntelligenceCharts";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AlertTriangle, Bot, CalendarCheck, Gauge, WalletCards } from "lucide-react";
@@ -20,7 +21,7 @@ const ASSISTANT_PROMPT =
   "Show me repayment scenarios for my current loan: paying today, paying three days late, and making a partial payment.";
 
 export default function LoansPage() {
-  const { loanUserId, user } = useCurrentUser();
+  const { loanUserId } = useCurrentUser();
   const [loan, setLoan] = useState<Loan | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -69,9 +70,17 @@ export default function LoansPage() {
 
   if (!loan) {
     return (
-      <div className="mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-4 font-heading text-xl font-semibold text-ceyfi-ink">Loan Dashboard</h1>
-        <p className="text-ceyfi-muted">No loan data available.</p>
+      <div data-module="loans" className="mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
+        <PageHeader
+          eyebrow="Loan health"
+          title="Understand your repayment position at a glance"
+          description="A calmer loan dashboard that explains what is due next, how much is complete, and which action keeps the account healthy."
+        />
+        <ErrorState
+          title="No loan data available"
+          message="We couldn't load your loan details. Check your connection or try again."
+          onRetry={fetchLoan}
+        />
       </div>
     );
   }
@@ -90,7 +99,7 @@ export default function LoansPage() {
         : "Needs action";
 
   return (
-    <div data-module="loans" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+    <div data-module="loans" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <PageHeader
         eyebrow="Loan health"
         title="Understand your repayment position at a glance"

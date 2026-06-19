@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ErrorState";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getProfileData } from "@/lib/api";
@@ -17,8 +18,6 @@ import {
   Clock,
   Receipt,
 } from "lucide-react";
-
-const USER_ID = "SEY-USR-001"; // fallback only
 
 function formatLKR(amount: number) {
   return `LKR ${Math.abs(amount).toLocaleString("en-LK")}`;
@@ -38,12 +37,19 @@ export default function ProfilePage() {
   const { userId, user } = useCurrentUser();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadProfile = () => {
+    setLoading(true);
+    setError(null);
     getProfileData(userId)
       .then(setProfile)
-      .catch(() => {})
+      .catch(() => setError("Could not load profile data."))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadProfile();
   }, [userId]);
 
   if (loading) {
@@ -62,8 +68,8 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-muted-foreground">Could not load profile data.</p>
+      <div data-module="profile" className="flex min-h-[60vh] items-center justify-center p-6">
+        <ErrorState message={error ?? "Could not load profile data."} onRetry={loadProfile} />
       </div>
     );
   }
@@ -90,7 +96,7 @@ export default function ProfilePage() {
         }}
       />
 
-      <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+      <div className="relative z-10 stagger space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
         <header className="relative overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-brand-lg backdrop-blur-xl sm:p-8 dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
           <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-seylan-red/25 blur-3xl" />
           <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center">

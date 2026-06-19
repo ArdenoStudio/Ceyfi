@@ -12,8 +12,10 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import { Search } from "lucide-react";
+import { Search, Download, Receipt } from "lucide-react";
 import { ChartCard } from "@/components/ui/ChartCard";
+import { BackToTopButton } from "@/components/ui/BackToTopButton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CeyfiTooltip } from "@/components/charts/CeyfiTooltip";
 import { ChartContainer } from "@/components/charts/ChartContainer";
 import { Badge } from "@/components/ui/badge";
@@ -112,10 +114,13 @@ export default function TransactionsPage() {
     weekday: number;
   } | null>(null);
   const [anomalyTip, setAnomalyTip] = useState<string | null>(null);
-  const perPage = 10;
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const perPage = 15;
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     getAccountContext(userId)
       .then((data) => {
         if (cancelled) return;
@@ -123,8 +128,16 @@ export default function TransactionsPage() {
         if (ctx.recent_transactions?.length) {
           setTransactions(enrichBasic(ctx.recent_transactions));
         }
+        setLoadError(null);
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!cancelled) {
+          setLoadError("Using demo transactions — live account data unavailable.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -244,8 +257,28 @@ export default function TransactionsPage() {
     return "bg-emerald-600 text-white";
   };
 
+  function exportCsv() {
+    const header = ["Date", "Description", "Category", "Type", "Amount (LKR)"];
+    const rows = filtered.map((t) => [
+      t.date,
+      `"${t.description.replace(/"/g, '""')}"`,
+      t.category,
+      t.type,
+      String(Math.abs(t.amount_lkr)),
+    ]);
+    const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ceyfi-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
-    <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10">
+    <div className="stagger mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10">
+      <BackToTopButton threshold={500} />
       <header>
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
           Transaction analytics
@@ -256,8 +289,23 @@ export default function TransactionsPage() {
         <p className="mt-2 text-sm text-ceyfi-muted">
           Overview, analytics, and a filterable ledger — all offline-ready.
         </p>
+        {loadError ? (
+          <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+            {loadError}
+          </p>
+        ) : null}
       </header>
 
+      {loading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-64" />
+          <div className="grid gap-4 md:grid-cols-2">
+            <Skeleton className="h-56" />
+            <Skeleton className="h-56" />
+          </div>
+          <Skeleton className="h-72 w-full" />
+        </div>
+      ) : (
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-ceyfi-canvas">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -427,17 +475,24 @@ export default function TransactionsPage() {
         </TabsContent>
 
         <TabsContent value="transactions" className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-ceyfi-line/70 bg-ceyfi-paper p-4">
-            <Select value={month} onValueChange={(v) => { setMonth(v ?? "all"); setPage(1); }}>
-              <SelectTrigger className="w-[130px]"><SelectValue placeholder="Month" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All months</SelectItem>
-                <SelectItem value="2026-06">June 2026</SelectItem>
-                <SelectItem value="2026-05">May 2026</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap items-center gap-3 rounded-[22px] border border-ceyfi-line/70 bg-ceyfi-canvas p-4">
+            <div className="flex rounded-lg border border-ceyfi-line bg-ceyfi-paper p-0.5">
+              {(["all", "credit", "debit"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => { setTypeFilter(t); setPage(1); }}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-[11px] font-semibold",
+                    typeFilter === t ? "bg-ceyfi-green text-white shadow-sm" : "text-ceyfi-muted"
+                  )}
+                >
+                  {t === "all" ? "All" : t === "credit" ? "Credits" : "Debits"}
+                </button>
+              ))}
+            </div>
             <Select value={category} onValueChange={(v) => { setCategory(v ?? "all"); setPage(1); }}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectTrigger className="w-[160px] bg-ceyfi-paper"><SelectValue placeholder="Category" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
                 {CATEGORIES.map((c) => (
@@ -445,73 +500,95 @@ export default function TransactionsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex rounded-lg border border-ceyfi-line bg-ceyfi-canvas p-0.5">
-              {(["all", "debit", "credit"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => { setTypeFilter(t); setPage(1); }}
-                  className={cn(
-                    "rounded-md px-3 py-1.5 text-[11px] font-semibold capitalize",
-                    typeFilter === t ? "bg-white text-ceyfi-green shadow-sm" : "text-ceyfi-muted"
-                  )}
-                >
-                  {t === "all" ? "All" : t}
-                </button>
-              ))}
-            </div>
-            <label className="flex h-9 flex-1 min-w-[160px] items-center gap-2 rounded-lg border border-ceyfi-line bg-ceyfi-canvas px-3">
+            <label className="flex h-9 flex-1 min-w-[160px] items-center gap-2 rounded-lg border border-ceyfi-line bg-ceyfi-paper px-3">
               <Search className="h-3.5 w-3.5 text-ceyfi-faint" />
               <Input
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-                placeholder="Search..."
+                placeholder="Search description…"
                 className="h-auto border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
               />
             </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={exportCsv}
+              disabled={filtered.length === 0}
+              className="border-ceyfi-line text-ceyfi-green hover:bg-ceyfi-sprout"
+            >
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              Export CSV
+            </Button>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-ceyfi-line/70 bg-ceyfi-paper">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-ceyfi-line/60 bg-ceyfi-canvas text-[10px] font-semibold uppercase tracking-wider text-ceyfi-muted">
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3 text-right">Amount</th>
-                  <th className="px-4 py-3">Type</th>
-                </tr>
-              </thead>
+          <div className="overflow-hidden rounded-[22px] border border-ceyfi-line/70 bg-ceyfi-canvas">
+            {paged.length === 0 ? (
+              <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+                <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-ceyfi-sprout">
+                  <Receipt className="h-7 w-7 text-ceyfi-green" />
+                </div>
+                <p className="font-medium text-ceyfi-ink">No transactions found</p>
+                <p className="mt-1 max-w-xs text-xs text-ceyfi-muted">
+                  Try adjusting your filters or search term to see more results.
+                </p>
+              </div>
+            ) : (
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-ceyfi-line/60 bg-ceyfi-paper text-[10px] font-semibold uppercase tracking-wider text-ceyfi-muted">
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Description</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3 text-right">Amount</th>
+                  </tr>
+                </thead>
               <tbody>
-                {paged.map((t) => (
-                  <tr key={t.id} className="border-b border-ceyfi-line/40 last:border-0">
-                    <td className="px-4 py-3 font-mono text-ceyfi-faint">{t.date}</td>
-                    <td className="px-4 py-3 font-medium text-ceyfi-ink">{t.description}</td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        variant="outline"
-                        className="border-0 text-[10px]"
-                        style={{ backgroundColor: `${CATEGORY_COLORS[t.category] ?? "#64748B"}18`, color: CATEGORY_COLORS[t.category] }}
-                      >
-                        {t.category}
-                      </Badge>
-                    </td>
-                    <td className={cn("px-4 py-3 text-right font-mono font-semibold", t.type === "credit" ? "text-emerald-700" : "text-ceyfi-ink")}>
-                      {t.type === "credit" ? "+" : "−"}
-                      {formatters.currency({ number: Math.abs(t.amount_lkr), maxFractionDigits: 0 })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", t.type === "credit" ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-600")}>
-                        {t.type}
-                      </span>
+                {paged.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-12 text-center">
+                      <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ceyfi-canvas dark:bg-white/5">
+                          <Receipt className="h-5 w-5 text-ceyfi-muted" />
+                        </div>
+                        <p className="text-sm font-medium text-ceyfi-ink dark:text-white">
+                          No transactions match your filters
+                        </p>
+                        <p className="text-xs text-ceyfi-muted">
+                          Try clearing search, category, or heatmap filters.
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                paged.map((t) => (
+                    <tr key={t.id} className="border-b border-ceyfi-line/40 last:border-0 bg-ceyfi-paper/40">
+                      <td className="px-4 py-3 font-mono text-ceyfi-faint">{t.date}</td>
+                      <td className="px-4 py-3 font-medium text-ceyfi-ink">{t.description}</td>
+                      <td className="px-4 py-3">
+                        <Badge
+                          variant="outline"
+                          className="border-0 text-[10px]"
+                          style={{ backgroundColor: `${CATEGORY_COLORS[t.category] ?? "#64748B"}18`, color: CATEGORY_COLORS[t.category] }}
+                        >
+                          {t.category}
+                        </Badge>
+                      </td>
+                      <td className={cn("px-4 py-3 text-right font-mono font-semibold", t.type === "credit" ? "text-emerald-700" : "text-ceyfi-muted")}>
+                        {t.type === "credit" ? "+" : "−"}
+                        {formatters.currency({ number: Math.abs(t.amount_lkr), maxFractionDigits: 0 })}
+                      </td>
+                  </tr>
+                ))
+                )}
               </tbody>
-            </table>
-            <div className="flex items-center justify-between border-t border-ceyfi-line/60 px-4 py-3">
+              </table>
+            )}
+            <div className="flex items-center justify-between border-t border-ceyfi-line/60 bg-ceyfi-paper px-4 py-3">
               <span className="text-[11px] text-ceyfi-muted">
-                Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, filtered.length)} of {filtered.length}
+                {filtered.length === 0
+                  ? "0 transactions"
+                  : `Showing ${(page - 1) * perPage + 1}–${Math.min(page * perPage, filtered.length)} of ${filtered.length}`}
               </span>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Prev</Button>
@@ -521,6 +598,7 @@ export default function TransactionsPage() {
           </div>
         </TabsContent>
       </Tabs>
+      )}
     </div>
   );
 }

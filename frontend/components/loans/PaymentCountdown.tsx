@@ -27,7 +27,11 @@ export function PaymentCountdown({ loan }: PaymentCountdownProps) {
         <div className="mt-1 text-3xl font-semibold">
           {formatLKR(loan.monthly_payment_lkr)}
         </div>
-        <div className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-ceyfi-deep">
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-ceyfi-deep">
+          <span className="relative flex h-2 w-2 will-change-transform">
+            <span className="live-pulse-ring absolute inline-flex h-full w-full rounded-full bg-ceyfi-green" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-ceyfi-green" />
+          </span>
           due in {daysUntil} days
         </div>
         <div className="mt-3 text-xs text-white/60">
