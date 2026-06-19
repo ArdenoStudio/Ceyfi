@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test:smoke": "node scripts/smoke.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:persona": "playwright test e2e/persona-production.spec.ts",
     "test:e2e:install": "playwright install chromium --with-deps"
   },
   "dependencies": {

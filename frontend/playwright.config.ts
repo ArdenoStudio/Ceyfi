@@ -5,8 +5,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: "list",
+  workers: process.env.CI ? 2 : undefined,
+  reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
@@ -17,10 +17,20 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: "NEXT_PUBLIC_SKIP_AUTH=true npm run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command:
+        "cd ../backend && python3 -m pip install -q -r requirements.txt && python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      url: "http://127.0.0.1:8000/health",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command:
+        "NEXT_PUBLIC_SKIP_AUTH=true NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000 npm run dev -- --port 3000",
+      url: "http://localhost:3000",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+  ],
 });

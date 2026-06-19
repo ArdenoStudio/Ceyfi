@@ -15,6 +15,10 @@ const requiredFiles = [
   "app/decisions/page.tsx",
   "app/demo/page.tsx",
   "app/login/page.tsx",
+  "app/metrics/page.tsx",
+  "app/profile/page.tsx",
+  "app/payments/checkout/page.tsx",
+  "app/payments/return/page.tsx",
   "contexts/AuthContext.tsx",
   "lib/auth.ts",
   ".env.example",
@@ -22,11 +26,13 @@ const requiredFiles = [
   "components/charts/TimeRiver.tsx",
   "components/charts/CeyfiTooltip.tsx",
   "components/charts/ScenarioFanChart.tsx",
-  "public/seylan-logo.svg",
-  "public/seylan-logo-white.svg",
+  "public/ceyfi-logo.svg",
+  "public/ceyfi-icon.svg",
   "components/layout/DemoModeBadge.tsx",
   "components/assistant/AudioPlayer.tsx",
   "components/seylan/SeylanBankHandoffBanner.tsx",
+  "components/layout/SiteFooter.tsx",
+  "components/payments/PayHereButton.tsx",
   "lib/seylan-external-links.ts",
 ];
 
@@ -50,9 +56,11 @@ const requiredSnippets = [
   ["components/layout/DemoModeBadge.tsx", "Demo environment"],
   ["app/demo/page.tsx", "Trigger wallet spend"],
   ["app/demo/page.tsx", "90-second script"],
-  ["public/manifest.json", "/seylan-logo.svg"],
+  ["public/manifest.json", "/ceyfi-logo.svg"],
   ["lib/seylan-external-links.ts", "seylanbank.lk"],
   ["components/seylan/SeylanBankHandoffBanner.tsx", "Personal Internet Banking"],
+  ["components/payments/PayHereButton.tsx", "Pay with PayHere"],
+  ["components/layout/SiteFooter.tsx", "CEYFI"],
 ];
 
 const missing = requiredFiles.filter((file) => !existsSync(join(root, file)));
@@ -72,4 +80,4 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-console.log("Smoke check passed: demo-critical frontend files are present.");
+console.log("Smoke check passed: production-critical frontend files are present.");

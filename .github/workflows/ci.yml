@@ -43,6 +43,9 @@ jobs:
       - run: npm run test:e2e
         env:
           CI: true
+      - run: npm run test:e2e:persona
+        env:
+          CI: true
 
   backend:
     name: Backend
@@ -59,4 +62,5 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
       - run: pip install pytest pytest-asyncio httpx
-      - run: python -m pytest tests/ -v
+      - run: python -m pytest tests/ -v --tb=short
+      - run: python -m pytest tests/test_persona_matrix.py -v --tb=line -q

@@ -37,6 +37,8 @@ jobs:
   build-and-deploy:
     name: Build and Deploy to ECS
     needs: test
+    # Set repository variable AWS_DEPLOY_ENABLED=true after bootstrap (see infrastructure/MANUAL_STEPS.md)
+    if: vars.AWS_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

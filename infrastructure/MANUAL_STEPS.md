@@ -78,6 +78,14 @@ In GitHub → Settings → Secrets and variables → Actions, add:
 | `AWS_ACCESS_KEY_ID` | IAM user access key with ECR + ECS deploy permissions |
 | `AWS_SECRET_ACCESS_KEY` | Matching secret key |
 
+**Variables** (optional — ECS deploy skipped until set):
+
+| Variable | Value |
+|----------|-------|
+| `AWS_DEPLOY_ENABLED` | `true` — enable only after bootstrap + secrets are ready |
+
+Until `AWS_DEPLOY_ENABLED` is `true`, `deploy.yml` runs backend tests but **skips** the ECS deploy job (safe without AWS credentials).
+
 Recommended IAM policy scope: ECR push, ECS `RegisterTaskDefinition` / `UpdateService`, `PassRole` on the two CEYFI ECS roles, and `secretsmanager:GetSecretValue` on `ceyfi/*`.
 
 ---

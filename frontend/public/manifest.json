@@ -8,12 +8,12 @@
   "theme_color": "#059669",
   "icons": [
     {
-      "src": "/seylan-logo.svg",
+      "src": "/ceyfi-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },
     {
-      "src": "/seylan-logo-white.svg",
+      "src": "/ceyfi-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
