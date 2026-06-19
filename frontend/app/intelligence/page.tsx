@@ -22,6 +22,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { BackgroundBeams } from "@/components/aceternity/background-beams";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { BentoGridShowcase } from "@/components/blocks/BentoGridShowcase";
 import { GradientBorder } from "@/components/blocks/GradientBorder";
@@ -109,19 +110,22 @@ export default function IntelligencePage() {
         <ErrorState message={error} onRetry={loadSnapshot} />
       ) : (
         <>
-      <header>
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-          Financial intelligence
-          {snapshot?.data_source === "live" ? (
-            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 dark:text-emerald-300">Live data</span>
-          ) : null}
+      <header className="relative overflow-hidden rounded-[26px] border border-ceyfi-line/60 bg-gradient-to-br from-ceyfi-paper via-ceyfi-sprout/40 to-ceyfi-paper px-6 py-8 sm:px-8 dark:border-white/10 dark:from-ceyfi-deep/50 dark:via-ceyfi-deep/30 dark:to-ceyfi-deep/40">
+        <BackgroundBeams className="opacity-30 dark:opacity-20" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
+            Financial intelligence
+            {snapshot?.data_source === "live" ? (
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">Live data</span>
+            ) : null}
+          </div>
+          <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-ceyfi-ink dark:text-white">
+            Explainable financial health
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-ceyfi-muted dark:text-white/70">
+            Score breakdown, anomaly feed, forecast accuracy, and ranked opportunities for {snapshot?.name ?? user?.name}.
+          </p>
         </div>
-        <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-foreground">
-          Explainable financial health
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Score breakdown, anomaly feed, forecast accuracy, and ranked opportunities for {snapshot?.name ?? user?.name}.
-        </p>
       </header>
 
       <BentoGridShowcase

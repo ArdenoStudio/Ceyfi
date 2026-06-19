@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FlaskConical, RotateCcw, Save } from "lucide-react";
+import { AlertTriangle, FlaskConical, Gauge, RotateCcw, Save, TrendingDown } from "lucide-react";
+import { BentoGrid, BentoGridItem } from "@/components/aceternity/bento-grid";
+import { CardSpotlight } from "@/components/aceternity/card-spotlight";
 import { ScenarioFanChart } from "@/components/charts/ScenarioFanChart";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { Button } from "@/components/ui/button";
@@ -244,18 +246,62 @@ export default function ScenariosPage() {
         <ScenarioFanChart paths={paths} height={300} />
       </ChartCard>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      <BentoGrid className="max-w-none md:auto-rows-[minmax(160px,auto)]">
         {[
-          { label: "Min projected balance", value: formatters.currency({ number: minBalance, maxFractionDigits: 0 }), danger: minBalance < 20000 },
-          { label: "Financial runway", value: `${runway.toFixed(1)} months`, danger: runway < 2 },
-          { label: "Shortfall probability", value: `${shortfallProb.toFixed(0)}%`, danger: shortfallProb > 40 },
+          {
+            label: "Min projected balance",
+            value: formatters.currency({ number: minBalance, maxFractionDigits: 0 }),
+            danger: minBalance < 20000,
+            icon: <TrendingDown className="h-4 w-4 text-ceyfi-green" />,
+            header: (
+              <div className="h-16 rounded-lg bg-gradient-to-br from-ceyfi-sprout to-ceyfi-paper dark:from-ceyfi-green/10 dark:to-transparent" />
+            ),
+          },
+          {
+            label: "Financial runway",
+            value: `${runway.toFixed(1)} months`,
+            danger: runway < 2,
+            icon: <Gauge className="h-4 w-4 text-ceyfi-green" />,
+            header: (
+              <div className="flex h-16 items-end rounded-lg bg-gradient-to-br from-ceyfi-deep/10 to-ceyfi-sprout px-3 pb-2 dark:from-ceyfi-green/20 dark:to-transparent">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-ceyfi-line/60">
+                  <div
+                    className={cn("h-full rounded-full", runway < 2 ? "bg-rose-500" : "bg-ceyfi-green")}
+                    style={{ width: `${Math.min(100, (runway / 6) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ),
+          },
+          {
+            label: "Shortfall probability",
+            value: `${shortfallProb.toFixed(0)}%`,
+            danger: shortfallProb > 40,
+            icon: <AlertTriangle className="h-4 w-4 text-ceyfi-green" />,
+            header: (
+              <div className="flex h-16 items-center justify-center rounded-lg bg-gradient-to-br from-ceyfi-sprout to-ceyfi-canvas dark:from-ceyfi-green/10 dark:to-transparent">
+                <span className={cn("font-mono text-3xl font-semibold", shortfallProb > 40 ? "text-rose-600" : "text-ceyfi-green")}>
+                  {shortfallProb.toFixed(0)}%
+                </span>
+              </div>
+            ),
+          },
         ].map((m) => (
-          <div key={m.label} className="rounded-xl border border-ceyfi-line/70 bg-ceyfi-paper p-5">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-ceyfi-muted">{m.label}</div>
-            <div className={cn("mt-2 font-heading text-2xl font-semibold", m.danger ? "text-rose-700" : "text-ceyfi-ink")}>{m.value}</div>
-          </div>
+          <CardSpotlight key={m.label} radius={280} className="p-0 md:col-span-1">
+            <BentoGridItem
+              className="border-0 bg-transparent p-5 shadow-none hover:shadow-none dark:bg-transparent"
+              header={m.header}
+              icon={m.icon}
+              title={
+                <span className={cn(m.danger ? "text-rose-700 dark:text-rose-300" : "text-ceyfi-ink dark:text-white")}>
+                  {m.value}
+                </span>
+              }
+              description={m.label}
+            />
+          </CardSpotlight>
         ))}
-      </section>
+      </BentoGrid>
 
       {saved.length > 0 && (
         <ChartCard title="Saved scenarios" subtitle="Up to 4 scenarios">
