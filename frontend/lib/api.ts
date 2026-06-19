@@ -5,6 +5,7 @@
  *   fallback             — Ceyfi Cloud Run backend in production, localhost:8000 in dev
  */
 import { authHeaders } from "@/lib/auth";
+import { PRODUCTION_BACKEND_URL } from "@/lib/urls";
 
 function jsonHeaders(extra?: Record<string, string>): Record<string, string> {
   return {
@@ -18,7 +19,7 @@ export const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ??
   process.env.NEXT_PUBLIC_API_BASE ??
   (process.env.NODE_ENV === "production"
-    ? "https://ceyfi-backend-98470559362.asia-southeast1.run.app"
+    ? PRODUCTION_BACKEND_URL
     : "http://localhost:8000");
 
 export class ApiError extends Error {

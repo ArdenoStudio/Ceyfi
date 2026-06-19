@@ -26,12 +26,15 @@ Production frontend traffic calls the canonical Cloud Run backend above.
 ```env
 NEXT_PUBLIC_API_BASE=https://ceyfi-backend-98470559362.asia-southeast1.run.app
 NEXT_PUBLIC_SITE_URL=https://frontend-taupe-three-96.vercel.app
+NEXT_PUBLIC_APP_URL=https://frontend-taupe-three-96.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 # Server-only (Vercel → Settings → Environment Variables, NOT exposed to browser):
 DEMO_ADMIN_KEY=...
 BACKEND_URL=https://ceyfi-backend-98470559362.asia-southeast1.run.app
 ```
+
+Shared URL constants for code fallbacks live in `frontend/lib/urls.ts` (`PRODUCTION_FRONTEND_URL`, `PRODUCTION_BACKEND_URL`). Set the env vars above in Vercel so builds do not rely on hardcoded defaults.
 
 ### Backend env
 
@@ -43,10 +46,13 @@ ELEVENLABS_API_KEY=...
 DEMO_SESSION_SECRET=...
 DEMO_ADMIN_KEY=...
 DEMO_AUTH_REQUIRED=true
+CORS_ORIGINS=http://localhost:3000,https://frontend-taupe-three-96.vercel.app,https://ceyfi.app
 USE_SEYLAN_REAL=false
 SEYLAN_API_KEY=...
 MPGS_ENABLE=false
 ```
+
+`CORS_ORIGINS` must include every frontend origin that calls the API (production domain, `ceyfi.app` if used, and Vercel preview URLs for PR testing). Code defaults cover local dev ports `3000`/`3003`/`3005` plus production URLs; add preview origins via Cloud Run env.
 
 ## Local dev
 

@@ -2,7 +2,7 @@
 
 > **Codename:** CEYFI  
 > **Brand tagline:** "Clarity for every rupee"  
-> **What this is:** Full redesign of SeylanHub. New name, new colour palette, new chart-rich UI, same FastAPI backend at `https://seylan-hub-backend.vercel.app`.
+> **What this is:** Full redesign of SeylanHub. New name, new colour palette, new chart-rich UI, same FastAPI backend on Google Cloud Run (`https://ceyfi-backend-98470559362.asia-southeast1.run.app`).
 > **Stack:** Next.js 15 (App Router), Tailwind CSS v4, Recharts 2.15.4, shadcn/ui, Sora font  
 > **Working directory:** The existing `frontend/` folder — do a clean rewrite of every page
 
@@ -358,7 +358,7 @@ export function ChartCard({ title, subtitle, action, children, className }: Char
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ??
   (process.env.NODE_ENV === "production"
-    ? "https://seylan-hub-backend.vercel.app"
+    ? "https://ceyfi-backend-98470559362.asia-southeast1.run.app"
     : "http://localhost:8000")
 ```
 
@@ -1433,7 +1433,7 @@ export default function DemoPage() {
 
 Set on the `seylan-hub` Vercel frontend project:
 ```
-NEXT_PUBLIC_API_BASE = https://seylan-hub-backend.vercel.app
+NEXT_PUBLIC_API_BASE = https://ceyfi-backend-98470559362.asia-southeast1.run.app
 ```
 
 Update `next.config.mjs` if needed:

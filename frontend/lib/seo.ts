@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { PRODUCTION_FRONTEND_URL } from "@/lib/urls";
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://ceyfi.app";
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_APP_URL ??
+  PRODUCTION_FRONTEND_URL;
 
 export const SITE_NAME = "CEYFI";
 export const DEFAULT_TITLE = "CEYFI — Clarity for every rupee";

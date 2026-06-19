@@ -75,4 +75,4 @@ All functions in [`justpay.py`](../../backend/app/seylan/justpay.py) currently r
 
 ## UX handoff vs API
 
-Retail features that customers complete in **official Seylan Internet Banking or Mobile Banking** remain **out-of-band links** unless Seylan exposes partner read/write APIs approved for Hub. The frontend **`SeylanBankHandoffBanner`** documents those canonical URLs beside demo screens.
+Retail features that customers complete in **official bank Internet or Mobile Banking** remain **out-of-band** unless a bank exposes partner read/write APIs approved for CEYFI. The CEYFI demo UI no longer surfaces a bank handoff banner; live banking flows are completed in authorized bank channels outside this app.

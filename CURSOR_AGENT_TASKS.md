@@ -8,7 +8,7 @@
 ## REQUIRED CONTEXT (read before any task)
 
 ### Repository
-- Monorepo: `frontend/` contains the Next.js app. Backend is deployed at `https://seylan-hub-backend.vercel.app`.
+- Monorepo: `frontend/` contains the Next.js app. Backend is deployed to Cloud Run at `https://ceyfi-backend-98470559362.asia-southeast1.run.app`.
 - All frontend work happens inside `frontend/`.
 
 ### Tech Stack
@@ -864,6 +864,6 @@ After all tasks are complete:
 
 ### Environment Variables Required
 The Vercel deployment needs:
-- `NEXT_PUBLIC_API_BASE=https://seylan-hub-backend.vercel.app`
+- `NEXT_PUBLIC_API_BASE=https://ceyfi-backend-98470559362.asia-southeast1.run.app`
 
 Check the `frontend/.env.local` or Vercel dashboard to verify this is set.

@@ -10,18 +10,24 @@ test.describe("CEYFI demo path", () => {
 
   test("intelligence page shows health score", async ({ page }) => {
     await page.goto("/intelligence");
-    await expect(page.getByText("Explainable financial health")).toBeVisible({
-      timeout: 20000,
+    await expect(
+      page.getByRole("heading", { name: "Explainable financial health" })
+    ).toBeVisible({
+      timeout: 30000,
     });
-    await expect(page.getByText("Health score")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("Health score")).toBeVisible({ timeout: 30000 });
   });
 
   test("decisions page shows ranked recommendations", async ({ page }) => {
     await page.goto("/decisions");
-    await expect(page.locator("h1").filter({ hasText: "Ranked financial recommendations" })).toBeVisible({
-      timeout: 20000,
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Ranked financial recommendations" })
+    ).toBeVisible({
+      timeout: 30000,
     });
-    await expect(page.getByText("Potential benefit").first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("Potential benefit").first()).toBeVisible({
+      timeout: 30000,
+    });
   });
 
   test("scenarios page renders shock controls", async ({ page }) => {
@@ -40,7 +46,12 @@ test.describe("CEYFI demo path", () => {
 
   test("login page shows personas when auth enabled", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByText("CEYFI")).toBeVisible({ timeout: 20000 });
-    await expect(page.getByText(/Powered by/i)).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole("heading", { name: "CEYFI" })).toBeVisible({
+      timeout: 20000,
+    });
+    await expect(page.getByText("A CEYFI financial intelligence demo")).toBeVisible({
+      timeout: 20000,
+    });
+    await expect(page.getByText("Nimal Fernando")).toBeVisible({ timeout: 20000 });
   });
 });

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { PRODUCTION_BACKEND_URL } from "@/lib/urls";
 
 const BACKEND_URL =
   process.env.BACKEND_URL ??
   process.env.NEXT_PUBLIC_API_BASE ??
-  "https://ceyfi-backend-98470559362.asia-southeast1.run.app";
+  PRODUCTION_BACKEND_URL;
 
 export async function GET() {
   try {

@@ -67,7 +67,10 @@ class Settings(BaseSettings):
     # App
     cors_origins: str = (
         "http://localhost:3000,"
-        "https://frontend-taupe-three-96.vercel.app"
+        "http://localhost:3003,"
+        "http://localhost:3005,"
+        "https://frontend-taupe-three-96.vercel.app,"
+        "https://ceyfi.app"
     )
     frontend_base_url: str = "https://frontend-taupe-three-96.vercel.app"
     backend_base_url: str = "http://localhost:8000"
