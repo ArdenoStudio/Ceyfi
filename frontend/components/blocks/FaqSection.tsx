@@ -35,7 +35,7 @@ export const CEYFI_FAQ_ITEMS: FaqItem[] = [
   {
     question: "How does the family wallet work for diaspora remittances?",
     answer:
-      "Incoming GBP remittances land in your family wallet and split across Household, Education, and Savings buckets. CEYFI tracks spend against each allocation so you can see when a bucket is running low before the next transfer arrives.",
+      "Incoming GBP remittances land in your family wallet and split across School Fees, Household, and Savings buckets. CEYFI tracks spend against each allocation so you can see when a bucket is running low before the next transfer arrives.",
   },
   {
     question: "What is the tax jar and when does it trigger?",

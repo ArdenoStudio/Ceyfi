@@ -17,7 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { getFinancialSnapshot } from "@/lib/api";
+import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CHART_COLORS } from "@/lib/chartUtils";
 import { cn, formatters } from "@/lib/utils";
 
@@ -85,18 +88,45 @@ function buildPaths(shocks: ShockState, base: number) {
 
 export default function ScenariosPage() {
   const { user } = useAuth();
+  const { offline } = useNetworkStatus();
   const [baseBalance, setBaseBalance] = useState(245000);
+  const [snapshotLoading, setSnapshotLoading] = useState(true);
+  const [snapshotError, setSnapshotError] = useState<string | null>(null);
   const [shocks, setShocks] = useState<ShockState>(DEFAULT_SHOCKS);
   const [saved, setSaved] = useState<SavedScenario[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [scenarioName, setScenarioName] = useState("");
 
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (!user) {
+        setSnapshotLoading(false);
+        return;
+      }
+      setSnapshotLoading(true);
+      setSnapshotError(null);
+      getFinancialSnapshot(user.user_id)
+        .then((s) => setBaseBalance(s.scenario_base_balance))
+        .catch(() => setSnapshotError("Could not load your financial snapshot."))
+        .finally(() => setSnapshotLoading(false));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [user]);
+
+  const reloadSnapshot = () => {
     if (!user) return;
+    if (offline) {
+      setSnapshotError("You appear to be offline.");
+      setSnapshotLoading(false);
+      return;
+    }
+    setSnapshotLoading(true);
+    setSnapshotError(null);
     getFinancialSnapshot(user.user_id)
       .then((s) => setBaseBalance(s.scenario_base_balance))
-      .catch(() => null);
-  }, [user]);
+      .catch(() => setSnapshotError("Could not load your financial snapshot."))
+      .finally(() => setSnapshotLoading(false));
+  };
 
   const paths = useMemo(() => buildPaths(shocks, baseBalance), [shocks, baseBalance]);
   const impact = computeImpact(shocks);
@@ -114,7 +144,15 @@ export default function ScenariosPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1240px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10">
+    <div
+      className="mx-auto w-full max-w-[1240px] space-y-6 p-4 sm:p-6 lg:p-8 xl:p-10"
+      aria-busy={snapshotLoading}
+    >
+      <NetworkErrorBanner
+        offline={offline}
+        message={snapshotError}
+        onRetry={reloadSnapshot}
+      />
       <header>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
           <FlaskConical className="h-3.5 w-3.5" />
@@ -243,7 +281,14 @@ export default function ScenariosPage() {
       </ChartCard>
 
       <ChartCard title="90-day projection fan" subtitle="Pessimistic · base · optimistic paths">
-        <ScenarioFanChart paths={paths} height={300} />
+        {snapshotLoading ? (
+          <div className="space-y-3" aria-hidden>
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-[300px] w-full rounded-xl" />
+          </div>
+        ) : (
+          <ScenarioFanChart paths={paths} height={300} />
+        )}
       </ChartCard>
 
       <BentoGrid className="max-w-none md:auto-rows-[minmax(160px,auto)]">

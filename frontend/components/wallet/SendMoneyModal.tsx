@@ -204,7 +204,7 @@ export function SendMoneyModal({
                   Send to Sri Lanka
                 </DialogTitle>
                 <DialogDescription className="sr-only">
-                  Send remittance to your Seylan Hub wallet recipient with card or demo transfer.
+                  Send remittance to your CEYFI family wallet with card or demo transfer.
                 </DialogDescription>
               </div>
               <button

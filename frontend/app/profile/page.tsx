@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ErrorState";
+import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
 import {
   ActivityFeedBlock,
@@ -13,6 +14,7 @@ import {
   DashboardMetricGrid,
 } from "@/components/blocks/DashboardMetricCard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { getProfileData } from "@/lib/api";
 import {
   Wallet,
@@ -43,18 +45,24 @@ type ProfileData = Awaited<ReturnType<typeof getProfileData>>;
 export default function ProfilePage() {
   const router = useRouter();
   const { userId, user } = useCurrentUser();
+  const { offline } = useNetworkStatus();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadProfile = useCallback(() => {
+    if (offline) {
+      setLoading(false);
+      setError("You appear to be offline.");
+      return;
+    }
     setLoading(true);
     setError(null);
     getProfileData(userId)
       .then(setProfile)
       .catch(() => setError("Could not load profile data."))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [userId, offline]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -65,7 +73,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4" aria-busy="true" aria-live="polite">
+        <span className="sr-only">Loading profile</span>
+        <NetworkErrorBanner offline={offline} onRetry={loadProfile} />
         <Skeleton className="h-24 w-full" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Skeleton className="h-40" />
@@ -79,7 +89,8 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div data-module="profile" className="flex min-h-[60vh] items-center justify-center p-6">
+      <div data-module="profile" className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-6">
+        <NetworkErrorBanner offline={offline} message={error} onRetry={loadProfile} />
         <ErrorState message={error ?? "Could not load profile data."} onRetry={loadProfile} />
       </div>
     );
@@ -108,6 +119,7 @@ export default function ProfilePage() {
       />
 
       <div className="relative z-10 stagger space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+        <NetworkErrorBanner offline={offline} message={error} onRetry={loadProfile} />
         <header className="relative overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-brand-lg backdrop-blur-xl sm:p-8 dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
           <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-seylan-red/25 blur-3xl" />
           <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center">

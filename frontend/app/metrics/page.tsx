@@ -12,6 +12,8 @@ import {
 } from "@/components/charts/TremorStyle";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ErrorState";
+import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { AgentCard } from "./components/AgentCard";
 import { ResponseTimeChart } from "./components/ResponseTimeChart";
 import { SuccessErrorChart } from "./components/SuccessErrorChart";
@@ -52,6 +54,7 @@ function buildHealthTracker(agents: AgentMetric[]): TrackerBlock[] {
 const REFRESH_INTERVAL = 30_000;
 
 export default function MetricsPage() {
+  const { offline } = useNetworkStatus();
   const [data, setData] = useState<MetricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -60,6 +63,11 @@ export default function MetricsPage() {
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL / 1000);
 
   const fetchMetrics = useCallback(async (isManual = false) => {
+    if (offline && !data) {
+      setFetchError("You appear to be offline. Connect to load metrics.");
+      setLoading(false);
+      return;
+    }
     if (isManual) setRefreshing(true);
     try {
       const res = await fetch("/api/metrics", { cache: "no-store" });
@@ -75,7 +83,7 @@ export default function MetricsPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [data, offline]);
 
   // Initial load
   useEffect(() => {
@@ -130,6 +138,7 @@ export default function MetricsPage() {
     <div
       data-module="metrics"
       className="relative min-h-full overflow-hidden"
+      aria-busy={loading}
     >
       {/* Background gradients */}
       <div className="pointer-events-none absolute inset-0">
@@ -145,6 +154,11 @@ export default function MetricsPage() {
       />
 
       <div className="relative z-10 stagger space-y-6 p-4 sm:space-y-7 sm:p-6 lg:p-8">
+        <NetworkErrorBanner
+          offline={offline}
+          message={fetchError}
+          onRetry={() => fetchMetrics(true)}
+        />
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -184,7 +198,7 @@ export default function MetricsPage() {
         </div>
 
         {/* Status banner */}
-        {fetchError ? (
+        {fetchError && data ? (
           <ErrorState message={fetchError} onRetry={() => fetchMetrics(true)} />
         ) : null}
         <div className={cn("flex items-center gap-3 rounded-2xl border px-4 py-3", banner.bg)}>

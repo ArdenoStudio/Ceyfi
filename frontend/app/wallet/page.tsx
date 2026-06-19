@@ -24,12 +24,15 @@ import { WalletBalanceHeader } from "@/components/wallet/WalletBalanceHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSections";
 import { WalletBalanceHistory } from "@/components/wallet/WalletBalanceHistory";
+import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 const ASSISTANT_PROMPT =
   "Explain the latest family wallet activity and tell me whether any bucket needs attention before the next transfer.";
 
 export default function WalletPage() {
   const { walletAccountId, userId } = useCurrentUser();
+  const { offline } = useNetworkStatus();
   const [modalOpen, setModalOpen] = useState(false);
   const [allocationFromHash, setAllocationFromHash] = useState(false);
   const [remittanceOverride, setRemittanceOverride] = useState<{
@@ -84,7 +87,14 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div data-module="wallet" className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
+      <div
+        data-module="wallet"
+        className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <span className="sr-only">Loading wallet</span>
+        <NetworkErrorBanner offline={offline} onRetry={() => void refetch()} />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-20 w-full" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -99,7 +109,8 @@ export default function WalletPage() {
 
   if (error && !wallet) {
     return (
-      <div data-module="wallet" className="mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
+      <div data-module="wallet" className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
+        <NetworkErrorBanner offline={offline} message={error} onRetry={() => void refetch()} />
         <ErrorState message={error} onRetry={() => void refetch()} />
       </div>
     );
@@ -132,6 +143,7 @@ export default function WalletPage() {
 
   return (
     <div data-module="wallet" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+      <NetworkErrorBanner offline={offline} message={error} onRetry={() => void refetch()} />
       <PageHeader
         eyebrow="Diaspora family wallet"
         title="Track money sent home with confidence"
@@ -288,7 +300,7 @@ export default function WalletPage() {
               date: new Date().toISOString().slice(0, 10),
               amount_gbp: amountGbp,
               fx_rate: currency?.lkrRate ?? GBP_LKR_RATE,
-              provider: "Seylan Hub",
+              provider: "Tempo",
               currency_code: currency?.code ?? "GBP",
               corridor: currency ? `${currency.code} → LKR` : "GBP → LKR",
             });

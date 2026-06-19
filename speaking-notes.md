@@ -23,7 +23,7 @@ We picked four real personas — the diaspora expat, the digital-native customer
 - **AI:** Groq's llama-3.3-70b for the LLM work, ElevenLabs for voice
 - **Payments:** Mastercard's MPGS Hosted Checkout, plus Seylan Bank's own gateway integration — feature-flagged so we can flip it live the moment the bank provisions us
 
-Everything's live right now at seylan-hub.vercel.app."
+Everything's live right now at ceyfi.app."
 
 ---
 
@@ -73,10 +73,10 @@ So we built a **Health Score** — a number from 0 to 100, colour-coded: green i
 
 Alongside that you get:
 - A **repayment progress bar** showing exactly how far through your loan you are
-- A **countdown** to your next due date — '12 days until payment'
-- Outstanding balance and next payment amount front and center
+- A **countdown** to your next due date — e.g. "6 days until payment" for Nimal's personal loan
+- Outstanding balance and next payment amount front and center — **LKR 22,000** for Nimal Fernando (`SEY-USR-001`)
 
-Then there's the **AI Advisor panel** — powered by Groq, cached so it loads instantly. It reads your loan profile and gives you a plain-English summary: 'You're on track. Your next payment is LKR 45,000 in 12 days. You've paid 60% of your total loan.' Actionable, specific, not scary.
+Then there's the **AI Advisor panel** — powered by Groq, cached so it loads instantly. It reads your loan profile and gives you a plain-English summary: 'You're on track. Your next payment is LKR 22,000 on 25 June. You've paid 67% of your total loan.' For Sunil Bandara's business loan, the score shows **AT RISK** with LKR 18,500 overdue — that's the anxious-borrower moment. Actionable, specific, not scary.
 
 And if you're ready to pay — you click **Pay Now**, and it opens **MPGS Hosted Checkout**. That's Mastercard's payment gateway, fully integrated. You pay, you're redirected back with `?paid=1`, we fire a success toast, update your loan state, and insert the transaction into Supabase. The whole loop, end to end."
 
@@ -114,7 +114,7 @@ You can also **accept payments from customers** via MPGS — and that 10% auto-s
 
 "We built this in 24 hours. The frontend is live on Vercel. The backend is running on Fly.io in Singapore. The database is on Supabase with realtime subscriptions firing across every module.
 
-Seylan Hub isn't a mockup. It's a working product, with real AI, real payments, and real-time data — designed for real people.
+CEYFI isn't a mockup. It's a working product, with real AI, real payments, and real-time data — designed for real people.
 
 Thanks — we're Ardeno Studio."
 

@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Play, RefreshCw, Sparkles, WalletCards, Zap, Timer, Keyboard } from "lucide-react";
+import {
+  CheckCircle2,
+  Play,
+  RefreshCw,
+  Sparkles,
+  WalletCards,
+  Zap,
+  Timer,
+  Keyboard,
+  ArrowRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,23 +27,139 @@ import {
   postTriggerSpend,
   prewarmDemoData,
 } from "@/lib/api";
-import { formatLKR } from "@/lib/utils";
+import { cn, formatLKR } from "@/lib/utils";
 import { FaqSection } from "@/components/blocks/FaqSection";
 
 type Action = "spend" | "tax" | "reset" | "prewarm";
 
-const DEMO_SCRIPT = [
-  { step: 1, label: "Overview", path: "/", hint: "TimeRiver — financial future, not just balance" },
-  { step: 2, label: "Wallet spend", action: "spend" as const, hint: "Diaspora bucket drains → causality explains spend" },
-  { step: 3, label: "Assistant", path: "/assistant", hint: "Ask in Sinhala or English with live context" },
-  { step: 4, label: "Decisions", path: "/decisions", hint: "One ranked action card with evidence" },
-  { step: 5, label: "Reset", action: "reset" as const, hint: "Clean slate for next audience" },
+type DemoStep = {
+  step: number;
+  label: string;
+  path?: string;
+  action?: "spend" | "reset";
+  hint: string;
+  seconds: number;
+  persona?: string;
+};
+
+const DEMO_SCRIPT: DemoStep[] = [
+  {
+    step: 1,
+    label: "Overview",
+    path: "/",
+    hint: "TimeRiver — financial future, not just balance",
+    seconds: 18,
+  },
+  {
+    step: 2,
+    label: "Wallet spend",
+    path: "/wallet",
+    action: "spend",
+    hint: "Household bucket drops LKR 12,400 at Softlogic Glomark",
+    seconds: 22,
+    persona: "Login as Nimal Fernando (diaspora)",
+  },
+  {
+    step: 3,
+    label: "Assistant",
+    path: "/assistant",
+    hint: "Ask in Sinhala or English with live account context",
+    seconds: 20,
+  },
+  {
+    step: 4,
+    label: "Decisions",
+    path: "/decisions",
+    hint: "One ranked action card with evidence",
+    seconds: 18,
+  },
+  {
+    step: 5,
+    label: "Reset",
+    action: "reset",
+    hint: "Clean slate for the next audience",
+    seconds: 12,
+  },
 ];
+
+function DemoStepIndicator({
+  steps,
+  activeStep,
+  completedThrough,
+}: {
+  steps: DemoStep[];
+  activeStep: number | null;
+  completedThrough: number;
+}) {
+  return (
+    <ol className="grid gap-3 sm:grid-cols-5">
+      {steps.map((item, index) => {
+        const done = item.step <= completedThrough;
+        const active = activeStep === item.step;
+        const isLast = index === steps.length - 1;
+
+        return (
+          <li key={item.step} className="relative flex flex-col">
+            {!isLast ? (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute left-[calc(50%+1.25rem)] top-5 hidden h-0.5 w-[calc(100%-2.5rem)] sm:block",
+                  done ? "bg-ceyfi-green" : "bg-border"
+                )}
+              />
+            ) : null}
+            <div
+              className={cn(
+                "flex flex-col items-center rounded-xl border px-3 py-4 text-center transition-colors",
+                active
+                  ? "border-ceyfi-green bg-ceyfi-sprout/60 shadow-sm"
+                  : done
+                    ? "border-ceyfi-green/40 bg-ceyfi-surface/80"
+                    : "border-border bg-background/60"
+              )}
+            >
+              <span
+                className={cn(
+                  "mb-2 flex size-10 items-center justify-center rounded-full text-sm font-bold",
+                  done
+                    ? "bg-ceyfi-green text-white"
+                    : active
+                      ? "bg-ceyfi-green/15 text-ceyfi-green ring-2 ring-ceyfi-green/30"
+                      : "bg-muted text-muted-foreground"
+                )}
+              >
+                {done && !active ? (
+                  <CheckCircle2 className="size-5" aria-hidden />
+                ) : (
+                  item.step
+                )}
+              </span>
+              <p className="text-sm font-semibold text-foreground">{item.label}</p>
+              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                {item.path ? (
+                  <code className="rounded bg-muted px-1 py-0.5">{item.path}</code>
+                ) : (
+                  "API action"
+                )}
+              </p>
+              <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-ceyfi-green">
+                ~{item.seconds}s
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function DemoControlPage() {
   const router = useRouter();
   const [running, setRunning] = useState<Action | null>(null);
   const [scriptRunning, setScriptRunning] = useState(false);
+  const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [completedThrough, setCompletedThrough] = useState(0);
 
   async function runAction(action: Action, task: () => Promise<unknown>) {
     setRunning(action);
@@ -53,30 +179,35 @@ export default function DemoControlPage() {
         account_id: "SEY-ACC-002",
         amount_lkr: 12400,
         merchant: "Softlogic Glomark",
-        bucket_id: "bucket_household",
+        bucket_id: "household",
       }),
     []
   );
 
   const runScript = useCallback(async () => {
     setScriptRunning(true);
+    setCompletedThrough(0);
     try {
       for (const item of DEMO_SCRIPT) {
+        setActiveStep(item.step);
         toast.info(`Step ${item.step}: ${item.label}`, { description: item.hint });
         if (item.path) {
           router.push(item.path);
-          await new Promise((r) => setTimeout(r, 2000));
-        } else if (item.action === "spend") {
+          await new Promise((r) => setTimeout(r, 1200));
+        }
+        if (item.action === "spend") {
           await triggerSpend();
-          await new Promise((r) => setTimeout(r, 1500));
         } else if (item.action === "reset") {
           await postDemoReset();
         }
+        setCompletedThrough(item.step);
+        await new Promise((r) => setTimeout(r, item.seconds * 1000 - (item.path ? 1200 : 0)));
       }
       toast.success("90-second demo script complete");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Script failed");
     } finally {
+      setActiveStep(null);
       setScriptRunning(false);
     }
   }, [router, triggerSpend]);
@@ -124,7 +255,7 @@ export default function DemoControlPage() {
             label: "Demo script",
             metric: "90s",
             subLabel: "5-step narrative",
-            description: "Overview → spend → assistant → decisions → reset",
+            description: "Overview → wallet spend → assistant → decisions → reset",
             icon: Timer,
             accent: "ceyfi",
           },
@@ -155,9 +286,39 @@ export default function DemoControlPage() {
         ]}
       />
 
+      <Card className="border-ceyfi-line/70">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ceyfi-green">
+                90-second script
+              </p>
+              <h2 className="font-heading text-lg font-semibold text-ceyfi-ink">
+                Step-by-step click path
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Login as <strong>Nimal Fernando</strong> before running. Step 2 opens{" "}
+                <code className="rounded bg-muted px-1">/wallet</code> and fires the spend trigger.
+              </p>
+            </div>
+            {scriptRunning ? (
+              <span className="inline-flex items-center gap-2 rounded-full bg-ceyfi-sprout px-3 py-1 text-xs font-semibold text-ceyfi-green">
+                <span className="size-2 animate-pulse rounded-full bg-ceyfi-green" />
+                Step {activeStep} running
+              </span>
+            ) : null}
+          </div>
+          <DemoStepIndicator
+            steps={DEMO_SCRIPT}
+            activeStep={activeStep}
+            completedThrough={completedThrough}
+          />
+        </CardContent>
+      </Card>
+
       <ActivityFeedBlock
         eyebrow="Demo timeline"
-        title="Script steps"
+        title="Script narration"
         footerLabel=""
         items={DEMO_SCRIPT.map(
           (step): ActivityFeedItem => ({
@@ -179,7 +340,7 @@ export default function DemoControlPage() {
             <div>
               <h2 className="font-semibold text-ceyfi-ink">Run demo script</h2>
               <p className="text-sm text-ceyfi-muted">
-                Automated 5-step narrative: Overview → spend → assistant → decisions → reset
+                Automated 5-step narrative with route changes and live wallet spend
               </p>
             </div>
           </div>
@@ -189,6 +350,7 @@ export default function DemoControlPage() {
             className="w-full bg-ceyfi-green text-white"
           >
             {scriptRunning ? "Running script…" : "Start 90-second script (S)"}
+            {!scriptRunning ? <ArrowRight className="ml-2 size-4" /> : null}
           </Button>
         </CardContent>
       </Card>
