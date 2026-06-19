@@ -65,7 +65,7 @@ export function FinanceConnectionDiagram({ className }: { className?: string }) 
         <div className="flex w-full max-w-sm items-center justify-between gap-4 sm:gap-6">
           <BeamNode ref={logoRef} label="CEYFI">
             <Image
-              src="/ceyfi-logo.svg"
+              src="/ceyfi-icon.svg"
               alt=""
               width={28}
               height={28}

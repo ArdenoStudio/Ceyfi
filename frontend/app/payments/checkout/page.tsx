@@ -45,7 +45,7 @@ function MissingCheckoutParams() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-ceyfi-canvas px-4 dark:bg-ceyfi-deep">
       <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-4 border border-ceyfi-line dark:border-white/10">
-        <Image src="/ceyfi-logo.svg" alt="CEYFI" width={40} height={40} className="mx-auto dark:brightness-0 dark:invert" />
+        <Image src="/ceyfi-icon.svg" alt="CEYFI" width={40} height={40} className="mx-auto" />
         <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">Checkout unavailable</h1>
         <p className="text-sm text-muted-foreground">
           Missing payment session. Please start again from the payment button in the app.
@@ -194,7 +194,7 @@ function HostedCheckoutLoader({
     return (
       <div className="min-h-screen flex items-center justify-center bg-ceyfi-canvas px-4 dark:bg-ceyfi-deep">
         <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-4 border border-ceyfi-line dark:border-white/10">
-          <Image src="/ceyfi-logo.svg" alt="CEYFI" width={40} height={40} className="mx-auto dark:brightness-0 dark:invert" />
+          <Image src="/ceyfi-icon.svg" alt="CEYFI" width={40} height={40} className="mx-auto" />
           <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">Something went wrong</h1>
           <p className="text-sm text-muted-foreground">{loadError}</p>
           <Link
@@ -210,7 +210,7 @@ function HostedCheckoutLoader({
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-ceyfi-canvas px-4 gap-4 dark:bg-ceyfi-deep">
-      <Image src="/ceyfi-logo.svg" alt="CEYFI" width={36} height={36} className="dark:brightness-0 dark:invert" />
+      <Image src="/ceyfi-icon.svg" alt="CEYFI" width={36} height={36} />
       <div className="h-10 w-10 rounded-full border-4 border-ceyfi-deep border-t-transparent animate-spin dark:border-ceyfi-mint dark:border-t-transparent" />
       <p className="text-sm text-muted-foreground text-center">
         Opening secure Mastercard checkout&hellip;
@@ -261,7 +261,7 @@ function GatewayCheckoutPanel({
     <div className="min-h-screen flex items-center justify-center bg-ceyfi-canvas px-4 dark:bg-ceyfi-deep">
       <div className="bg-ceyfi-paper dark:bg-white/5 rounded-2xl shadow-lg p-8 max-w-md w-full space-y-6 border border-ceyfi-line dark:border-white/10">
         <div className="text-center space-y-2">
-          <Image src="/ceyfi-logo.svg" alt="CEYFI" width={40} height={40} className="mx-auto dark:brightness-0 dark:invert" />
+          <Image src="/ceyfi-icon.svg" alt="CEYFI" width={40} height={40} className="mx-auto" />
           <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">Choose payment method</h1>
           <p className="text-sm text-muted-foreground">{description}</p>
           <p className="text-xl font-bold text-ceyfi-deep">{formatLKR(amountLkr)}</p>

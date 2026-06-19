@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
+import { CeyfiLogoIcon } from "@/components/brand/CeyfiLogoIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -135,9 +136,10 @@ export function Sidebar() {
 
       <div className="relative border-b border-sidebar-border px-6 py-6">
         <Link href="/" className="group flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-sidebar-primary text-lg font-bold text-sidebar-primary-foreground shadow-[0_8px_24px_rgba(5,150,105,0.28)] ring-1 ring-inset ring-white/10 transition-transform duration-200 group-hover:scale-105 dark:shadow-[0_8px_24px_rgba(227,24,33,0.28)]">
-            C
-          </span>
+          <CeyfiLogoIcon
+            size={40}
+            className="transition-transform duration-200 group-hover:scale-105"
+          />
           <span>
             <span className="block font-heading text-base font-bold tracking-[0.16em]">
               CEYFI
