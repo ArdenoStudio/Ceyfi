@@ -9,16 +9,24 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+import {
+  Banknote,
+  ChartLine,
+  Globe2,
+  PiggyBank,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const CEYFI_PANELS = [
-  { from: "#059669", to: "#34D399", rotate: -8, delay: 0 },
-  { from: "#047857", to: "#6EE7B7", rotate: 12, delay: 0.4 },
-  { from: "#065F46", to: "#10B981", rotate: -14, delay: 0.8 },
-  { from: "#064E3B", to: "#A7F3D0", rotate: 6, delay: 1.2 },
-  { from: "#075C3E", to: "#34D399", rotate: -10, delay: 0.6 },
-  { from: "#052E16", to: "#059669", rotate: 18, delay: 1.0 },
+  { from: "#059669", to: "#34D399", rotate: -8, delay: 0, icon: Banknote, label: "Cash flow" },
+  { from: "#047857", to: "#6EE7B7", rotate: 12, delay: 0.4, icon: ChartLine, label: "Growth" },
+  { from: "#065F46", to: "#10B981", rotate: -14, delay: 0.8, icon: PiggyBank, label: "Savings" },
+  { from: "#064E3B", to: "#A7F3D0", rotate: 6, delay: 1.2, icon: ShieldCheck, label: "Protect" },
+  { from: "#075C3E", to: "#34D399", rotate: -10, delay: 0.6, icon: Globe2, label: "Diaspora" },
+  { from: "#052E16", to: "#059669", rotate: 18, delay: 1.0, icon: Sparkles, label: "Insights" },
 ] as const;
 
 export interface HeroColorPanelsBadge {
@@ -65,11 +73,13 @@ function ColorPanelsVisual({ compact }: { compact?: boolean }) {
             : "grid-cols-3 grid-rows-2 h-[85%] w-[85%] max-w-[420px]"
         )}
       >
-        {panels.map((panel, i) => (
+        {panels.map((panel, i) => {
+          const PanelIcon = panel.icon;
+          return (
           <motion.div
             key={i}
             className={cn(
-              "relative overflow-hidden rounded-2xl shadow-[0_8px_32px_rgba(5,46,22,0.18)]",
+              "relative flex flex-col items-center justify-center overflow-hidden rounded-2xl shadow-[0_8px_32px_rgba(5,46,22,0.18)]",
               compact ? "h-16 sm:h-20" : "min-h-[80px]"
             )}
             style={{
@@ -89,12 +99,25 @@ function ColorPanelsVisual({ compact }: { compact?: boolean }) {
               y: { duration: 6 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: panel.delay },
             }}
           >
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:14px_14px] opacity-40" />
             <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10" />
-            <div
-              className="absolute -right-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-white/20 blur-xl"
+            <div className="absolute -right-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-white/20 blur-xl" />
+            <PanelIcon
+              className={cn(
+                "relative z-10 text-white/90 drop-shadow-sm",
+                compact ? "size-5 sm:size-6" : "size-7 sm:size-8"
+              )}
+              strokeWidth={1.6}
+              aria-hidden
             />
+            {!compact ? (
+              <span className="relative z-10 mt-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-white/75">
+                {panel.label}
+              </span>
+            ) : null}
           </motion.div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -18,7 +18,18 @@ import {
   type ReactNode,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  BriefcaseBusiness,
+  GraduationCap,
+  Home,
+  Landmark,
+  PiggyBank,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useOutsideClick } from "@/hooks/use-outside-click";
@@ -27,6 +38,9 @@ export type CeyfiCarouselCard = {
   title: string;
   category: string;
   content: ReactNode;
+  /** Short stat or hook shown on the collapsed card face */
+  highlight?: string;
+  icon?: LucideIcon;
   /** CSS linear-gradient for card background when no image is provided */
   gradient?: string;
   src?: string;
@@ -253,9 +267,23 @@ export function CarouselCard({ card, index, layout = true, className }: CardProp
       >
         <CardBackground gradient={cardBackground} src={card.src} alt={card.title} />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ceyfi-deep/90 via-ceyfi-deep/35 to-transparent" />
+        {card.icon || card.highlight ? (
+          <div className="relative z-10 flex flex-1 flex-col items-start justify-center gap-3 p-6 md:p-8">
+            {card.icon ? (
+              <span className="grid size-12 place-items-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm md:size-14">
+                <card.icon className="size-6 text-white md:size-7" strokeWidth={1.6} aria-hidden />
+              </span>
+            ) : null}
+            {card.highlight ? (
+              <p className="max-w-[14rem] text-sm font-medium leading-snug text-white/85 md:text-base">
+                {card.highlight}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         <div className="relative z-10 p-6 md:p-8">
           <motion.p
-            layoutId={layout ? `category-${card.category}` : undefined}
+            layoutId={layout ? `category-${card.title}` : undefined}
             className="text-left text-xs font-semibold uppercase tracking-[0.14em] text-ceyfi-mint/90 md:text-sm"
           >
             {card.category}
@@ -312,7 +340,11 @@ function CardBackground({
       className="absolute inset-0 z-0"
       style={{ background: gradient }}
       aria-hidden
-    />
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:18px_18px] opacity-50" />
+      <div className="absolute -right-8 top-8 size-32 rounded-full bg-white/10 blur-2xl" />
+      <div className="absolute -bottom-6 left-6 size-24 rounded-full bg-black/10 blur-xl" />
+    </div>
   );
 }
 
@@ -320,6 +352,8 @@ const LOAN_PRODUCT_CARDS: CeyfiCarouselCard[] = [
   {
     category: "Personal lending",
     title: "Flexible personal loans for everyday goals",
+    icon: Landmark,
+    highlight: "From 12.5% APR · LKR 250K–2M",
     gradient: "linear-gradient(145deg, #052E16 0%, #065F46 45%, #059669 100%)",
     href: "/assistant?prompt=Tell%20me%20about%20CEYFI%20personal%20loan%20options",
     content: (
@@ -340,6 +374,8 @@ const LOAN_PRODUCT_CARDS: CeyfiCarouselCard[] = [
   {
     category: "Home & family",
     title: "Home improvement and renovation finance",
+    icon: Home,
+    highlight: "Up to LKR 5M · milestone drawdowns",
     gradient: "linear-gradient(145deg, #064E3B 0%, #047857 50%, #34D399 100%)",
     href: "/scenarios",
     content: (
@@ -359,6 +395,8 @@ const LOAN_PRODUCT_CARDS: CeyfiCarouselCard[] = [
   {
     category: "Education",
     title: "Education finance for school and university",
+    icon: GraduationCap,
+    highlight: "Grace periods · school-bucket sync",
     gradient: "linear-gradient(145deg, #075C3E 0%, #059669 40%, #6EE7B7 100%)",
     href: "/wallet",
     content: (
@@ -378,6 +416,8 @@ const LOAN_PRODUCT_CARDS: CeyfiCarouselCard[] = [
   {
     category: "Diaspora",
     title: "Remittance-backed diaspora home loans",
+    icon: Building2,
+    highlight: "GBP & USD corridors · co-borrower options",
     gradient: "linear-gradient(145deg, #052E16 0%, #0A4424 55%, #10B981 100%)",
     href: "/wallet",
     content: (
@@ -397,6 +437,8 @@ const LOAN_PRODUCT_CARDS: CeyfiCarouselCard[] = [
   {
     category: "Business",
     title: "Micro business credit for growing ventures",
+    icon: BriefcaseBusiness,
+    highlight: "LKR 500K–3M · cash-flow based limits",
     gradient: "linear-gradient(145deg, #10261A 0%, #065F46 50%, #059669 100%)",
     href: "/assistant?prompt=Explain%20CEYFI%20micro%20business%20loan%20eligibility",
     content: (
@@ -416,6 +458,8 @@ const LOAN_PRODUCT_CARDS: CeyfiCarouselCard[] = [
   {
     category: "Savings linked",
     title: "Savings-secured lower-rate lending",
+    icon: PiggyBank,
+    highlight: "From 8.9% APR · up to 90% of savings",
     gradient: "linear-gradient(145deg, #047857 0%, #059669 60%, #A7F3D0 100%)",
     href: "/profile",
     content: (
