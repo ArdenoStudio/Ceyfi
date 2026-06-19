@@ -10,6 +10,9 @@ import { ChatInput, type ChatInputHandle } from "@/components/assistant/ChatInpu
 import { LanguageToggle } from "@/components/assistant/LanguageToggle";
 import { SuggestedQuestions } from "@/components/assistant/SuggestedQuestions";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { FinanceConnectionDiagram } from "@/components/assistant/FinanceConnectionDiagram";
+import { GradientText } from "@/components/motion/GradientText";
+import { ShinyText } from "@/components/motion/ShinyText";
 import { TypewriterSubtitle } from "@/components/ui/TypewriterSubtitle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFamilyWallet } from "@/lib/api";
@@ -113,21 +116,27 @@ function AssistantPageContent() {
             <LanguageToggle language={language} onChange={setLanguage} />
           </div>
 
-          <div className="mb-10 text-center">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-ceyfi-line bg-ceyfi-paper p-2.5 shadow-brand-lg ring-1 ring-ceyfi-green/15 dark:border-white/15 dark:bg-white/10 dark:shadow-black/30 dark:ring-white/15">
-              <Image
-                src="/ceyfi-logo.svg"
-                alt="CEYFI"
-                width={48}
-                height={48}
-                className="h-full w-full object-contain dark:brightness-0 dark:invert"
-                priority
-              />
-            </div>
-            <h1 className="font-heading text-4xl font-semibold text-ceyfi-ink dark:text-white sm:text-5xl">
-              CEYFI Assistant
+          <div className="mb-8 text-center">
+            <h1 className="font-heading text-4xl font-semibold sm:text-5xl">
+              <GradientText
+                className="font-heading text-4xl font-semibold sm:text-5xl"
+                colors={["#059669", "#34D399", "#052E16"]}
+                animationSpeed={7}
+              >
+                CEYFI Assistant
+              </GradientText>
             </h1>
+            <p className="mt-3 text-sm text-ceyfi-muted dark:text-white/55">
+              <ShinyText
+                text="Account-aware guidance in English or Sinhala"
+                color="#617267"
+                shineColor="#059669"
+                speed={3}
+                className="text-sm font-medium dark:text-white/55"
+              />
+            </p>
             <TypewriterSubtitle prompts={TYPEWRITER_PROMPTS} />
+            <FinanceConnectionDiagram className="mt-8" />
           </div>
 
           <div className="w-full max-w-2xl">
