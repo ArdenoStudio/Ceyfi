@@ -18,6 +18,6 @@ export function fireSpendToast(
 
   toast(
     `${who} just spent ${formatLKR(transaction.amount_lkr)} — ${transaction.merchant}${bucketPart}`,
-    { description, icon: createElement(Bell, { className: "h-4 w-4 text-seylan-red" }) }
+    { description, icon: createElement(Bell, { className: "h-4 w-4 text-ceyfi-green" }) }
   );
 }

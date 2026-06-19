@@ -86,7 +86,7 @@ export default function BusinessPage() {
 
   if (plLoading) {
     return (
-      <div className="dark min-h-full p-6 space-y-4" style={{ background: "#0c0407" }}>
+      <div className="dark min-h-full p-6 space-y-4" style={{ background: "#04241a" }}>
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-48 w-full" />
       </div>
@@ -111,10 +111,10 @@ export default function BusinessPage() {
   const reviewCount = misc > 0 ? extraTransactions.length + 1 : extraTransactions.length;
 
   return (
-    <div data-module="business" className="dark relative min-h-full overflow-hidden" style={{ background: "#0c0407" }}>
+    <div data-module="business" className="dark relative min-h-full overflow-hidden" style={{ background: "#04241a" }}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(227,24,33,0.15),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(114,28,36,0.10),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(5,150,105,0.15),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(5,46,22,0.10),transparent)]" />
       </div>
       <div className="pointer-events-none absolute inset-0 opacity-[0.018]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
     <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">

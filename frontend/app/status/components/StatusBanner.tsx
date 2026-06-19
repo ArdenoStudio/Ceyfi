@@ -22,7 +22,7 @@ function bannerCopy(status: SiteStatus, affected: SiteSummary[]): { title: strin
     case "up":
       return {
         title: "All systems operational",
-        sub: "Every SeylanHub endpoint is responding normally.",
+        sub: "Every CEYFI endpoint is responding normally.",
       };
     case "degraded":
       return {

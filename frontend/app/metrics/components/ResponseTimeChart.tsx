@@ -13,7 +13,7 @@ import {
 import type { AgentMetric } from "../types";
 
 const AGENT_COLORS = [
-  "#E31821", // Core API — seylan red
+  "#059669", // Core API — ceyfi green
   "#10b981", // Wallet — emerald
   "#f59e0b", // Loans — amber
   "#60a5fa", // Account Context — blue
@@ -75,7 +75,7 @@ export function ResponseTimeChart({ agents }: { agents: AgentMetric[] }) {
 
   return (
     <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 backdrop-blur">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red mb-1">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green mb-1">
         24-hour trends
       </p>
       <h3 className="font-heading text-base font-semibold text-white mb-5">

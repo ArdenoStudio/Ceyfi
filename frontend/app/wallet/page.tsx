@@ -92,12 +92,12 @@ export default function WalletPage() {
     <div
       data-module="wallet"
       className="dark relative min-h-full overflow-hidden"
-      style={{ background: "#0c0407" }}
+      style={{ background: "#04241a" }}
     >
       {/* Ambient glow layers — mirrors the assistant page */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(227,24,33,0.15),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(114,28,36,0.10),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(5,150,105,0.15),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(5,46,22,0.10),transparent)]" />
       </div>
       {/* Subtle dot-grid texture */}
       <div
@@ -227,7 +227,7 @@ export default function WalletPage() {
               date: new Date().toISOString().slice(0, 10),
               amount_gbp: amountGbp,
               fx_rate: currency?.lkrRate ?? 408.3,
-              provider: "Seylan Hub",
+              provider: "CEYFI",
               currency_code: currency?.code ?? "GBP",
               corridor: currency ? `${currency.code} → LKR` : "GBP → LKR",
             });

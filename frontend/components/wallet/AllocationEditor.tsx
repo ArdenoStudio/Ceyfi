@@ -59,13 +59,13 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
       <button
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
-        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-seylan-mist/50 dark:hover:bg-white/[0.04]"
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-ceyfi-sprout/50 dark:hover:bg-white/[0.04]"
       >
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-seylan-mist border border-seylan-border dark:bg-white/[0.08] dark:border-white/[0.10]">
-            <SlidersHorizontal className="h-3.5 w-3.5 text-seylan-plum dark:text-white/60" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-ceyfi-sprout border border-ceyfi-line dark:bg-white/[0.08] dark:border-white/[0.10]">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-ceyfi-deep dark:text-white/60" />
           </div>
-          <span className="text-sm font-semibold text-seylan-charcoal dark:text-white">Allocation Rules</span>
+          <span className="text-sm font-semibold text-ceyfi-ink dark:text-white">Allocation Rules</span>
         </div>
         <ChevronDown
           className={cn(
@@ -76,7 +76,7 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
       </button>
 
       {expanded && (
-        <CardContent className="border-t border-seylan-border/60 dark:border-white/[0.06] px-5 pb-5 pt-4">
+        <CardContent className="border-t border-ceyfi-line/60 dark:border-white/[0.06] px-5 pb-5 pt-4">
           <div className="space-y-5">
             {buckets.map((bucket) => {
               const key = bucket.icon ?? bucket.label.toLowerCase();
@@ -87,9 +87,9 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={cn("h-2 w-2 rounded-full shrink-0", accent.dot)} />
-                      <span className="text-sm font-medium text-seylan-charcoal dark:text-white">{bucket.label}</span>
+                      <span className="text-sm font-medium text-ceyfi-ink dark:text-white">{bucket.label}</span>
                     </div>
-                    <span className="font-heading text-sm font-bold text-seylan-charcoal dark:text-white tabular-nums">
+                    <span className="font-heading text-sm font-bold text-ceyfi-ink dark:text-white tabular-nums">
                       {pct}%
                     </span>
                   </div>
@@ -108,7 +108,7 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
           </div>
 
           {/* Footer */}
-          <div className="mt-5 flex items-center justify-between gap-3 border-t border-seylan-border/60 dark:border-white/[0.06] pt-4">
+          <div className="mt-5 flex items-center justify-between gap-3 border-t border-ceyfi-line/60 dark:border-white/[0.06] pt-4">
             <div className={cn("flex items-center gap-1.5 text-sm font-medium", isValid ? "text-emerald-600" : "text-red-600")}>
               {isValid ? (
                 <CheckCircle2 className="h-4 w-4" />

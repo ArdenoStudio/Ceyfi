@@ -22,26 +22,26 @@ export function LastRemittanceBanner({
   return (
     <Card className="card-glass shadow-brand border-0 overflow-hidden">
       {/* Warm accent strip */}
-      <div className="h-1 w-full bg-gradient-to-r from-seylan-red via-seylan-gold to-seylan-red/30" />
+      <div className="h-1 w-full bg-gradient-to-r from-ceyfi-green via-ceyfi-mint to-ceyfi-green/30" />
 
       <CardContent className="p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           {/* Left: amounts */}
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-seylan-red">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ceyfi-green">
               Last remittance
             </p>
 
             {/* £ → Rs flow */}
             <div className="mt-2 flex items-center gap-3">
               <div>
-                <span className="font-heading text-3xl font-bold text-seylan-charcoal dark:text-white tabular-nums leading-none">
+                <span className="font-heading text-3xl font-bold text-ceyfi-ink dark:text-white tabular-nums leading-none">
                   {formatLKR(last_remittance.amount_lkr)}
                 </span>
               </div>
               <div className="flex flex-col items-center gap-0.5 shrink-0">
                 <div className="flex items-center gap-1">
-                  <div className="h-px w-6 bg-seylan-border dark:bg-white/20" />
+                  <div className="h-px w-6 bg-ceyfi-line dark:bg-white/20" />
                   <ArrowRight className="h-3 w-3 text-muted-foreground dark:text-white/40" />
                 </div>
               </div>
@@ -58,7 +58,7 @@ export function LastRemittanceBanner({
                 <CalendarDays className="h-3 w-3 shrink-0" />
                 {last_remittance.date}
               </span>
-              <span className="text-seylan-border dark:text-white/20">·</span>
+              <span className="text-ceyfi-line dark:text-white/20">·</span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground dark:text-white/40">
                 <Building2 className="h-3 w-3 shrink-0" />
                 {last_remittance.provider}
@@ -77,12 +77,12 @@ export function LastRemittanceBanner({
         </div>
 
         {/* FX rate pill */}
-        <div className="mt-4 flex items-center gap-2 rounded-2xl border border-seylan-border/70 bg-seylan-mist/50 px-4 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.04]">
+        <div className="mt-4 flex items-center gap-2 rounded-2xl border border-ceyfi-line/70 bg-ceyfi-sprout/50 px-4 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.04]">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-seylan-charcoal dark:text-white/60">
+            <span className="text-xs font-medium text-ceyfi-ink dark:text-white/60">
               {corridor}
             </span>
-            <span className="font-heading text-base font-bold text-seylan-charcoal dark:text-white tabular-nums">
+            <span className="font-heading text-base font-bold text-ceyfi-ink dark:text-white tabular-nums">
               {last_remittance.fx_rate}
             </span>
           </div>

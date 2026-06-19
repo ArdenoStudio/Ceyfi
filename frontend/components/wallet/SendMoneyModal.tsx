@@ -39,8 +39,8 @@ interface SendMoneyModalProps {
 }
 
 const BUCKET_COLORS: Record<string, string> = {
-  school: "#E0AF49",
-  household: "#E31821",
+  school: "#34D399",
+  household: "#059669",
   savings: "#10B981",
 };
 
@@ -138,9 +138,9 @@ export function SendMoneyModal({
         allocation_rules: allocations,
       });
       toast.custom(() => (
-        <div className="flex items-start gap-3 rounded-xl border border-[#E31821]/30 bg-[#0c0407] px-4 py-3.5 shadow-[0_8px_32px_rgba(227,24,33,0.25)] w-[356px]">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E31821]/15">
-            <CircleCheck className="h-4 w-4 text-[#E31821]" />
+        <div className="flex items-start gap-3 rounded-xl border border-[#059669]/30 bg-[#04241a] px-4 py-3.5 shadow-[0_8px_32px_rgba(5,150,105,0.25)] w-[356px]">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#059669]/15">
+            <CircleCheck className="h-4 w-4 text-[#059669]" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-white">
@@ -178,15 +178,15 @@ export function SendMoneyModal({
         showCloseButton={false}
       >
         {/* Top accent bar */}
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#E31821] via-[#E0AF49] to-[#E31821]" />
+        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#059669] via-[#34D399] to-[#059669]" />
 
         <div className="relative flex flex-col gap-0">
           {/* Header */}
           <DialogHeader className="px-5 pt-5 pb-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#E31821]">
-                  Seylan Hub
+                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#059669]">
+                  CEYFI
                 </p>
                 <DialogTitle className="font-heading text-lg font-semibold text-gray-900">
                   Send to Sri Lanka
@@ -231,7 +231,7 @@ export function SendMoneyModal({
             {/* Recipient card */}
             <VerificationCard
               backgroundImage="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/ruixen_moon.png"
-              label="Seylan Hub · Recipient"
+              label="CEYFI · Recipient"
               idNumber={recipientId}
               name={recipientAccountHolder.trim() || "Hub Wallet"}
               validThru={`${currency.code}→LKR`}
@@ -262,7 +262,7 @@ export function SendMoneyModal({
                   const v = parseFloat(e.target.value);
                   setAmount(Number.isFinite(v) && v >= 0 ? v : 0);
                 }}
-                className="border-gray-200 bg-white pl-16 text-sm font-semibold text-gray-900 placeholder:text-gray-300 focus-visible:border-[#E31821]/40 focus-visible:ring-[#E31821]/10"
+                className="border-gray-200 bg-white pl-16 text-sm font-semibold text-gray-900 placeholder:text-gray-300 focus-visible:border-[#059669]/40 focus-visible:ring-[#059669]/10"
               />
               <div className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center">
                 <span className="text-xs font-medium text-gray-400">{currency.symbol}</span>
@@ -286,7 +286,7 @@ export function SendMoneyModal({
                   <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                     Recipient gets
                   </p>
-                  <p className="font-heading text-2xl font-bold tracking-tight text-[#E31821]">
+                  <p className="font-heading text-2xl font-bold tracking-tight text-[#059669]">
                     {formatLKR(amountLkr)}
                   </p>
                 </div>
@@ -359,7 +359,7 @@ export function SendMoneyModal({
                       href={SEYLAN_LINKS.internetBankingPersonalLogin}
                       target="_blank"
                       rel={EXTERNAL_LINK_REL}
-                      className="font-medium text-[#E31821] underline-offset-2 hover:underline"
+                      className="font-medium text-[#059669] underline-offset-2 hover:underline"
                     >
                       Personal Internet Banking
                     </a>
@@ -374,7 +374,7 @@ export function SendMoneyModal({
               type="button"
               disabled={sending || !isValid}
               onClick={handleSubmit}
-              className="group relative w-full overflow-hidden rounded-xl bg-[#E31821] py-3.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(227,24,33,0.3)] transition-all hover:bg-[#c41219] hover:shadow-[0_6px_24px_rgba(227,24,33,0.4)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              className="group relative w-full overflow-hidden rounded-xl bg-[#059669] py-3.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(5,150,105,0.3)] transition-all hover:bg-[#047857] hover:shadow-[0_6px_24px_rgba(5,150,105,0.4)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               <span className="relative flex items-center justify-center gap-2">
                 {sending ? (
@@ -403,11 +403,11 @@ export function SendMoneyModal({
           className="max-w-lg border border-gray-100 p-0 shadow-2xl [background:#ffffff]"
           showCloseButton={false}
         >
-          <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#E31821] via-[#E0AF49] to-[#E31821]" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#059669] via-[#34D399] to-[#059669]" />
           <div className="p-8">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#E31821]">Seylan Hub</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#059669]">CEYFI</p>
                 <p className="mt-0.5 text-xl font-semibold text-gray-900">FX Calculator</p>
               </div>
               <button

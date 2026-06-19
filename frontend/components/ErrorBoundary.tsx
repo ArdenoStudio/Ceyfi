@@ -27,10 +27,10 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex items-center justify-center min-h-[50vh] p-6">
-          <Card className="border-seylan-border max-w-md w-full">
+          <Card className="border-ceyfi-line max-w-md w-full">
             <CardContent className="p-6 text-center">
-              <AlertTriangle className="h-8 w-8 text-seylan-red mx-auto mb-3" />
-              <h2 className="text-lg font-semibold text-seylan-charcoal mb-2">
+              <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-3" />
+              <h2 className="text-lg font-semibold text-ceyfi-ink mb-2">
                 Something went wrong
               </h2>
               <p className="text-sm text-muted-foreground mb-4">

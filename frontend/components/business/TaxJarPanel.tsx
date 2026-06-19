@@ -90,9 +90,9 @@ export function TaxJarPanel({
         account_id: "SEY-BIZ-001",
       } as Transaction);
       toast.custom(() => (
-        <div className="flex items-start gap-3 rounded-xl border border-[#E31821]/30 bg-[#0c0407] px-4 py-3.5 shadow-[0_8px_32px_rgba(227,24,33,0.25)] w-[356px]">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E31821]/15">
-            <CircleCheck className="h-4 w-4 text-[#E31821]" />
+        <div className="flex items-start gap-3 rounded-xl border border-[#059669]/30 bg-[#04241a] px-4 py-3.5 shadow-[0_8px_32px_rgba(5,150,105,0.25)] w-[356px]">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#059669]/15">
+            <CircleCheck className="h-4 w-4 text-[#059669]" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-white">Payment simulated</p>
@@ -112,14 +112,14 @@ export function TaxJarPanel({
 
   return (
     <>
-    <Card className="border-seylan-border dark:border-[#D9A441]/20 bg-[linear-gradient(135deg,#fffdf8_0%,#fff0d5_100%)] dark:bg-[linear-gradient(135deg,#1a1200_0%,#0f0a00_100%)] shadow-lg shadow-seylan-gold/10">
+    <Card className="border-ceyfi-line dark:border-[#34D399]/20 bg-[linear-gradient(135deg,#f7fdfa_0%,#dcf3e6_100%)] dark:bg-[linear-gradient(135deg,#0b1a10_0%,#06120a_100%)] shadow-lg shadow-ceyfi-mint/10">
       <CardContent className="p-5">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-seylan-red">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
               Auto-save rule
             </p>
-            <h3 className="font-heading text-xl font-semibold text-seylan-charcoal dark:text-white">
+            <h3 className="font-heading text-xl font-semibold text-ceyfi-ink dark:text-white">
               Tax Jar
             </h3>
           </div>
@@ -128,7 +128,7 @@ export function TaxJarPanel({
           </span>
         </div>
 
-        <div className="text-4xl font-semibold text-seylan-charcoal dark:text-white mb-1">
+        <div className="text-4xl font-semibold text-ceyfi-ink dark:text-white mb-1">
           {formatLKR(displayBalance)}
         </div>
 
@@ -137,11 +137,11 @@ export function TaxJarPanel({
         </div>
 
         <div className="mb-4 h-2 overflow-hidden rounded-full bg-white dark:bg-white/10">
-          <div className="h-full w-3/5 rounded-full bg-seylan-gold" />
+          <div className="h-full w-3/5 rounded-full bg-ceyfi-mint" />
         </div>
 
         <Button
-          className="w-full rounded-full bg-seylan-red hover:bg-seylan-red/90 text-white font-semibold"
+          className="w-full rounded-full bg-ceyfi-green hover:bg-ceyfi-green/90 text-white font-semibold"
           onClick={() => { setPaymentMode("card"); setCardModalOpen(true); }}
         >
           <CreditCard className="h-4 w-4 mr-2" />
@@ -182,8 +182,8 @@ export function TaxJarPanel({
             </button>
           </div>
 
-          <div className="rounded-lg bg-seylan-mist/60 border border-seylan-border p-3 text-sm">
-            <p className="font-medium text-seylan-charcoal">Silva Hardware &amp; Electricals</p>
+          <div className="rounded-lg bg-ceyfi-sprout/60 border border-ceyfi-line p-3 text-sm">
+            <p className="font-medium text-ceyfi-ink">Silva Hardware &amp; Electricals</p>
             <p className="text-xs text-muted-foreground mt-0.5">10% auto-saved to Tax Jar on receipt</p>
           </div>
           <div>
@@ -203,7 +203,7 @@ export function TaxJarPanel({
             {cardAmount > 0 && (
               <p className="mt-1 text-xs text-muted-foreground">
                 Tax Jar will receive:{" "}
-                <span className="font-semibold text-seylan-charcoal">
+                <span className="font-semibold text-ceyfi-ink">
                   {formatLKR(Math.round(cardAmount * 0.1))}
                 </span>
               </p>
@@ -212,9 +212,9 @@ export function TaxJarPanel({
           {paymentMode === "card" && (
             <p className="text-[11px] text-muted-foreground">
               Approved MPGS test card:{" "}
-              <span className="font-mono font-semibold text-seylan-charcoal">5123 4500 0000 0008</span>
-              , expiry <span className="font-mono font-semibold text-seylan-charcoal">01/39</span>,
-              CVV <span className="font-mono font-semibold text-seylan-charcoal">100</span>.
+              <span className="font-mono font-semibold text-ceyfi-ink">5123 4500 0000 0008</span>
+              , expiry <span className="font-mono font-semibold text-ceyfi-ink">01/39</span>,
+              CVV <span className="font-mono font-semibold text-ceyfi-ink">100</span>.
               Real cards are not accepted on this test gateway.
             </p>
           )}
@@ -228,7 +228,7 @@ export function TaxJarPanel({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-seylan-red hover:bg-seylan-red/90 text-white"
+              className="flex-1 bg-ceyfi-green hover:bg-ceyfi-green/90 text-white"
               disabled={submitting || !cardAmount || cardAmount <= 0}
               onClick={handlePayment}
             >

@@ -80,7 +80,7 @@ export function SuccessErrorChart({ agents }: { agents: AgentMetric[] }) {
 
   return (
     <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 backdrop-blur">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red mb-1">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green mb-1">
         All agents
       </p>
       <h3 className="font-heading text-base font-semibold text-white mb-5">

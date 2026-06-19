@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -30,6 +30,48 @@ import {
 } from "@/lib/api";
 import { cn, formatters } from "@/lib/utils";
 import type { AccountContext, Loan, WalletState } from "@/types";
+
+function getGreeting(): string {
+  const h = parseInt(
+    new Date().toLocaleString("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: "Asia/Colombo",
+    })
+  );
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function AnimatedLKR({ value, className }: { value: number; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const start = performance.now();
+    const duration = 1400;
+    const step = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 4);
+      if (ref.current) {
+        ref.current.textContent = formatters.currency({
+          number: Math.round(value * eased),
+          maxFractionDigits: 0,
+        });
+      }
+      if (progress < 1) rafRef.current = requestAnimationFrame(step);
+    };
+    rafRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [value]);
+
+  return (
+    <span ref={ref} className={className}>
+      {formatters.currency({ number: 0, maxFractionDigits: 0 })}
+    </span>
+  );
+}
 
 const FALLBACK_CONTEXT: AccountContext = {
   user_id: "SEY-USR-001",
@@ -235,7 +277,7 @@ export default function OverviewPage() {
     context.recent_transactions ?? FALLBACK_CONTEXT.recent_transactions ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-[1540px] space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8 xl:p-10">
+    <div className="mx-auto w-full max-w-[1540px] space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8 xl:p-10 stagger">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -260,7 +302,7 @@ export default function OverviewPage() {
             </span>
           </div>
           <h1 className="mt-2 font-heading text-2xl font-semibold tracking-[-0.035em] text-ceyfi-ink sm:text-[2rem]">
-            Good morning, {firstName}.
+            {getGreeting()}, {firstName}.
           </h1>
           <p className="mt-2 text-sm text-ceyfi-muted">
             Here&apos;s what moved, what&apos;s protected, and what needs your
@@ -277,20 +319,27 @@ export default function OverviewPage() {
         </Link>
       </header>
 
-      <section className="relative overflow-hidden rounded-[26px] bg-ceyfi-deep p-5 text-white sm:p-7 lg:p-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(52,211,153,0.20),transparent_30rem)]" />
-        <div className="absolute -right-12 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-white/5" />
-        <div className="absolute -right-3 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full border border-white/5" />
+      <section className="relative overflow-hidden rounded-[26px] bg-ceyfi-deep p-5 text-white sm:p-7 lg:p-8 shadow-[0_2px_40px_rgba(5,46,22,0.28)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(52,211,153,0.22),transparent_30rem)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_0%_100%,rgba(5,150,105,0.10),transparent)]" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div className="absolute -right-12 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full border border-white/[0.06]" />
+        <div className="absolute -right-3 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full border border-white/[0.08]" />
+        <div className="absolute right-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full border border-ceyfi-mint/10" />
         <div className="relative grid gap-8 lg:grid-cols-[1.1fr_1.9fr] lg:items-end">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
               Total financial position
             </div>
-            <div className="mt-3 font-heading text-4xl font-semibold tracking-[-0.055em] tabular-nums sm:text-5xl">
-              {formatters.currency({
-                number: balance,
-                maxFractionDigits: 0,
-              })}
+            <div className="mt-3 font-heading text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">
+              <AnimatedLKR value={balance} className="tabular-nums" />
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-white/50">
               <ShieldCheck className="h-4 w-4 text-ceyfi-mint" />
@@ -529,8 +578,10 @@ export default function OverviewPage() {
           </div>
         </ChartCard>
 
-        <section className="relative min-w-0 overflow-hidden rounded-[22px] border border-ceyfi-green/15 bg-ceyfi-sprout p-5 sm:p-6">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border border-ceyfi-green/10" />
+        <section className="relative min-w-0 overflow-hidden rounded-[22px] border border-ceyfi-green/20 bg-gradient-to-br from-ceyfi-sprout via-[#edfaf4] to-[#e2f6ea] p-5 sm:p-6 shadow-[0_0_48px_rgba(5,150,105,0.09)]">
+          <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full border border-ceyfi-green/[0.12]" />
+          <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full border border-ceyfi-green/[0.08]" />
+          <div className="absolute right-10 top-10 h-14 w-14 rounded-full bg-ceyfi-green/[0.07]" />
           <div className="relative">
             <div className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-green text-white">
               <Bot className="h-5 w-5" />
@@ -588,7 +639,7 @@ export default function OverviewPage() {
           <Link
             key={item.title}
             href={item.href}
-            className="group flex items-center gap-3 rounded-[18px] border border-ceyfi-line/70 bg-ceyfi-paper p-4 transition hover:border-ceyfi-green/20"
+            className="group flex items-center gap-3 rounded-[18px] border border-ceyfi-line/70 bg-ceyfi-paper p-4 transition-all duration-200 hover:border-ceyfi-green/25 hover:shadow-[0_4px_20px_rgba(5,150,105,0.08)] hover:-translate-y-0.5"
           >
             <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-canvas text-ceyfi-green transition group-hover:bg-ceyfi-sprout">
               <item.icon className="h-4.5 w-4.5" />

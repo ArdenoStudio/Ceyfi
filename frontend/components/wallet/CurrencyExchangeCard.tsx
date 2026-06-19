@@ -219,7 +219,7 @@ export function CurrencyExchangeCard({
       {/* CTA */}
       <Button
         size="lg"
-        className="w-full bg-[#E31821] text-base font-bold text-white hover:bg-[#c41219]"
+        className="w-full bg-[#059669] text-base font-bold text-white hover:bg-[#047857]"
         onClick={() =>
           onExchange({ from: fromCurrency, amount: numericAmount, amountLkr: totalAmount })
         }

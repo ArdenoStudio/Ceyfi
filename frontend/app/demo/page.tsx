@@ -33,7 +33,7 @@ export default function DemoControlPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-seylan-charcoal">
+        <h1 className="text-xl font-bold text-ceyfi-ink">
           Demo Controls
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -42,12 +42,12 @@ export default function DemoControlPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
-              <WalletCards className="h-5 w-5 text-seylan-red" />
+              <WalletCards className="h-5 w-5 text-ceyfi-green" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal">
+                <h2 className="font-semibold text-ceyfi-ink">
                   Wallet spend trigger
                 </h2>
                 <p className="text-sm text-muted-foreground">
@@ -75,12 +75,12 @@ export default function DemoControlPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal">
+                <h2 className="font-semibold text-ceyfi-ink">
                   Tax jar trigger
                 </h2>
                 <p className="text-sm text-muted-foreground">
@@ -106,12 +106,12 @@ export default function DemoControlPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
-              <RefreshCw className="h-5 w-5 text-seylan-red" />
+              <RefreshCw className="h-5 w-5 text-ceyfi-green" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal">
+                <h2 className="font-semibold text-ceyfi-ink">
                   Reset demo state
                 </h2>
                 <p className="text-sm text-muted-foreground">
@@ -130,12 +130,12 @@ export default function DemoControlPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
               <Sparkles className="h-5 w-5 text-amber-600" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal">
+                <h2 className="font-semibold text-ceyfi-ink">
                   Prewarm demo data
                 </h2>
                 <p className="text-sm text-muted-foreground">

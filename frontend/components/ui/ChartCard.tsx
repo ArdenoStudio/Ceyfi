@@ -19,7 +19,7 @@ export function ChartCard({
   return (
     <section
       className={cn(
-        "min-w-0 rounded-[22px] border border-ceyfi-line/75 bg-ceyfi-paper p-5 sm:p-6",
+        "min-w-0 rounded-[22px] border border-ceyfi-line/75 bg-ceyfi-paper p-5 sm:p-6 transition-all duration-200 hover:border-ceyfi-green/20 hover:shadow-[0_4px_24px_rgba(5,150,105,0.07)]",
         className
       )}
     >

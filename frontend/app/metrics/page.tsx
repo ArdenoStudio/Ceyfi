@@ -114,12 +114,12 @@ export default function MetricsPage() {
     <div
       data-module="metrics"
       className="dark relative min-h-full overflow-hidden"
-      style={{ background: "#0c0407" }}
+      style={{ background: "#04241a" }}
     >
       {/* Background gradients */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(227,24,33,0.12),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(114,28,36,0.08),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(5,150,105,0.12),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(5,46,22,0.08),transparent)]" />
       </div>
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.015]"
@@ -133,7 +133,7 @@ export default function MetricsPage() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green mb-1">
               Nasiko · Arize Phoenix
             </p>
             <h1 className="font-heading text-2xl font-bold text-white">

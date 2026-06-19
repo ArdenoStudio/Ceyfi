@@ -29,8 +29,8 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
           {isThinking ? (
             <span className="flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-seylan-red/60 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-seylan-red/80" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ceyfi-green/60 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-ceyfi-green/80" />
               </span>
               Thinking…
             </span>
@@ -60,7 +60,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
         className={cn(
           "max-w-[82%] px-4 py-3 text-sm leading-6",
           isUser
-            ? "bg-seylan-red text-white shadow-lg shadow-seylan-red/20 rounded-tl-[20px] rounded-bl-[20px] rounded-br-[20px] rounded-tr-md"
+            ? "bg-ceyfi-green text-white shadow-lg shadow-ceyfi-green/20 rounded-tl-[20px] rounded-bl-[20px] rounded-br-[20px] rounded-tr-md"
             : "border border-white/[0.08] bg-white/[0.06] text-white/85 backdrop-blur-sm rounded-tr-[20px] rounded-br-[20px] rounded-bl-[20px] rounded-tl-md"
         )}
       >
@@ -80,8 +80,8 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
             href={pa.checkout_url}
             className={cn(
               "mt-3 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5",
-              "bg-seylan-red text-white text-sm font-semibold",
-              "hover:bg-seylan-red/90 transition-colors"
+              "bg-ceyfi-green text-white text-sm font-semibold",
+              "hover:bg-ceyfi-green/90 transition-colors"
             )}
           >
             <span>💳</span>

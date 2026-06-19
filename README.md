@@ -1,4 +1,4 @@
-# Seylan Hub
+# CEYFI
 
 **AI banking for Sri Lanka** — diaspora wallets, voice assistant, loan health, and bookkeeping for SMEs.
 

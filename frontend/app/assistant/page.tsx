@@ -10,7 +10,7 @@ import { SuggestedQuestions } from "@/components/assistant/SuggestedQuestions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFamilyWallet } from "@/lib/api";
 import { WalletState } from "@/types";
-import Image from "next/image";
+import { CeyfiMark } from "@/components/brand/CeyfiMark";
 
 function AssistantPageContent() {
   const searchParams = useSearchParams();
@@ -62,12 +62,12 @@ function AssistantPageContent() {
     <div
       data-module="assistant"
       className="relative flex flex-col overflow-hidden"
-      style={{ background: "#0c0407", minHeight: "100dvh" }}
+      style={{ background: "#04241a", minHeight: "100dvh" }}
     >
       {/* Ambient glow layers */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(227,24,33,0.12),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(114,28,36,0.10),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(5,150,105,0.12),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(5,46,22,0.10),transparent)]" />
       </div>
 
       {/* Subtle dot-grid texture */}
@@ -82,30 +82,41 @@ function AssistantPageContent() {
 
       {isEmpty ? (
         /* ── Hero / empty state ─────────────────────────────── */
-        <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4">
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pb-6">
           {/* Language toggle pinned top-right */}
           <div className="absolute right-4 top-4 sm:right-6">
             <LanguageToggle language={language} onChange={setLanguage} />
           </div>
 
           {/* Icon + title */}
-          <div className="mb-10 text-center">
-            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15 shadow-lg shadow-black/30 p-2.5">
-              <Image
-                src="/seylan-bank-icon.png"
-                alt="Seylan Bank"
-                width={48}
-                height={48}
-                className="h-full w-full object-contain"
-                priority
-              />
+          <div className="mb-8 text-center">
+            {/* Logo with pulse rings */}
+            <div className="relative mx-auto mb-7 flex h-[4.5rem] w-[4.5rem] items-center justify-center">
+              <span className="absolute inset-0 rounded-[22px] bg-ceyfi-green/20 animate-glow-ring" />
+              <span className="absolute inset-0 rounded-[22px] bg-ceyfi-green/12 animate-glow-ring-delayed" />
+              <div className="relative z-10 flex h-full w-full items-center justify-center rounded-[22px] bg-white/[0.12] p-3.5 ring-1 ring-white/20 shadow-[0_0_48px_rgba(5,150,105,0.30),0_8px_32px_rgba(0,0,0,0.40)]">
+                <CeyfiMark className="h-full w-full text-white" />
+              </div>
             </div>
-            <h1 className="font-heading text-4xl font-semibold text-white sm:text-5xl">
-              Seylan AI
+
+            <h1 className="font-heading text-5xl font-semibold tracking-[-0.04em] text-white sm:text-6xl">
+              CEYFI AI
             </h1>
-            <p className="mt-3 max-w-sm text-sm text-white/40">
-              Ask anything about your finances — in English or Sinhala
+            <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-white/38">
+              Ask anything about your finances
             </p>
+
+            {/* Language badges */}
+            <div className="mt-5 flex items-center justify-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-white/[0.04] px-3.5 py-1.5 text-[11px] font-medium text-white/45">
+                <span className="h-1.5 w-1.5 rounded-full bg-ceyfi-green/80" />
+                English
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-white/[0.04] px-3.5 py-1.5 text-[11px] font-medium text-white/45 sinhala">
+                <span className="h-1.5 w-1.5 rounded-full bg-ceyfi-mint/80" />
+                සිංහල
+              </span>
+            </div>
           </div>
 
           {/* Glassmorphic input */}
@@ -114,7 +125,7 @@ function AssistantPageContent() {
           </div>
 
           {/* Quick-action suggestion chips */}
-          <div className="mt-5 w-full max-w-2xl">
+          <div className="mt-4 w-full max-w-2xl">
             <SuggestedQuestions language={language} onSelect={send} />
           </div>
         </div>
@@ -124,11 +135,11 @@ function AssistantPageContent() {
           {/* Compact header */}
           <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-white/[0.08] px-4 py-3 backdrop-blur-sm">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red/60">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green/60">
                 Bilingual banking AI
               </p>
               <h1 className="font-heading text-lg font-semibold text-white">
-                Seylan AI
+                CEYFI AI
               </h1>
             </div>
             <LanguageToggle language={language} onChange={setLanguage} />
@@ -152,7 +163,7 @@ export default function AssistantPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-6 space-y-4 min-h-screen" style={{ background: "#0c0407" }}>
+        <div className="p-6 space-y-4 min-h-screen" style={{ background: "#04241a" }}>
           <Skeleton className="h-8 w-48 bg-white/10" />
           <Skeleton className="h-64 w-full bg-white/10" />
         </div>

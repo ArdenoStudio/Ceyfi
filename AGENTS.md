@@ -1,4 +1,4 @@
-# Seylan Hub
+# CEYFI
 
 ## Cursor Cloud specific instructions
 

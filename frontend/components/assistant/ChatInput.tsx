@@ -92,7 +92,7 @@ export function ChatInput({ onSend, disabled, language }: ChatInputProps) {
               className={cn(
                 "h-8 w-8 rounded-xl transition-all duration-150",
                 canSend
-                  ? "bg-seylan-red text-white shadow-md shadow-seylan-red/30 hover:bg-seylan-red/90 hover:shadow-seylan-red/40"
+                  ? "bg-ceyfi-green text-white shadow-md shadow-ceyfi-green/30 hover:bg-ceyfi-green/90 hover:shadow-ceyfi-green/40"
                   : "bg-white/[0.08] text-white/20 cursor-not-allowed"
               )}
             >

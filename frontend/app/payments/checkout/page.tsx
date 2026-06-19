@@ -36,15 +36,15 @@ declare global {
 
 function MissingCheckoutParams() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-seylan-mist px-4">
+    <div className="min-h-screen flex items-center justify-center bg-ceyfi-sprout px-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-4">
-        <h1 className="text-lg font-semibold text-seylan-charcoal">Checkout unavailable</h1>
+        <h1 className="text-lg font-semibold text-ceyfi-ink">Checkout unavailable</h1>
         <p className="text-sm text-muted-foreground">
           Missing payment session. Please start again from the payment button in the app.
         </p>
         <Link
           href="/wallet"
-          className="inline-block w-full rounded-lg bg-seylan-plum px-4 py-2 text-sm font-medium text-white hover:bg-seylan-red transition-colors"
+          className="inline-block w-full rounded-lg bg-ceyfi-deep px-4 py-2 text-sm font-medium text-white hover:bg-ceyfi-green transition-colors"
         >
           Back to wallet
         </Link>
@@ -99,7 +99,7 @@ function HostedCheckoutLoader({
           session: { id: sessionId },
           interaction: {
             merchant: {
-              name: "Seylan Hub",
+              name: "CEYFI",
             },
           },
         };
@@ -144,13 +144,13 @@ function HostedCheckoutLoader({
 
   if (loadError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-seylan-mist px-4">
+      <div className="min-h-screen flex items-center justify-center bg-ceyfi-sprout px-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center space-y-4">
-          <h1 className="text-lg font-semibold text-seylan-charcoal">Something went wrong</h1>
+          <h1 className="text-lg font-semibold text-ceyfi-ink">Something went wrong</h1>
           <p className="text-sm text-muted-foreground">{loadError}</p>
           <Link
             href="/wallet"
-            className="inline-block w-full rounded-lg bg-seylan-plum px-4 py-2 text-sm font-medium text-white hover:bg-seylan-red transition-colors"
+            className="inline-block w-full rounded-lg bg-ceyfi-deep px-4 py-2 text-sm font-medium text-white hover:bg-ceyfi-green transition-colors"
           >
             Back to wallet
           </Link>
@@ -160,8 +160,8 @@ function HostedCheckoutLoader({
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-seylan-mist px-4 gap-4">
-      <div className="h-10 w-10 rounded-full border-4 border-seylan-plum border-t-transparent animate-spin" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-ceyfi-sprout px-4 gap-4">
+      <div className="h-10 w-10 rounded-full border-4 border-ceyfi-deep border-t-transparent animate-spin" />
       <p className="text-sm text-muted-foreground text-center">
         Opening secure Mastercard checkout&hellip;
       </p>
@@ -194,8 +194,8 @@ export default function PaymentsCheckoutPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-seylan-mist">
-          <div className="h-10 w-10 rounded-full border-4 border-seylan-plum border-t-transparent animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-ceyfi-sprout">
+          <div className="h-10 w-10 rounded-full border-4 border-ceyfi-deep border-t-transparent animate-spin" />
         </div>
       }
     >

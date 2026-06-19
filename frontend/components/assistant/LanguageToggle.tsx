@@ -16,7 +16,7 @@ export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
         className={cn(
           "px-3 py-1 text-xs rounded-full transition-all duration-150",
           language === "en"
-            ? "bg-white text-seylan-charcoal shadow-sm font-semibold"
+            ? "bg-white text-ceyfi-ink shadow-sm font-semibold"
             : "text-white/35 hover:text-white/60"
         )}
       >
@@ -27,7 +27,7 @@ export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
         className={cn(
           "px-3 py-1 text-xs rounded-full transition-all duration-150 sinhala",
           language === "si"
-            ? "bg-white text-seylan-charcoal shadow-sm font-semibold"
+            ? "bg-white text-ceyfi-ink shadow-sm font-semibold"
             : "text-white/35 hover:text-white/60"
         )}
       >

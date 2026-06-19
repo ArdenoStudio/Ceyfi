@@ -13,6 +13,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CeyfiMark } from "@/components/brand/CeyfiMark";
 
 const NAV_ITEMS = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
@@ -31,8 +32,8 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[17.5rem] flex-col border-r border-white/8 bg-ceyfi-deep text-white md:flex">
       <div className="border-b border-white/8 px-6 py-6">
         <Link href="/" className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-green text-lg font-bold shadow-[0_8px_24px_rgba(5,150,105,0.28)]">
-            C
+          <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-green shadow-[0_8px_24px_rgba(5,150,105,0.28)]">
+            <CeyfiMark className="h-6 w-6 text-white" />
           </span>
           <span>
             <span className="block font-heading text-base font-bold tracking-[0.16em]">
@@ -83,7 +84,7 @@ export function Sidebar() {
               className={cn(
                 "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
                 isActive
-                  ? "bg-white/[0.09] text-white"
+                  ? "bg-white/[0.09] text-white shadow-[inset_0_0_24px_rgba(52,211,153,0.05)]"
                   : "text-white/52 hover:bg-white/[0.055] hover:text-white"
               )}
             >
