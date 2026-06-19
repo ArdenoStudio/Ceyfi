@@ -317,6 +317,6 @@ function toActivityFeedItem(tx: ProfileData["recent_transactions"][number]): Act
       minute: "2-digit",
     }),
     transactionId: tx.id,
-    paymentMethod: "Seylan Bank",
+    paymentMethod: "Bank transfer",
   };
 }

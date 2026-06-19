@@ -5,7 +5,6 @@ import { AppTopbar } from "./AppTopbar";
 import { MobileNav } from "./MobileNav";
 import { DemoModeBadge } from "./DemoModeBadge";
 import { PageEnter } from "@/components/motion/PageEnter";
-import { SeylanBankHandoffBanner } from "@/components/seylan/SeylanBankHandoffBanner";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import { GlobalKeyboardShortcuts } from "@/components/GlobalKeyboardShortcuts";
@@ -21,9 +20,6 @@ export function AppShell({ children }: AppShellProps) {
   const isPaymentGatewaySurface =
     pathname.startsWith("/payments/checkout") || pathname.startsWith("/payments/return");
   const isLoginPage = pathname.startsWith("/login");
-  const showSeylanHandoff = ["/profile", "/wallet", "/loans", "/business"].some(
-    (p) => pathname.startsWith(p),
-  );
 
   if (isLoginPage) {
     return (
@@ -56,7 +52,6 @@ export function AppShell({ children }: AppShellProps) {
         <PageEnter className="flex-1">
           {children}
         </PageEnter>
-        {showSeylanHandoff ? <SeylanBankHandoffBanner /> : null}
         <SiteFooter />
       </main>
       <MobileNav />

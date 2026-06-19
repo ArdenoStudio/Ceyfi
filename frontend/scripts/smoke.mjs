@@ -33,10 +33,8 @@ const requiredFiles = [
   "app/apple-icon.png",
   "components/layout/DemoModeBadge.tsx",
   "components/assistant/AudioPlayer.tsx",
-  "components/seylan/SeylanBankHandoffBanner.tsx",
   "components/layout/SiteFooter.tsx",
   "components/payments/PayHereButton.tsx",
-  "lib/seylan-external-links.ts",
 ];
 
 const requiredSnippets = [
@@ -50,18 +48,15 @@ const requiredSnippets = [
   ["components/layout/MobileNav.tsx", "More pages"],
   ["lib/chartUtils.ts", "CHART_COLORS"],
   ["components/charts/TimeRiver.tsx", "CausalityPanel"],
-  ["components/layout/Sidebar.tsx", "Powered by Seylan Bank"],
+  ["components/layout/Sidebar.tsx", "Financial clarity workspace"],
   ["hooks/useWalletRealtime.ts", "subscribeToTransactions"],
   ["app/wallet/page.tsx", "Track money sent home"],
-  ["components/layout/AppShell.tsx", "showSeylanHandoff"],
   ["components/assistant/MessageBubble.tsx", "<AudioPlayer"],
   ["app/login/page.tsx", "Choose a persona"],
   ["components/layout/DemoModeBadge.tsx", "Demo environment"],
   ["app/demo/page.tsx", "Trigger wallet spend"],
   ["app/demo/page.tsx", "90-second script"],
   ["app/manifest.ts", "/favicon.ico"],
-  ["lib/seylan-external-links.ts", "seylanbank.lk"],
-  ["components/seylan/SeylanBankHandoffBanner.tsx", "Personal Internet Banking"],
   ["components/payments/PayHereButton.tsx", "Pay with PayHere"],
   ["components/layout/SiteFooter.tsx", "CEYFI"],
 ];

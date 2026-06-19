@@ -23,9 +23,9 @@ export interface FaqItem {
 
 export const CEYFI_FAQ_ITEMS: FaqItem[] = [
   {
-    question: "What is CEYFI and how does it connect to my Seylan account?",
+    question: "What is CEYFI and how does it connect to my accounts?",
     answer:
-      "CEYFI is an account-aware financial assistant layered on top of your Seylan Bank data. It reads balances, transactions, loans, and wallet buckets so every insight and recommendation reflects your real accounts — not generic advice.",
+      "CEYFI is an account-aware financial assistant layered on top of your connected financial data. It reads balances, transactions, loans, and wallet buckets so every insight and recommendation reflects your accounts — not generic advice.",
   },
   {
     question: "Can I ask the assistant in Sinhala?",
@@ -50,7 +50,7 @@ export const CEYFI_FAQ_ITEMS: FaqItem[] = [
   {
     question: "Is my financial data safe in demo mode?",
     answer:
-      "The demo uses mock Seylan fixtures — no live credentials or real account numbers. When connected to production, CEYFI reads data through secure bank APIs and never stores your login password.",
+      "The demo uses mock financial fixtures — no live credentials or real account numbers. When connected to production, CEYFI reads data through secure APIs and never stores your login password.",
   },
 ];
 

@@ -122,6 +122,12 @@ export function Sidebar() {
   const { user, logout } = useAuth();
   const reduceMotion = useReducedMotion();
   const animate = !reduceMotion;
+  const personaLabel =
+    user?.persona === "sme"
+      ? "SME profile"
+      : user?.persona === "borrower"
+        ? "Borrower profile"
+        : "Diaspora profile";
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -145,7 +151,7 @@ export function Sidebar() {
               CEYFI
             </span>
             <span className="block text-[11px] text-sidebar-foreground/42">
-              Powered by Seylan Bank
+              Financial clarity workspace
             </span>
           </span>
         </Link>
@@ -164,8 +170,8 @@ export function Sidebar() {
           />
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{user?.name ?? "Demo user"}</div>
-            <div className="truncate font-mono text-[10px] text-sidebar-foreground/38">
-              {user?.user_id ?? "—"}
+            <div className="truncate text-[10px] text-sidebar-foreground/38">
+              {personaLabel}
             </div>
           </div>
         </Link>
@@ -244,7 +250,7 @@ export function Sidebar() {
           Demo data connected
         </div>
         <div className="mt-1 px-2 text-[10px] text-sidebar-foreground/20">
-          CEYFI · Powered by Seylan
+          CEYFI · Demo workspace
         </div>
       </div>
     </aside>

@@ -1,4 +1,4 @@
-# CEYFI — powered by Seylan Bank
+# CEYFI
 
 **Clarity for every rupee** — AI-powered banking for Sri Lanka: diaspora wallets, voice assistant, loan health, and SME bookkeeping.
 
@@ -72,15 +72,8 @@ cd frontend && npm run test:smoke
 cd frontend && npm run test:e2e:install && npm run test:e2e
 ```
 
-## Seylan Bank integration
-
-Stakeholder brief: [docs/seylan-stakeholder-brief.md](docs/seylan-stakeholder-brief.md)
-
-API mapping: [docs/seylan-hub-api-mapping.md](docs/seylan-hub-api-mapping.md)
-
 ## Credits
 
-- **Seylan Bank** — Sponsor & banking domain
 - **Groq** — Fast LLM inference
 - **ElevenLabs** — Text-to-speech
 - **Vercel** — Frontend hosting

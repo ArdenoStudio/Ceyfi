@@ -4,11 +4,11 @@ AI banking platform for Sri Lanka: diaspora wallets, voice assistant, loan healt
 
 ## Deploy URL
 
-https://seylan-hub.vercel.app
+https://frontend-taupe-three-96.vercel.app
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router, TypeScript strict)
+- **Framework:** Next.js 16 (App Router, TypeScript strict)
 - **Styling:** Tailwind CSS v4 + shadcn/ui
 - **Icons:** Lucide React
 - **Realtime:** Supabase JS client

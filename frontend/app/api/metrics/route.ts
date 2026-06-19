@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { PRODUCTION_BACKEND_URL } from "@/lib/urls";
 
 const BACKEND_URL =
   process.env.BACKEND_URL ??
   process.env.NEXT_PUBLIC_API_BASE ??
-  "https://seylan-hub-backend.vercel.app";
+  PRODUCTION_BACKEND_URL;
 
 export async function GET() {
   try {

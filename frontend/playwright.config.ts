@@ -20,7 +20,7 @@ export default defineConfig({
   webServer: [
     {
       command:
-        "cd ../backend && python3 -m pip install -q -r requirements.txt && python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+        "cd ../backend && python3 -m pip install -q -r requirements.txt && DEMO_AUTH_REQUIRED=false DEMO_SESSION_SECRET=e2e-test-secret python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
       url: "http://127.0.0.1:8000/health",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
