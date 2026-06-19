@@ -1,5 +1,5 @@
 export type HealthScore = "ON_TRACK" | "AT_RISK" | "CRITICAL";
-export type Language = "en" | "si";
+export type Language = "en" | "si" | "ta";
 export type MessageRole = "user" | "assistant" | "system";
 
 export interface Bucket {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +14,8 @@ import { Loan } from "@/types";
 import { formatLKR } from "@/lib/utils";
 import { createPaymentSession, postDemoLoanPayment } from "@/lib/api";
 import { toast } from "sonner";
-import { CreditCard, Zap, CircleCheck } from "lucide-react";
+import { PaymentModeToggle } from "@/components/payments/PaymentModeToggle";
+import { CircleCheck } from "lucide-react";
 
 interface LoanPaymentModalProps {
   loan: Loan;
@@ -90,29 +90,7 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
           <DialogTitle>Make Loan Payment</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
-          {/* Mode toggle */}
-          <div className="flex rounded-xl border border-gray-100 bg-gray-50 p-1">
-            {(["card", "demo"] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setPaymentMode(mode)}
-                className="relative flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-all"
-              >
-                {paymentMode === mode && (
-                  <motion.div
-                    layoutId="loan-mode-pill"
-                    className="absolute inset-0 rounded-lg bg-white shadow-sm ring-1 ring-gray-200"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className={`relative flex items-center gap-1.5 ${paymentMode === mode ? "text-gray-900" : "text-gray-400"}`}>
-                  {mode === "card" ? <CreditCard className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                  {mode === "card" ? "Card (MPGS)" : "Demo Mode"}
-                </span>
-              </button>
-            ))}
-          </div>
+          <PaymentModeToggle value={paymentMode} onChange={setPaymentMode} />
 
           {/* Loan summary */}
           <div className="rounded-lg border border-ceyfi-line bg-ceyfi-sprout/60 p-4 space-y-2 text-sm">

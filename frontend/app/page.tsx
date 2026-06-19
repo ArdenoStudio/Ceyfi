@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -14,64 +14,19 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
+import { PeriodBadge } from "@/components/charts/PeriodBadge";
+import { TimeRiver } from "@/components/charts/TimeRiver";
 import {
-  AllocationBar,
   CashflowChart,
-  PortfolioChart,
   ProgressCircle,
-  type PortfolioPoint,
 } from "@/components/charts/OverviewCharts";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { KpiCard } from "@/components/ui/KpiCard";
-import {
-  getAccountContext,
-  getFamilyWallet,
-  getLoans,
-} from "@/lib/api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getAccountContext, getFamilyWallet, getLoans } from "@/lib/api";
+import { periodDelta } from "@/lib/chartUtils";
 import { cn, formatters } from "@/lib/utils";
 import type { AccountContext, Loan, WalletState } from "@/types";
-
-function getGreeting(): string {
-  const h = parseInt(
-    new Date().toLocaleString("en-US", {
-      hour: "numeric",
-      hour12: false,
-      timeZone: "Asia/Colombo",
-    })
-  );
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
-
-function AnimatedLKR({ value, className }: { value: number; className?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const rafRef = useRef<number>(0);
-
-  useEffect(() => {
-    const start = performance.now();
-    const duration = 1400;
-    const step = (now: number) => {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 4);
-      if (ref.current) {
-        ref.current.textContent = formatters.currency({
-          number: Math.round(value * eased),
-          maxFractionDigits: 0,
-        });
-      }
-      if (progress < 1) rafRef.current = requestAnimationFrame(step);
-    };
-    rafRef.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [value]);
-
-  return (
-    <span ref={ref} className={className}>
-      {formatters.currency({ number: 0, maxFractionDigits: 0 })}
-    </span>
-  );
-}
 
 const FALLBACK_CONTEXT: AccountContext = {
   user_id: "SEY-USR-001",
@@ -156,28 +111,7 @@ const CASHFLOW = [
   { month: "Jun", Income: 185000, Expenses: 104000 },
 ];
 
-function buildBalanceHistory(balance: number, savings: number): PortfolioPoint[] {
-  const pulses = [
-    -12000, -7000, -10500, -4500, -9000, -2000, -5500, 1000, -3500, 2500,
-    -1500, 4000, 1000, 6500, 3000, 8500, 4500, 12000, 8000, 14500, 9500,
-    17000, 12500, 19500, 15500, 22000, 18000, 24500, 21000, 27000,
-  ];
-  const start = new Date(Date.UTC(2026, 4, 20));
-
-  return pulses.map((pulse, index) => {
-    const date = new Date(start);
-    date.setUTCDate(start.getUTCDate() + index);
-    return {
-      date: date.toLocaleDateString("en", {
-        month: "short",
-        day: "numeric",
-        timeZone: "UTC",
-      }),
-      Balance: Math.max(0, balance - 27000 + pulse),
-      Savings: Math.max(0, savings - 12000 + Math.round(index * 420)),
-    };
-  });
-}
+const UPCOMING_OBLIGATIONS = 22000 + 15000 + 2800;
 
 function relativeDate(date: string) {
   return new Intl.DateTimeFormat("en-LK", {
@@ -215,6 +149,7 @@ function TransactionIcon({
 }
 
 export default function OverviewPage() {
+  const { userId, walletAccountId, loanUserId, user } = useCurrentUser();
   const [context, setContext] = useState<AccountContext>(FALLBACK_CONTEXT);
   const [wallet, setWallet] =
     useState<Pick<WalletState, "buckets" | "total_balance_lkr">>(
@@ -227,9 +162,9 @@ export default function OverviewPage() {
     let cancelled = false;
 
     Promise.allSettled([
-      getAccountContext("SEY-USR-001"),
-      getFamilyWallet("SEY-ACC-002"),
-      getLoans("SEY-USR-001"),
+      getAccountContext(userId),
+      walletAccountId ? getFamilyWallet(walletAccountId) : Promise.reject(),
+      getLoans(loanUserId),
     ]).then(([contextResult, walletResult, loanResult]) => {
       if (cancelled) return;
       if (contextResult.status === "fulfilled") {
@@ -247,23 +182,21 @@ export default function OverviewPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [userId, walletAccountId, loanUserId]);
 
   const balance = context.balance_lkr ?? 245000;
   const savings = context.savings_balance ?? 125400;
   const current = context.current_balance ?? Math.max(0, balance - savings);
-  const firstName = (context.name ?? context.account_holder ?? "Nimal").split(
-    " "
-  )[0];
-  const portfolioData = useMemo(
-    () => buildBalanceHistory(balance, savings),
-    [balance, savings]
-  );
-  const bucketItems = wallet.buckets.map((bucket, index) => ({
-    label: bucket.label,
-    value: bucket.allocation_pct,
-    color: ["#2563eb", "#059669", "#d97706", "#7c3aed"][index % 4],
-  }));
+  const firstName = (
+    user?.name ??
+    context.name ??
+    context.account_holder ??
+    "there"
+  ).split(" ")[0];
+  const safeToMove = Math.max(0, current - UPCOMING_OBLIGATIONS - 20000);
+  const balance30dAgo = Math.round(balance / 1.024);
+  const balanceDelta = periodDelta(balance, balance30dAgo);
+
   const loanHealth =
     loan?.health_score === "ON_TRACK"
       ? 82
@@ -276,70 +209,117 @@ export default function OverviewPage() {
   const transactions =
     context.recent_transactions ?? FALLBACK_CONTEXT.recent_transactions ?? [];
 
+  const safeToSpendChips = useMemo(
+    () => [
+      {
+        label: "Available now",
+        value: current,
+        color: "text-emerald-700",
+      },
+      {
+        label: "Protected",
+        value: savings,
+        color: "text-blue-700",
+      },
+      {
+        label: "Committed",
+        value: UPCOMING_OBLIGATIONS,
+        color: "text-amber-700",
+      },
+      {
+        label: "Safe to move",
+        value: safeToMove,
+        color: "text-ceyfi-green",
+      },
+    ],
+    [current, savings, safeToMove]
+  );
+
   return (
-    <div className="mx-auto w-full max-w-[1540px] space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8 xl:p-10 stagger">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
-              Financial overview
-            </span>
-            <span
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em]",
-                isLive
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-amber-50 text-amber-700"
-              )}
-            >
+    <div className="mx-auto w-full max-w-[1540px] space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8 xl:p-10">
+      {/* Section 1: Page header + safe-to-spend strip */}
+      <header className="space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
+                Financial overview
+              </span>
               <span
                 className={cn(
-                  "h-1.5 w-1.5 rounded-full",
-                  isLive ? "bg-emerald-500" : "bg-amber-500"
+                  "inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em]",
+                  isLive
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-amber-50 text-amber-700"
                 )}
-              />
-              {isLive ? "Backend connected" : "Demo snapshot"}
-            </span>
+              >
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    isLive ? "bg-emerald-500" : "bg-amber-500"
+                  )}
+                />
+                {isLive ? "Backend connected" : "Demo snapshot"}
+              </span>
+            </div>
+            <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-ceyfi-ink">
+              Good morning, {firstName}
+            </h1>
+            <p className="mt-2 text-sm text-ceyfi-muted">
+              Here&apos;s what moved, what&apos;s protected, and what needs your
+              attention.
+            </p>
           </div>
-          <h1 className="mt-2 font-heading text-2xl font-semibold tracking-[-0.035em] text-ceyfi-ink sm:text-[2rem]">
-            {getGreeting()}, {firstName}.
-          </h1>
-          <p className="mt-2 text-sm text-ceyfi-muted">
-            Here&apos;s what moved, what&apos;s protected, and what needs your
-            attention.
-          </p>
+          <Link
+            href="/assistant"
+            className="inline-flex w-fit items-center gap-2 rounded-xl bg-ceyfi-deep px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0a4424] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30"
+          >
+            <Sparkles className="h-4 w-4 text-ceyfi-mint" />
+            Ask CEYFI
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
-        <Link
-          href="/assistant"
-          className="inline-flex w-fit items-center gap-2 rounded-xl bg-ceyfi-deep px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0a4424] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30"
-        >
-          <Sparkles className="h-4 w-4 text-ceyfi-mint" />
-          Ask CEYFI
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible">
+          {safeToSpendChips.map((chip) => (
+            <div
+              key={chip.label}
+              className="min-w-[140px] shrink-0 rounded-xl border border-ceyfi-line/70 bg-ceyfi-paper px-3.5 py-2.5 sm:min-w-0"
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ceyfi-faint">
+                {chip.label}
+              </div>
+              <div
+                className={cn(
+                  "mt-1 font-mono text-sm font-semibold tabular-nums",
+                  chip.color
+                )}
+              >
+                {formatters.currency({
+                  number: chip.value,
+                  maxFractionDigits: 0,
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </header>
 
-      <section className="relative overflow-hidden rounded-[26px] bg-ceyfi-deep p-5 text-white sm:p-7 lg:p-8 shadow-[0_2px_40px_rgba(5,46,22,0.28)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(52,211,153,0.22),transparent_30rem)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_0%_100%,rgba(5,150,105,0.10),transparent)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="absolute -right-12 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full border border-white/[0.06]" />
-        <div className="absolute -right-3 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full border border-white/[0.08]" />
-        <div className="absolute right-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full border border-ceyfi-mint/10" />
+      {/* Dark hero banner */}
+      <section className="relative overflow-hidden rounded-[26px] bg-ceyfi-deep p-5 text-white sm:p-7 lg:p-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(52,211,153,0.20),transparent_30rem)]" />
+        <div className="absolute -right-12 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-white/5" />
+        <div className="absolute -right-3 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full border border-white/5" />
         <div className="relative grid gap-8 lg:grid-cols-[1.1fr_1.9fr] lg:items-end">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
               Total financial position
             </div>
-            <div className="mt-3 font-heading text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">
-              <AnimatedLKR value={balance} className="tabular-nums" />
+            <div className="mt-3 font-heading text-4xl font-semibold tracking-[-0.055em] tabular-nums sm:text-5xl">
+              {formatters.currency({
+                number: balance,
+                maxFractionDigits: 0,
+              })}
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-white/50">
               <ShieldCheck className="h-4 w-4 text-ceyfi-mint" />
@@ -391,6 +371,23 @@ export default function OverviewPage() {
         </div>
       </section>
 
+      {/* Section 2: Time River hero */}
+      <ChartCard
+        title="Financial timeline"
+        subtitle="90-day history · today · 90-day forecast"
+        className="min-h-[300px]"
+        action={
+          <PeriodBadge
+            value={balanceDelta.pct}
+            positive={balanceDelta.positive}
+            label={balanceDelta.label}
+          />
+        }
+      >
+        <TimeRiver dangerThreshold={20000} height={280} />
+      </ChartCard>
+
+      {/* Section 3: KPI grid */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           title="Total balance"
@@ -435,18 +432,14 @@ export default function OverviewPage() {
         />
       </section>
 
+      {/* Section 4: Income/spending + loan health */}
       <section className="grid gap-6 xl:grid-cols-3">
         <ChartCard
-          title="Portfolio balance"
-          subtitle="Current balance and protected savings · last 30 days"
+          title="Income and spending"
+          subtitle="Monthly cash flow in LKR"
           className="xl:col-span-2"
-          action={
-            <span className="rounded-full bg-ceyfi-sprout px-2.5 py-1 font-mono text-[10px] text-ceyfi-green">
-              +11.2%
-            </span>
-          }
         >
-          <PortfolioChart data={portfolioData} />
+          <CashflowChart data={CASHFLOW} />
         </ChartCard>
 
         <ChartCard
@@ -489,45 +482,7 @@ export default function OverviewPage() {
         </ChartCard>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.55fr_1fr]">
-        <ChartCard
-          title="Income and spending"
-          subtitle="Monthly cash flow in LKR"
-        >
-          <CashflowChart data={CASHFLOW} />
-        </ChartCard>
-
-        <ChartCard
-          title="Rupee flow"
-          subtitle="How the family wallet is allocated right now"
-        >
-          <AllocationBar items={bucketItems} />
-          <div className="mt-6 space-y-2">
-            {wallet.buckets.map((bucket) => (
-              <div
-                key={bucket.bucket_id}
-                className="flex items-center justify-between rounded-xl bg-ceyfi-canvas px-3 py-2.5 text-xs"
-              >
-                <span className="text-ceyfi-muted">{bucket.label}</span>
-                <span className="font-mono font-semibold text-ceyfi-ink">
-                  {formatters.currency({
-                    number: bucket.balance_lkr,
-                    maxFractionDigits: 0,
-                  })}
-                </span>
-              </div>
-            ))}
-          </div>
-          <Link
-            href="/wallet"
-            className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-ceyfi-green hover:text-ceyfi-deep"
-          >
-            Adjust allocations
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </ChartCard>
-      </section>
-
+      {/* Section 5: Recent transactions + AI signal */}
       <section className="grid gap-6 xl:grid-cols-[1.35fr_1fr]">
         <ChartCard
           title="Recent movement"
@@ -578,10 +533,8 @@ export default function OverviewPage() {
           </div>
         </ChartCard>
 
-        <section className="relative min-w-0 overflow-hidden rounded-[22px] border border-ceyfi-green/20 bg-gradient-to-br from-ceyfi-sprout via-[#edfaf4] to-[#e2f6ea] p-5 sm:p-6 shadow-[0_0_48px_rgba(5,150,105,0.09)]">
-          <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full border border-ceyfi-green/[0.12]" />
-          <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full border border-ceyfi-green/[0.08]" />
-          <div className="absolute right-10 top-10 h-14 w-14 rounded-full bg-ceyfi-green/[0.07]" />
+        <section className="relative min-w-0 overflow-hidden rounded-[22px] border border-ceyfi-green/15 bg-ceyfi-sprout p-5 sm:p-6">
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border border-ceyfi-green/10" />
           <div className="relative">
             <div className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-green text-white">
               <Bot className="h-5 w-5" />
@@ -615,6 +568,7 @@ export default function OverviewPage() {
         </section>
       </section>
 
+      {/* Section 6: Quick links */}
       <section className="grid gap-3 sm:grid-cols-3">
         {[
           {
@@ -632,14 +586,14 @@ export default function OverviewPage() {
           {
             href: "/assistant",
             icon: Bot,
-            title: "Ask in English or Sinhala",
+            title: "Ask CEYFI",
             detail: "Account-aware financial guidance",
           },
         ].map((item) => (
           <Link
             key={item.title}
             href={item.href}
-            className="group flex items-center gap-3 rounded-[18px] border border-ceyfi-line/70 bg-ceyfi-paper p-4 transition-all duration-200 hover:border-ceyfi-green/25 hover:shadow-[0_4px_20px_rgba(5,150,105,0.08)] hover:-translate-y-0.5"
+            className="group flex items-center gap-3 rounded-[18px] border border-ceyfi-line/70 bg-ceyfi-paper p-4 transition hover:border-ceyfi-green/20"
           >
             <span className="grid h-10 w-10 place-items-center rounded-[14px] bg-ceyfi-canvas text-ceyfi-green transition group-hover:bg-ceyfi-sprout">
               <item.icon className="h-4.5 w-4.5" />

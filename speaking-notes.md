@@ -5,7 +5,7 @@
 
 ## INTRO (30–45 sec)
 
-"Hey everyone — we're Ardeno Studio, and this is **CEYFI**: an AI-powered banking platform we built for Seylan Bank in 24 hours for the Cursor Buildathon Colombo 2026.
+"Hey everyone — we're Ardeno Studio, and this is **CEYFI**: clarity for every rupee — an AI-powered financial platform we built for Sri Lanka in 24 hours for the Cursor Buildathon Colombo 2026.
 
 The core idea is simple: banking in Sri Lanka still feels like it was designed in 2005. You can't see where your money actually went. You don't understand your loan. You definitely don't have an accountant. And if you're sending money home from abroad, you're basically flying blind.
 
@@ -114,7 +114,7 @@ You can also **accept payments from customers** via MPGS — and that 10% auto-s
 
 "We built this in 24 hours. The frontend is live on Vercel. The backend is running on Fly.io in Singapore. The database is on Supabase with realtime subscriptions firing across every module.
 
-CEYFI isn't a mockup. It's a working product, with real AI, real payments, and real-time data — designed for real people.
+Seylan Hub isn't a mockup. It's a working product, with real AI, real payments, and real-time data — designed for real people.
 
 Thanks — we're Ardeno Studio."
 

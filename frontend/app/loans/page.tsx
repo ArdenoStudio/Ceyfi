@@ -9,19 +9,22 @@ import { RepaymentProgressBar } from "@/components/loans/RepaymentProgressBar";
 import { PaymentCountdown } from "@/components/loans/PaymentCountdown";
 import { AIAdvisorPanel } from "@/components/loans/AIAdvisorPanel";
 import { RepaymentTimeline } from "@/components/loans/RepaymentTimeline";
+import { LoanIntelligenceCharts } from "@/components/loans/LoanIntelligenceCharts";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AlertTriangle, Bot, CalendarCheck, Gauge, WalletCards } from "lucide-react";
 
 const ASSISTANT_PROMPT =
   "Show me repayment scenarios for my current loan: paying today, paying three days late, and making a partial payment.";
 
 export default function LoansPage() {
+  const { loanUserId, user } = useCurrentUser();
   const [loan, setLoan] = useState<Loan | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const userId = "SEY-USR-001";
+  const userId = loanUserId;
 
   useEffect(() => {
     // Show success toast when redirected back from MPGS payment
@@ -55,7 +58,7 @@ export default function LoansPage() {
 
   if (loading) {
     return (
-      <div className="dark min-h-full p-6 space-y-4" style={{ background: "#04241a" }}>
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-24 w-full" />
@@ -66,9 +69,9 @@ export default function LoansPage() {
 
   if (!loan) {
     return (
-      <div className="dark min-h-full p-6" style={{ background: "#04241a" }}>
-        <h1 className="text-xl font-bold text-white mb-4">Loan Dashboard</h1>
-        <p className="text-white/50">No loan data available.</p>
+      <div className="mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-4 font-heading text-xl font-semibold text-ceyfi-ink">Loan Dashboard</h1>
+        <p className="text-ceyfi-muted">No loan data available.</p>
       </div>
     );
   }
@@ -87,13 +90,7 @@ export default function LoansPage() {
         : "Needs action";
 
   return (
-    <div data-module="loans" className="dark relative min-h-full overflow-hidden" style={{ background: "#04241a" }}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(5,150,105,0.15),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(5,46,22,0.10),transparent)]" />
-      </div>
-      <div className="pointer-events-none absolute inset-0 opacity-[0.018]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-    <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+    <div data-module="loans" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <PageHeader
         eyebrow="Loan health"
         title="Understand your repayment position at a glance"
@@ -105,6 +102,42 @@ export default function LoansPage() {
         <LoanSummaryCard loan={loan} onPaymentSuccess={fetchLoan} />
         <PaymentCountdown loan={loan} />
       </div>
+
+      <InsightActionStrip
+        eyebrow="Early payoff"
+        title="Paying 6 months early could save meaningful interest"
+        insights={[
+          {
+            label: "Interest saved",
+            value: `LKR ${Math.round(loan.outstanding_lkr * 0.025).toLocaleString()}`,
+            detail: "Estimated savings if you clear the loan 6 months ahead of schedule.",
+            tone: "success",
+            icon: Gauge,
+          },
+          {
+            label: "Progress",
+            value: `${progressPct}%`,
+            detail: `${loan.payments_made} of ${loan.total_payments} instalments complete.`,
+            tone: "info",
+            icon: CalendarCheck,
+          },
+          {
+            label: "Risk",
+            value: riskCopy,
+            detail: `Next payment LKR ${loan.monthly_payment_lkr.toLocaleString()} in ${daysUntil} days.`,
+            tone: loan.health_score === "ON_TRACK" ? "success" : "alert",
+            icon: AlertTriangle,
+          },
+        ]}
+        actions={[
+          {
+            label: "Ask loan advisor",
+            icon: Bot,
+            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}`,
+          },
+          { label: "Simulate payoff", icon: WalletCards, href: "/scenarios" },
+        ]}
+      />
 
       <InsightActionStrip
         eyebrow="Repayment signal"
@@ -153,7 +186,10 @@ export default function LoansPage() {
       <section id="repayment-timeline" className="scroll-mt-6">
         <RepaymentTimeline schedule={loan.schedule} />
       </section>
-    </div>{/* /z-10 */}
+
+      <section id="loan-intelligence" className="scroll-mt-6">
+        <LoanIntelligenceCharts />
+      </section>
     </div>
   );
 }

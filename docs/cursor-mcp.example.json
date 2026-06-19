@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ceyfi-banking": {
+      "command": "python",
+      "args": ["backend/scripts/banking_mcp_stdio.py"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "backend"
+      }
+    }
+  }
+}

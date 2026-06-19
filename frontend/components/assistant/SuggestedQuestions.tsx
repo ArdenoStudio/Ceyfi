@@ -50,7 +50,7 @@ const QUICK_ACTIONS = [
 
 export function SuggestedQuestions({ language, onSelect }: SuggestedQuestionsProps) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+    <div className="flex flex-wrap justify-center gap-2">
       {QUICK_ACTIONS.map((action) => {
         const isSinhala = /[඀-෿]/.test(action.label);
         const displayLabel =
@@ -60,17 +60,14 @@ export function SuggestedQuestions({ language, onSelect }: SuggestedQuestionsPro
             key={action.label}
             onClick={() => onSelect(action.q)}
             className={cn(
-              "group flex items-center gap-3 rounded-2xl border border-white/[0.09] bg-white/[0.035]",
-              "px-4 py-3.5 text-left text-xs text-white/50 backdrop-blur-sm",
-              "transition-all duration-150",
-              "hover:border-ceyfi-green/35 hover:bg-ceyfi-green/[0.09] hover:text-white/85 hover:scale-[1.02] active:scale-[0.99]",
+              "interactive-card flex items-center gap-2 rounded-full border border-border/80 bg-card/70 px-4 py-2 text-xs text-muted-foreground backdrop-blur-sm",
+              "transition-all duration-200",
+              "hover:border-primary/30 hover:bg-primary/5 hover:text-foreground dark:border-white/10 dark:bg-white/[0.04] dark:text-white/50 dark:hover:border-seylan-red/30 dark:hover:bg-seylan-red/[0.08] dark:hover:text-white/80",
               isSinhala && "sinhala"
             )}
           >
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-white/[0.06] text-ceyfi-green/60 transition-all duration-150 group-hover:bg-ceyfi-green/20 group-hover:text-ceyfi-mint">
-              <action.icon className="h-3.5 w-3.5" />
-            </span>
-            <span className="leading-[1.35]">{displayLabel}</span>
+            <action.icon className="h-3.5 w-3.5 shrink-0 text-seylan-red/50" />
+            {displayLabel}
           </button>
         );
       })}

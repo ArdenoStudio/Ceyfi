@@ -8,20 +8,25 @@ import { CategorisedTransactionFeed } from "@/components/business/CategorisedTra
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getPlSummary, getBusinessAccount } from "@/lib/api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getPlSummary, getBusinessAccount, getFinancialSnapshot } from "@/lib/api";
 import { PlSummary, Transaction } from "@/types";
 import { Bot, PiggyBank, ReceiptText, TrendingUp } from "lucide-react";
+import { CfoBriefPanel } from "@/components/business/CfoBriefPanel";
+import { BusinessAnalyticsSections } from "@/components/business/BusinessAnalyticsSections";
 import { toast } from "sonner";
 
-const BUSINESS_USER_ID = "SEY-BIZ-001";
 const ASSISTANT_PROMPT =
   "Act as my SME bookkeeper. Review this week's revenue, expenses, tax jar readiness, and transactions that need category review.";
 
 export default function BusinessPage() {
+  const { businessUserId, user } = useCurrentUser();
+  const BUSINESS_USER_ID = businessUserId;
   const [extraTransactions, setExtraTransactions] = useState<Transaction[]>([]);
   const [pl, setPl] = useState<PlSummary | null>(null);
   const [taxJarBalance, setTaxJarBalance] = useState(15070);
   const [plLoading, setPlLoading] = useState(true);
+  const [anomalyCount, setAnomalyCount] = useState(0);
   const paidToastFired = useRef(false);
 
   // Handle redirect back from MPGS payment
@@ -56,9 +61,10 @@ export default function BusinessPage() {
     Promise.allSettled([
       getPlSummary(BUSINESS_USER_ID),
       getBusinessAccount(BUSINESS_USER_ID),
+      getFinancialSnapshot(BUSINESS_USER_ID),
     ]).then((results) => {
       if (cancelled) return;
-      const [plRes, bizRes] = results;
+      const [plRes, bizRes, snapRes] = results;
       if (plRes.status === "fulfilled") {
         setPl(plRes.value as PlSummary);
       } else {
@@ -72,13 +78,16 @@ export default function BusinessPage() {
       } else {
         setTaxJarBalance(15070);
       }
+      if (snapRes.status === "fulfilled") {
+        setAnomalyCount((snapRes.value as { anomalies?: unknown[] }).anomalies?.length ?? 0);
+      }
     }).finally(() => {
       if (!cancelled) setPlLoading(false);
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [BUSINESS_USER_ID]);
 
   const handleNewTransaction = useCallback((tx: Transaction) => {
     setExtraTransactions((prev) => [tx, ...prev]);
@@ -86,7 +95,7 @@ export default function BusinessPage() {
 
   if (plLoading) {
     return (
-      <div className="dark min-h-full p-6 space-y-4" style={{ background: "#04241a" }}>
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-48 w-full" />
       </div>
@@ -111,19 +120,13 @@ export default function BusinessPage() {
   const reviewCount = misc > 0 ? extraTransactions.length + 1 : extraTransactions.length;
 
   return (
-    <div data-module="business" className="dark relative min-h-full overflow-hidden" style={{ background: "#04241a" }}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(5,150,105,0.15),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(5,46,22,0.10),transparent)]" />
-      </div>
-      <div className="pointer-events-none absolute inset-0 opacity-[0.018]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-    <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+    <div data-module="business" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <PageHeader
         eyebrow="SME bookkeeper"
-        title="Silva Hardware & Electricals"
+        title={user?.persona === "sme" ? "Silva Hardware & Electricals" : "Business cockpit"}
         description="A weekly finance cockpit for revenue, spending, tax savings, and AI-assisted transaction categories."
         meta={
-          <span className="inline-flex rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-medium text-white/70">
+          <span className="inline-flex rounded-full border border-ceyfi-line bg-ceyfi-canvas px-3 py-1 text-xs font-medium text-ceyfi-muted">
             Gampaha
           </span>
         }
@@ -148,6 +151,13 @@ export default function BusinessPage() {
             icon: PiggyBank,
           },
           {
+            label: "Anomalies",
+            value: `${anomalyCount}`,
+            detail: "Unusual spends or income gaps detected by CEYFI intelligence.",
+            tone: anomalyCount > 0 ? "alert" : "success",
+            icon: ReceiptText,
+          },
+          {
             label: "Needs review",
             value: `${reviewCount}`,
             detail: "Recent transactions should be checked before filing.",
@@ -165,6 +175,8 @@ export default function BusinessPage() {
           { label: "Check categories", icon: ReceiptText, href: "#business-feed" },
         ]}
       />
+
+      <CfoBriefPanel userId={BUSINESS_USER_ID} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -186,7 +198,8 @@ export default function BusinessPage() {
           extraTransactions={extraTransactions}
         />
       </section>
-    </div>{/* /z-10 */}
+
+      <BusinessAnalyticsSections />
     </div>
   );
 }

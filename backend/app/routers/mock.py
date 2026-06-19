@@ -3,10 +3,11 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from app.config import settings
+from app.services.auth import require_admin
 from app.models.schemas import TriggerSpendRequest, TaxJarTriggerRequest
 from app.services import supabase_client
 
@@ -253,7 +254,7 @@ async def tax_jar_trigger(req: TaxJarTriggerRequest):
     }
 
 
-@router.post("/reset-demo")
+@router.post("/reset-demo", dependencies=[Depends(require_admin)])
 async def reset_demo():
     result: dict = {}
     try:
@@ -271,7 +272,7 @@ async def reset_demo():
     }
 
 
-@router.post("/seed")
+@router.post("/seed", dependencies=[Depends(require_admin)])
 async def admin_seed():
     tables_reset = []
     try:
@@ -298,7 +299,7 @@ async def admin_seed():
     return {"status": "seeded", "tables_reset": tables_reset}
 
 
-@router.post("/warm-up")
+@router.post("/warm-up", dependencies=[Depends(require_admin)])
 async def warm_up():
     import asyncio
     import time

@@ -1,0 +1,9 @@
+{
+  "hooks": {
+    "beforeMCPExecution": [
+      {
+        "command": "node scripts/hooks/mcp-guard.mjs"
+      }
+    ]
+  }
+}

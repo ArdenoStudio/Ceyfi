@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     # Seylan gateway (sandbox proxy — override via env for production)
     seylan_gateway_default: str = "http://34.21.206.87:3000"
     seylan_gateway_qr: str = "https://dev.apigateway1.seylan.lk:2250"
-    seylan_api_key: str = "5be33036-59e9-4224-969f-41a1657bd1b7"
+    seylan_api_key: str = ""
     seylan_checksum_key_merchant: str = ""
     seylan_checksum_key_lankaqr: str = ""
     seylan_justpay_code: str = "6289_M001_001"
@@ -62,6 +62,11 @@ class Settings(BaseSettings):
         "https://seylan-hub-frontend.netlify.app"
     )
     frontend_base_url: str = "https://seylan-hub-frontend.netlify.app"
+
+    # Demo auth & admin
+    demo_session_secret: str = "ceyfi-demo-session-change-in-production"
+    demo_session_ttl_seconds: int = 86400 * 7
+    demo_admin_key: str = "ceyfi-demo-admin"
 
     @property
     def cors_list(self) -> list[str]:

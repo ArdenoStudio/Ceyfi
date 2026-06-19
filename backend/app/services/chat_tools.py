@@ -73,6 +73,20 @@ TOOL_DEFINITIONS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_financial_snapshot",
+            "description": "Get unified financial health, anomalies, ranked decisions, and forecast.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "user_id": {"type": "string", "description": "The user ID"},
+                },
+                "required": ["user_id"],
+            },
+        },
+    },
 ]
 
 
@@ -139,6 +153,15 @@ async def execute_tool_async(name: str, arguments: dict) -> str:
     """Async version of execute_tool — handles tools that require async I/O."""
     if name == "pay_loan_instalment":
         return await _pay_loan_instalment(arguments)
+    if name == "get_financial_snapshot":
+        from app.services.financial_snapshot import build_financial_snapshot
+        from app.services import auth as auth_service
+
+        user_id = arguments.get("user_id", "SEY-USR-001")
+        persona = auth_service.get_persona(user_id)
+        persona_type = persona["persona"] if persona else "diaspora"
+        snap = await build_financial_snapshot(user_id, persona_type)
+        return json.dumps(snap)
     return execute_tool(name, arguments)
 
 

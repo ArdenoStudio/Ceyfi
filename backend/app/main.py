@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from app.services import metrics_store
 
 from app.config import settings
-from app.routers import mock, wallet, chat, tts, loans, business, payments, stt
+from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot, banking_tools
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 log = logging.getLogger(__name__)
@@ -91,7 +91,7 @@ async def lifespan(app: FastAPI):
     log.info("shutdown")
 
 
-app = FastAPI(title="Seylan Hub API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="CEYFI API — powered by Seylan", version="0.2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -130,6 +130,8 @@ async def rate_limit_middleware(request: Request, call_next):
     return response
 
 
+app.include_router(auth.router)
+app.include_router(snapshot.router)
 app.include_router(mock.router)
 app.include_router(wallet.router)
 app.include_router(chat.router)
@@ -138,6 +140,9 @@ app.include_router(stt.router)
 app.include_router(loans.router)
 app.include_router(business.router)
 app.include_router(payments.router)
+
+
+app.include_router(banking_tools.router)
 
 
 @app.exception_handler(Exception)
@@ -149,7 +154,7 @@ async def global_error(request: Request, exc: Exception):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.1.0"}
+    return {"status": "ok", "version": "0.2.0"}
 
 
 @app.get("/api/metrics")

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useLayoutEffect, useEffect } from "react";
 import { useWalletRealtime } from "@/hooks/useWalletRealtime";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { BucketGrid } from "@/components/wallet/BucketGrid";
 import { AllocationEditor } from "@/components/wallet/AllocationEditor";
 import { TransactionFeed } from "@/components/wallet/TransactionFeed";
@@ -17,13 +18,13 @@ import { saveAllocationRules, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { type RemittanceCurrency } from "@/lib/remittance-fx";
 import { ArrowRightLeft, Bot, PieChart, ShieldCheck } from "lucide-react";
+import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSections";
 
-const FAMILY_ACCOUNT_ID = "SEY-ACC-002";
-const WALLET_SENDER_ID = "SEY-USR-001";
 const ASSISTANT_PROMPT =
   "Explain the latest family wallet activity and tell me whether any bucket needs attention before the next transfer.";
 
 export default function WalletPage() {
+  const { walletAccountId, userId } = useCurrentUser();
   const [modalOpen, setModalOpen] = useState(false);
   const [allocationFromHash, setAllocationFromHash] = useState(false);
   const [remittanceOverride, setRemittanceOverride] = useState<{
@@ -50,7 +51,7 @@ export default function WalletPage() {
 
   const { wallet, transactions, buckets, loading, refetch } =
     useWalletRealtime({
-      accountId: FAMILY_ACCOUNT_ID,
+      accountId: walletAccountId,
       onSpend: handleSpend,
     });
 
@@ -60,9 +61,9 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
         <Skeleton className="h-24 w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
           <Skeleton className="h-40" />
@@ -89,35 +90,14 @@ export default function WalletPage() {
   const latestSpend = transactions.find((tx) => tx.type === "debit");
 
   return (
-    <div
-      data-module="wallet"
-      className="dark relative min-h-full overflow-hidden"
-      style={{ background: "#04241a" }}
-    >
-      {/* Ambient glow layers — mirrors the assistant page */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-8%,rgba(5,150,105,0.15),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-[radial-gradient(ellipse_55%_35%_at_50%_110%,rgba(5,46,22,0.10),transparent)]" />
-      </div>
-      {/* Subtle dot-grid texture */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.018]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
-
-      {/* Actual page content */}
-      <div className="relative z-10 space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+    <div data-module="wallet" className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <PageHeader
         eyebrow="Diaspora family wallet"
         title="Track money sent home with confidence"
         description="See the latest remittance, how the family is using each bucket, and adjust the next split before sending again."
         
         action={
-          <Button onClick={() => setModalOpen(true)} className="rounded-full">
+          <Button onClick={() => setModalOpen(true)} className="interactive-press rounded-full shadow-brand">
             Send Money
           </Button>
         }
@@ -178,7 +158,7 @@ export default function WalletPage() {
           {
             label: "Ask Assistant",
             icon: Bot,
-            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}&context=wallet&accountId=${encodeURIComponent(FAMILY_ACCOUNT_ID)}`,
+            href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}&context=wallet&accountId=${encodeURIComponent(walletAccountId)}`,
           },
           { label: "Tune split", icon: PieChart, href: "#allocation-editor" },
         ]}
@@ -194,9 +174,9 @@ export default function WalletPage() {
           onSave={async (newAllocations) => {
             try {
               await saveAllocationRules(
-                WALLET_SENDER_ID,
+                userId,
                 newAllocations,
-                FAMILY_ACCOUNT_ID
+                walletAccountId
               );
               toast.success("Allocation rules saved for your next transfer.");
               await refetch(true);
@@ -215,9 +195,11 @@ export default function WalletPage() {
 
       <TransactionFeed transactions={transactions} />
 
+      <WalletAnalyticsSections />
+
       <SendMoneyModal
-        senderId={WALLET_SENDER_ID}
-        recipientId={FAMILY_ACCOUNT_ID}
+        senderId={userId}
+        recipientId={walletAccountId}
         recipientAccountHolder={wallet?.account_holder ?? ""}
         allocations={allocations}
         onSuccess={(amountLkr?: number, amountGbp?: number, currency?: RemittanceCurrency) => {
@@ -227,7 +209,7 @@ export default function WalletPage() {
               date: new Date().toISOString().slice(0, 10),
               amount_gbp: amountGbp,
               fx_rate: currency?.lkrRate ?? 408.3,
-              provider: "CEYFI",
+              provider: "Seylan Hub",
               currency_code: currency?.code ?? "GBP",
               corridor: currency ? `${currency.code} → LKR` : "GBP → LKR",
             });
@@ -237,7 +219,6 @@ export default function WalletPage() {
         open={modalOpen}
         onOpenChange={setModalOpen}
       />
-      </div>{/* /z-10 content */}
     </div>
   );
 }

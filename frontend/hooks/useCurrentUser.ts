@@ -1,29 +1,39 @@
 "use client";
 
-// Persona switcher removed — single real user identity
-export const CURRENT_USER = {
-  id: "SEY-USR-001",
-  name: "Nimal Fernando",
-  accountNumber: "064000012548001",
-  accountLabel: "VOXVERSE STUDIO",
-  location: "Colombo, Sri Lanka",
-  defaultRoute: "/wallet",
-} as const;
+import { useAuth } from "@/contexts/AuthContext";
+import type { DemoPersona } from "@/lib/auth";
+
+const PERSONA_DEFAULT_ROUTE: Record<DemoPersona["persona"], string> = {
+  diaspora: "/wallet",
+  borrower: "/loans",
+  sme: "/business",
+};
+
+/** Loan fixture user — borrower persona maps here; diaspora may also have loans on own id. */
+function resolveLoanUserId(user: DemoPersona | null): string {
+  if (!user) return "SEY-USR-001";
+  if (user.persona === "borrower") return "SEY-USR-003";
+  return user.user_id;
+}
 
 export function useCurrentUser() {
+  const { user, loading } = useAuth();
+
+  const userId = user?.user_id ?? "SEY-USR-001";
+  const walletAccountId = user?.wallet_account_id ?? "SEY-ACC-002";
+  const loanUserId = resolveLoanUserId(user);
+  const businessUserId = user?.persona === "sme" ? user.user_id : "SEY-BIZ-001";
+  const defaultRoute = user ? PERSONA_DEFAULT_ROUTE[user.persona] : "/";
+
   return {
-    userId: CURRENT_USER.id,
-    user: {
-      id: CURRENT_USER.id,
-      name: CURRENT_USER.name,
-      location: CURRENT_USER.location,
-      role: "demo",
-      defaultRoute: CURRENT_USER.defaultRoute,
-      personaCode: "P1" as const,
-      shortBio: "Seylan Bank demo account",
-    },
-    switchUser: () => {},
-    allUsers: [],
-    mounted: true,
+    user,
+    userId,
+    walletAccountId,
+    loanUserId,
+    businessUserId,
+    defaultRoute,
+    persona: user?.persona ?? "diaspora",
+    loading,
+    mounted: !loading,
   };
 }

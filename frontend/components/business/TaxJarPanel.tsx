@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,8 @@ import { formatLKR } from "@/lib/utils";
 import { createPaymentSession, postTaxJarTrigger } from "@/lib/api";
 import { toast } from "sonner";
 import { Transaction } from "@/types";
-import { CreditCard, Loader2, Zap, CircleCheck } from "lucide-react";
+import { PaymentModeToggle } from "@/components/payments/PaymentModeToggle";
+import { CreditCard, Loader2, CircleCheck } from "lucide-react";
 
 interface TaxJarPanelProps {
   userId: string;
@@ -156,31 +156,13 @@ export function TaxJarPanel({
           <DialogTitle>Accept Card Payment</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
-          {/* Mode toggle */}
-          <div className="relative flex rounded-xl bg-muted p-1">
-            <motion.div
-              className="absolute inset-y-1 rounded-lg bg-background shadow-sm"
-              layout
-              transition={{ type: "spring", stiffness: 500, damping: 35 }}
-              style={{ width: "calc(50% - 4px)", left: paymentMode === "card" ? 4 : "calc(50%)" }}
-            />
-            <button
-              type="button"
-              onClick={() => setPaymentMode("card")}
-              className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-sm font-medium transition-colors ${paymentMode === "card" ? "text-foreground" : "text-muted-foreground"}`}
-            >
-              <CreditCard className="h-3.5 w-3.5" />
-              Pay with Card
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentMode("demo")}
-              className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-sm font-medium transition-colors ${paymentMode === "demo" ? "text-foreground" : "text-muted-foreground"}`}
-            >
-              <Zap className="h-3.5 w-3.5" />
-              Demo Mode
-            </button>
-          </div>
+          <PaymentModeToggle
+            value={paymentMode}
+            onChange={setPaymentMode}
+            cardLabel="Pay with Card"
+            demoLabel="Demo Mode"
+            size="sm"
+          />
 
           <div className="rounded-lg bg-ceyfi-sprout/60 border border-ceyfi-line p-3 text-sm">
             <p className="font-medium text-ceyfi-ink">Silva Hardware &amp; Electricals</p>

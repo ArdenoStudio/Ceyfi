@@ -43,14 +43,14 @@ export function ChatThread({ messages, isStreaming }: ChatThreadProps) {
 
       {/* Thinking indicator — shows before content starts streaming */}
       {isThinking && (
-        <div className="flex justify-start">
-          <div className="flex items-center gap-2.5 rounded-tr-[20px] rounded-br-[20px] rounded-bl-[20px] rounded-tl-md border border-white/[0.08] bg-white/[0.06] px-4 py-3 backdrop-blur-sm">
+          <div className="flex justify-start">
+          <div className="flex items-center gap-2.5 rounded-tr-[20px] rounded-br-[20px] rounded-bl-[20px] rounded-tl-md border border-border/80 bg-card/80 px-4 py-3 backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.06]">
             {/* Pulsing dots */}
             <span className="flex items-center gap-1">
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="h-1.5 w-1.5 rounded-full bg-white/40"
+                  className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50 dark:bg-white/40"
                   style={{
                     animation: "pulse 1.2s ease-in-out infinite",
                     animationDelay: `${i * 0.2}s`,

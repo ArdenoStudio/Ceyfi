@@ -1,75 +1,93 @@
-# CEYFI
+# CEYFI — powered by Seylan Bank
 
-**AI banking for Sri Lanka** — diaspora wallets, voice assistant, loan health, and bookkeeping for SMEs.
+**Clarity for every rupee** — AI-powered banking for Sri Lanka: diaspora wallets, voice assistant, loan health, and SME bookkeeping.
 
-Built in 24 hours for **Cursor Buildathon Colombo 2026** by Ardeno Studio.
+Built for **Cursor Buildathon Colombo 2026** by Ardeno Studio.
 
 ## Live Demo
 
-🌐 **Frontend:** [seylan-hub.vercel.app](https://seylan-hub.vercel.app) _(Vercel)_
+🌐 **Frontend:** [seylan-hub1.vercel.app](https://seylan-hub1.vercel.app) _(Vercel — auto-deploy from `ArdenoStudio/seylan-hub`)_
 
-**Backend:** [seylan-hub-api.fly.dev](https://seylan-hub-api.fly.dev) *(Fly.io — Singapore region)*
+**Backend:** [seylan-hub-backend.vercel.app](https://seylan-hub-backend.vercel.app) _(Vercel)_
 
 ## Architecture
 
-| Layer | Tech | Owner |
+| Layer | Tech | Notes |
 |-------|------|-------|
-| Frontend | Next.js 16, Tailwind v4, shadcn/ui | Ovindu |
-| Backend | FastAPI, Supabase, Groq | Suven |
-| Realtime | Supabase Postgres Changes | Both |
-| AI | Groq llama-3.3-70b, ElevenLabs TTS | Suven |
-| Deploy | Vercel (frontend), Fly.io (backend — sin) | Both |
+| Frontend | Next.js 16, Tailwind v4, CEYFI design system | Persona login, live intelligence |
+| Backend | FastAPI, Neon Postgres | Unified financial snapshot API |
+| Realtime | Supabase Postgres Changes | Wallet spend notifications |
+| AI | Groq llama-3.3-70b, ElevenLabs TTS | Bilingual assistant |
+| Deploy | Vercel (frontend), Fly.io (backend) | Demo + production paths |
 
 ## Modules
 
 | Module | Route | Persona |
 |--------|-------|---------|
-| Diaspora Family Wallet | `/wallet` | P1 — Sri Lankan expat sending money home |
-| AI Assistant | `/assistant` | P2 — Digital-native customer (EN + Sinhala) |
-| Loan Dashboard | `/loans` | P3 — Anxious borrower needing clarity |
-| Business Bookkeeper | `/business` | P4 — Mudalali (SME owner) |
+| Diaspora Family Wallet | `/wallet` | Nimal Fernando — diaspora parent |
+| AI Assistant | `/assistant` | EN + Sinhala voice & chat |
+| Loan Dashboard | `/loans` | Sunil Bandara — borrower |
+| Business Bookkeeper | `/business` | Suresh Silva — SME owner |
+| Financial Intelligence | `/intelligence` | Live health score from snapshot API |
+| Decision Room | `/decisions` | Ranked actions from live data |
+| Scenario Lab | `/scenarios` | Shock modeling on real balances |
 
 ## Quick Start
 
 ```bash
-# Frontend
-cd frontend
-npm install
-npm run dev
-# → http://localhost:3000
-
-# Backend (separate repo/directory)
+# Backend
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --port 8000
+
+# Frontend (separate terminal)
+cd frontend
+npm install
+cp .env.example .env.local
+npm run dev
+# → http://localhost:3000/login
 ```
 
 ## Environment Variables
 
-See `frontend/.env.example` for all required variables. Set `NEXT_PUBLIC_USE_MOCK=true` to run with demo data (no backend needed).
+See `frontend/.env.example` and `backend/.env.example`.
+
+Key demo settings:
+- `DEMO_ADMIN_KEY` / `NEXT_PUBLIC_DEMO_ADMIN_KEY` — protects reset/seed endpoints
+- `USE_SEYLAN_REAL=true` + `SEYLAN_ENABLE_TRANSFERS=true` — live sandbox transfers
 
 ## Demo Notes
 
-- Frontend demo controls live at `/demo` for spend trigger, tax jar trigger,
-  reset, and prewarm actions.
-- The deployed UI shows whether it is using demo data or the live API.
-- Wallet realtime has a polling fallback so the demo can continue if Supabase
-  realtime is unavailable.
+- **Persona login** at `/login` — three Sri Lankan banking journeys
+- **Presenter controls** at `/demo` — scripted 90-second walkthrough (press `S`)
+- Keyboard shortcuts on demo page: `1` spend · `2` tax · `3` reset · `4` prewarm
+- **Financial snapshot API** (`GET /api/financial-snapshot/{user_id}`) powers intelligence, decisions, and scenarios
 
-## Seylan Bank integration notes
+## Testing
 
-Stakeholder onboarding brief (non-technical and technical checkpoints for Seylan): [docs/seylan-stakeholder-brief.md](docs/seylan-stakeholder-brief.md).
+```bash
+# Backend
+cd backend && python -m pytest tests/ -v
 
-Hub modules mapped to gateway Python packages and environment toggles:
-[docs/seylan-hub-api-mapping.md](docs/seylan-hub-api-mapping.md).
+# Frontend smoke
+cd frontend && npm run test:smoke
+
+# Frontend E2E (Playwright)
+cd frontend && npm run test:e2e:install && npm run test:e2e
+```
+
+## Seylan Bank integration
+
+Stakeholder brief: [docs/seylan-stakeholder-brief.md](docs/seylan-stakeholder-brief.md)
+
+API mapping: [docs/seylan-hub-api-mapping.md](docs/seylan-hub-api-mapping.md)
 
 ## Credits
 
 - **Seylan Bank** — Sponsor & banking domain
-- **Groq** — Fast LLM inference (llama-3.3-70b)
+- **Groq** — Fast LLM inference
 - **ElevenLabs** — Text-to-speech
-- **Supabase** — Realtime database & auth
-- **Vercel** — Frontend hosting & edge functions
+- **Vercel** — Frontend hosting
 - **Cursor** — AI-assisted development
 
 ## Team — Ardeno Studio

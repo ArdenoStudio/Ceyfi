@@ -24,7 +24,15 @@ import {
 // LKR_CURRENCY exported for CurrencyExchangeCard use
 import { toast } from "sonner";
 import { EXTERNAL_LINK_REL, SEYLAN_LINKS } from "@/lib/seylan-external-links";
-import { ArrowRight, CreditCard, Zap, Send, ChevronRight, RefreshCw, CircleCheck } from "lucide-react";
+import { PaymentModeToggle } from "@/components/payments/PaymentModeToggle";
+import {
+  ArrowRight,
+  ChevronRight,
+  CircleCheck,
+  CreditCard,
+  RefreshCw,
+  Send,
+} from "lucide-react";
 import { VerificationCard } from "@/components/ui/verification-card";
 import { CurrencyExchangeCard } from "@/components/wallet/CurrencyExchangeCard";
 
@@ -39,8 +47,8 @@ interface SendMoneyModalProps {
 }
 
 const BUCKET_COLORS: Record<string, string> = {
-  school: "#34D399",
-  household: "#059669",
+  school: "#E0AF49",
+  household: "#E31821",
   savings: "#10B981",
 };
 
@@ -138,9 +146,9 @@ export function SendMoneyModal({
         allocation_rules: allocations,
       });
       toast.custom(() => (
-        <div className="flex items-start gap-3 rounded-xl border border-[#059669]/30 bg-[#04241a] px-4 py-3.5 shadow-[0_8px_32px_rgba(5,150,105,0.25)] w-[356px]">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#059669]/15">
-            <CircleCheck className="h-4 w-4 text-[#059669]" />
+        <div className="flex items-start gap-3 rounded-xl border border-[#E31821]/30 bg-[#0c0407] px-4 py-3.5 shadow-[0_8px_32px_rgba(227,24,33,0.25)] w-[356px]">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E31821]/15">
+            <CircleCheck className="h-4 w-4 text-[#E31821]" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-white">
@@ -174,28 +182,28 @@ export function SendMoneyModal({
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent
-        className="max-w-sm overflow-hidden border border-gray-100 p-0 shadow-2xl [background:#ffffff] [box-shadow:0_24px_64px_rgba(0,0,0,0.18),0_4px_16px_rgba(0,0,0,0.08)]"
+        className="max-w-sm overflow-hidden border border-border bg-popover p-0 shadow-2xl"
         showCloseButton={false}
       >
         {/* Top accent bar */}
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#059669] via-[#34D399] to-[#059669]" />
+        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#E31821] via-[#E0AF49] to-[#E31821]" />
 
         <div className="relative flex flex-col gap-0">
           {/* Header */}
           <DialogHeader className="px-5 pt-5 pb-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#059669]">
-                  CEYFI
+                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#E31821]">
+                  Seylan Hub
                 </p>
-                <DialogTitle className="font-heading text-lg font-semibold text-gray-900">
+                <DialogTitle className="font-heading text-lg font-semibold text-foreground">
                   Send to Sri Lanka
                 </DialogTitle>
               </div>
               <button
                 type="button"
                 onClick={() => handleDialogOpenChange(false)}
-                className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 aria-label="Close"
               >
                 ×
@@ -204,34 +212,12 @@ export function SendMoneyModal({
           </DialogHeader>
 
           <div className="space-y-3 px-5 pb-5">
-            {/* Mode toggle */}
-            <div className="flex rounded-xl border border-gray-100 bg-gray-50 p-1">
-              {(["card", "demo"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setPaymentMode(mode)}
-                  className="relative flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-all"
-                >
-                  {paymentMode === mode && (
-                    <motion.div
-                      layoutId="mode-pill"
-                      className="absolute inset-0 rounded-lg bg-white shadow-sm ring-1 ring-gray-200"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className={`relative flex items-center gap-1.5 ${paymentMode === mode ? "text-gray-900" : "text-gray-400"}`}>
-                    {mode === "card" ? <CreditCard className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                    {mode === "card" ? "Card (MPGS)" : "Demo Mode"}
-                  </span>
-                </button>
-              ))}
-            </div>
+            <PaymentModeToggle value={paymentMode} onChange={setPaymentMode} />
 
             {/* Recipient card */}
             <VerificationCard
               backgroundImage="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/ruixen_moon.png"
-              label="CEYFI · Recipient"
+              label="Seylan Hub · Recipient"
               idNumber={recipientId}
               name={recipientAccountHolder.trim() || "Hub Wallet"}
               validThru={`${currency.code}→LKR`}
@@ -239,9 +225,9 @@ export function SendMoneyModal({
 
             {/* Sandbox routing */}
             {sandboxRoutingLoaded && sandboxRouting && (
-              <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 font-mono text-[11px] text-gray-400">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 font-mono text-[11px] text-muted-foreground">
                 <span className="truncate">{sandboxRouting.source_account}</span>
-                <ArrowRight className="h-3 w-3 shrink-0 text-gray-300" />
+                <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground/70" />
                 <span className="truncate">{sandboxRouting.destination_account}</span>
               </div>
             )}
@@ -250,7 +236,7 @@ export function SendMoneyModal({
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center gap-1.5">
                 <img src={currency.flag} alt={currency.code} className="h-4 w-4 rounded-full object-cover" />
-                <span className="text-xs font-semibold text-gray-500">{currency.code}</span>
+                <span className="text-xs font-semibold text-muted-foreground">{currency.code}</span>
               </div>
               <Input
                 id="amount"
@@ -262,10 +248,10 @@ export function SendMoneyModal({
                   const v = parseFloat(e.target.value);
                   setAmount(Number.isFinite(v) && v >= 0 ? v : 0);
                 }}
-                className="border-gray-200 bg-white pl-16 text-sm font-semibold text-gray-900 placeholder:text-gray-300 focus-visible:border-[#059669]/40 focus-visible:ring-[#059669]/10"
+                className="border-border bg-background pl-16 text-sm font-semibold text-foreground placeholder:text-muted-foreground/70 focus-visible:border-[#E31821]/40 focus-visible:ring-[#E31821]/10"
               />
               <div className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center">
-                <span className="text-xs font-medium text-gray-400">{currency.symbol}</span>
+                <span className="text-xs font-medium text-muted-foreground">{currency.symbol}</span>
               </div>
             </div>
 
@@ -273,26 +259,26 @@ export function SendMoneyModal({
             <button
               type="button"
               onClick={() => setShowFxCalc(true)}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-200 py-2 text-xs font-medium text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-gray-300 hover:text-gray-600"
             >
               <RefreshCw className="h-3 w-3" />
               FX calculator
             </button>
 
             {/* LKR conversion */}
-            <div className="relative overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-4">
+            <div className="relative overflow-hidden rounded-xl border border-border bg-muted p-4">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Recipient gets
                   </p>
-                  <p className="font-heading text-2xl font-bold tracking-tight text-[#059669]">
+                  <p className="font-heading text-2xl font-bold tracking-tight text-[#E31821]">
                     {formatLKR(amountLkr)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-gray-400">Rate</p>
-                  <p className="font-mono text-xs font-semibold text-gray-500">
+                  <p className="text-[10px] text-muted-foreground">Rate</p>
+                  <p className="font-mono text-xs font-semibold text-muted-foreground">
                     1 {currency.code} = {currency.lkrRate} LKR
                   </p>
                 </div>
@@ -300,8 +286,8 @@ export function SendMoneyModal({
             </div>
 
             {/* Allocation */}
-            <div className="rounded-xl border border-gray-100 bg-white p-3.5">
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+            <div className="rounded-xl border border-border bg-card p-3.5">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Allocation
               </p>
               <div className="space-y-2.5">
@@ -310,10 +296,10 @@ export function SendMoneyModal({
                   return (
                     <div key={id}>
                       <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs font-medium capitalize text-gray-700">
+                        <span className="text-xs font-medium capitalize text-muted-foreground">
                           {id.replace(/_/g, " ")}
                         </span>
-                        <span className="font-mono text-xs font-semibold text-gray-500">
+                        <span className="font-mono text-xs font-semibold text-muted-foreground">
                           {pct}%
                         </span>
                       </div>
@@ -340,7 +326,7 @@ export function SendMoneyModal({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.2 }}
-                className="text-[11px] leading-relaxed text-gray-400"
+                className="text-[11px] leading-relaxed text-muted-foreground"
               >
                 {paymentMode === "card" ? (
                   <>
@@ -359,7 +345,7 @@ export function SendMoneyModal({
                       href={SEYLAN_LINKS.internetBankingPersonalLogin}
                       target="_blank"
                       rel={EXTERNAL_LINK_REL}
-                      className="font-medium text-[#059669] underline-offset-2 hover:underline"
+                      className="font-medium text-[#E31821] underline-offset-2 hover:underline"
                     >
                       Personal Internet Banking
                     </a>
@@ -374,7 +360,7 @@ export function SendMoneyModal({
               type="button"
               disabled={sending || !isValid}
               onClick={handleSubmit}
-              className="group relative w-full overflow-hidden rounded-xl bg-[#059669] py-3.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(5,150,105,0.3)] transition-all hover:bg-[#047857] hover:shadow-[0_6px_24px_rgba(5,150,105,0.4)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              className="group relative w-full overflow-hidden rounded-xl bg-[#E31821] py-3.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(227,24,33,0.3)] transition-all hover:bg-[#c41219] hover:shadow-[0_6px_24px_rgba(227,24,33,0.4)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               <span className="relative flex items-center justify-center gap-2">
                 {sending ? (
@@ -403,17 +389,17 @@ export function SendMoneyModal({
           className="max-w-lg border border-gray-100 p-0 shadow-2xl [background:#ffffff]"
           showCloseButton={false}
         >
-          <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#059669] via-[#34D399] to-[#059669]" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#E31821] via-[#E0AF49] to-[#E31821]" />
           <div className="p-8">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#059669]">CEYFI</p>
-                <p className="mt-0.5 text-xl font-semibold text-gray-900">FX Calculator</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#E31821]">Seylan Hub</p>
+                <p className="mt-0.5 text-xl font-semibold text-foreground">FX Calculator</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowFxCalc(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 text-lg"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-gray-100 hover:text-gray-600 text-lg"
               >
                 ×
               </button>
