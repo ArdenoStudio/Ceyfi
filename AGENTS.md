@@ -16,6 +16,13 @@
 - **With backend:** Start backend first (`cd backend && . .venv/bin/activate && uvicorn app.main:app --port 8000`), then frontend with `NEXT_PUBLIC_USE_MOCK=false NEXT_PUBLIC_API_BASE=http://localhost:8000 npm run dev`.
 - Backend serves mock fixture data at `/mock/*` endpoints and AI-powered endpoints at `/api/*`. AI endpoints fall back to deterministic heuristics when `GROQ_API_KEY` is absent.
 
+### Real-backend mode (live integrations)
+
+- Config is loaded via pydantic-settings from gitignored env files: `backend/.env` and `frontend/.env.local` (both covered by `.gitignore`; never commit real keys). The frontend always calls `NEXT_PUBLIC_API_BASE` (defaults to `http://localhost:8000` in dev).
+- Setting `DATABASE_URL` (Neon Postgres) makes the backend run idempotent `CREATE TABLE IF NOT EXISTS` migrations on startup (`DB migrations applied` in logs) and persist transactions/payments. Verify with `GET /health/deep` (`database: ok`, `groq: configured`).
+- Setting `GROQ_API_KEY` enables live LLM streaming on `/api/chat` and the AI assistant page; on startup it prewarms a couple of cached completions.
+- `MPGS_ENABLE=true` with `MPGS_MERCHANT_ID`/`MPGS_API_PASSWORD` makes `/api/payments/session` call the real Mastercard gateway. Card sessions still require the in-UI **Demo Mode** toggle for a reliable flow; the live `CREATE_CHECKOUT_SESSION` request shape is gateway/version sensitive.
+
 ### Lint / test / build
 
 - **Frontend lint:** `cd frontend && npm run lint` — ESLint 9 with next config. Pre-existing failures: 2 errors (`react-hooks/set-state-in-effect`) plus 6 `@next/next/no-img-element` warnings.
