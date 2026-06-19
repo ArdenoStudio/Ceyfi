@@ -34,7 +34,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!user && !isPublic) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-ceyfi-canvas">
+        <div className="text-sm text-ceyfi-muted">Loading CEYFI…</div>
+      </div>
+    );
   }
 
   return <>{children}</>;

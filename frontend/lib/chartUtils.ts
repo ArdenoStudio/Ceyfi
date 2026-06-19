@@ -52,8 +52,12 @@ export function seriesColor(index: number): string {
 // Y-axis domain with 10% padding
 export function getYDomain(data: number[]): [number, number] {
   if (data.length === 0) return [0, 100];
-  const min = Math.min(...data);
-  const max = Math.max(...data);
+  let min = data[0];
+  let max = data[0];
+  for (const v of data) {
+    if (v < min) min = v;
+    if (v > max) max = v;
+  }
   const pad = (max - min) * 0.1 || max * 0.1 || 1;
   return [Math.max(0, min - pad), max + pad];
 }
