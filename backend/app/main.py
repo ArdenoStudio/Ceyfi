@@ -145,6 +145,9 @@ async def demo_auth_middleware(request: Request, call_next):
     """Require a valid demo session for protected API and mock routes."""
     path = request.url.path
 
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
     if not settings.demo_auth_required:
         return await call_next(request)
 
