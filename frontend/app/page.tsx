@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -21,11 +22,10 @@ import {
   WalletBucketIcon,
 } from "@/components/icons/CeyfiIconSet";
 import { PeriodBadge } from "@/components/charts/PeriodBadge";
-import { TimeRiver } from "@/components/charts/TimeRiver";
 import {
-  CashflowChart,
   ProgressCircle,
 } from "@/components/charts/OverviewCharts";
+import { ChartSkeleton } from "@/components/lazy/LazySkeletons";
 import { RotatingInsightsCard } from "@/components/insights/RotatingInsightsCard";
 import { GradientText } from "@/components/motion/GradientText";
 import { ShinyText } from "@/components/motion/ShinyText";
@@ -39,6 +39,28 @@ import { getAccountContext, getFamilyWallet, getLoans } from "@/lib/api";
 import { buildSparkline, periodDelta } from "@/lib/chartUtils";
 import { cn, formatters } from "@/lib/utils";
 import type { AccountContext, Loan, WalletState } from "@/types";
+
+const TimeRiver = dynamic(
+  () =>
+    import("@/components/charts/TimeRiver").then((m) => ({
+      default: m.TimeRiver,
+    })),
+  {
+    loading: () => <ChartSkeleton height={280} />,
+    ssr: false,
+  }
+);
+
+const CashflowChart = dynamic(
+  () =>
+    import("@/components/charts/OverviewCharts").then((m) => ({
+      default: m.CashflowChart,
+    })),
+  {
+    loading: () => <ChartSkeleton height={240} />,
+    ssr: false,
+  }
+);
 
 const FALLBACK_CONTEXT: AccountContext = {
   user_id: "SEY-USR-001",
@@ -473,7 +495,7 @@ export default function OverviewPage() {
         <ChartCard
           title="Income and spending"
           subtitle="Monthly cash flow in LKR"
-          className="xl:col-span-2"
+          className="xl:col-span-2 min-h-[320px]"
         >
           <CashflowChart data={CASHFLOW} />
         </ChartCard>
@@ -481,6 +503,7 @@ export default function OverviewPage() {
         <ChartCard
           title="Loan health"
           subtitle="Repayment strength across active loans"
+          className="min-h-[320px]"
         >
           <div className="flex flex-col items-center py-1">
             <ProgressCircle value={loanHealth}>

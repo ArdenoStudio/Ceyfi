@@ -69,6 +69,7 @@ export function FinanceConnectionDiagram({ className }: { className?: string }) 
               alt=""
               width={28}
               height={28}
+              sizes="28px"
               className="h-7 w-7 object-contain dark:brightness-0 dark:invert"
             />
           </BeamNode>

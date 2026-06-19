@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { getLoans } from "@/lib/api";
 import { Loan } from "@/types";
 import { toast } from "sonner";
@@ -12,13 +13,24 @@ import { RepaymentTimeline } from "@/components/loans/RepaymentTimeline";
 import { LoanIntelligenceCharts } from "@/components/loans/LoanIntelligenceCharts";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { HeroColorPanels } from "@/components/blocks/HeroColorPanels";
-import { LoanProductsCarousel } from "@/components/blocks/AppleCardsCarousel";
+import { CarouselSkeleton } from "@/components/lazy/LazySkeletons";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { StatCard, StatGrid } from "@/components/hyperui";
 import { AlertTriangle, Bot, CalendarCheck, Gauge, Wallet, WalletCards } from "lucide-react";
+
+const LoanProductsCarousel = dynamic(
+  () =>
+    import("@/components/blocks/AppleCardsCarousel").then((m) => ({
+      default: m.LoanProductsCarousel,
+    })),
+  {
+    loading: () => <CarouselSkeleton />,
+    ssr: false,
+  }
+);
 
 const ASSISTANT_PROMPT =
   "Show me repayment scenarios for my current loan: paying today, paying three days late, and making a partial payment.";
@@ -64,9 +76,15 @@ export default function LoansPage() {
     return (
       <div className="mx-auto w-full max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-32 w-full rounded-[26px]" />
+        <CarouselSkeleton />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+        </div>
+        <Skeleton className="h-48 w-full rounded-2xl" />
       </div>
     );
   }

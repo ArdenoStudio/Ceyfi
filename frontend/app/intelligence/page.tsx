@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -22,7 +23,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { BackgroundBeams } from "@/components/aceternity/background-beams";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { BentoGridShowcase } from "@/components/blocks/BentoGridShowcase";
 import { GradientBorder } from "@/components/blocks/GradientBorder";
@@ -45,6 +45,14 @@ import { getFinancialSnapshot, type FinancialSnapshot } from "@/lib/api";
 import { CHART_COLORS } from "@/lib/chartUtils";
 import { formatters } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+
+const BackgroundBeams = dynamic(
+  () =>
+    import("@/components/aceternity/background-beams").then((m) => ({
+      default: m.BackgroundBeams,
+    })),
+  { ssr: false }
+);
 
 const ICON_MAP = {
   TrendingUp,
@@ -110,7 +118,7 @@ export default function IntelligencePage() {
         <ErrorState message={error} onRetry={loadSnapshot} />
       ) : (
         <>
-      <header className="relative overflow-hidden rounded-[26px] border border-ceyfi-line/60 bg-gradient-to-br from-ceyfi-paper via-ceyfi-sprout/40 to-ceyfi-paper px-6 py-8 sm:px-8 dark:border-white/10 dark:from-ceyfi-deep/50 dark:via-ceyfi-deep/30 dark:to-ceyfi-deep/40">
+      <header className="relative min-h-[168px] overflow-hidden rounded-[26px] border border-ceyfi-line/60 bg-gradient-to-br from-ceyfi-paper via-ceyfi-sprout/40 to-ceyfi-paper px-6 py-8 sm:px-8 dark:border-white/10 dark:from-ceyfi-deep/50 dark:via-ceyfi-deep/30 dark:to-ceyfi-deep/40">
         <BackgroundBeams className="opacity-30 dark:opacity-20" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
