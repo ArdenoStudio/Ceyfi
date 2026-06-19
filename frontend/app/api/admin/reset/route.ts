@@ -5,18 +5,31 @@ const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8000";
 /**
  * Demo-only proxy for POST /mock/reset-demo.
  *
- * The admin key is read from DEMO_ADMIN_KEY on the server — never from a
- * NEXT_PUBLIC_* variable — so it is not shipped in the client bundle.
- *
- * There is no session check: the in-app demo reset button is meant for kiosk
- * / buildathon use. To disable reset in a deployment, omit DEMO_ADMIN_KEY
- * (returns 403). Local dev falls back to the shared demo key.
+ * Requires a valid demo session (Bearer token). The admin key stays server-side
+ * in DEMO_ADMIN_KEY — never use NEXT_PUBLIC_* for secrets.
  */
 const ADMIN_KEY =
   process.env.DEMO_ADMIN_KEY ??
   (process.env.NODE_ENV === "development" ? "ceyfi-demo-admin" : undefined);
 
-export async function POST() {
+export async function POST(request: Request) {
+  const auth = request.headers.get("authorization");
+  if (!auth?.startsWith("Bearer ")) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  try {
+    const meRes = await fetch(`${BACKEND}/api/auth/me`, {
+      headers: { Authorization: auth },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!meRes.ok) {
+      return NextResponse.json({ error: "Invalid or expired session." }, { status: 401 });
+    }
+  } catch {
+    return NextResponse.json({ error: "Could not verify session." }, { status: 502 });
+  }
+
   if (!ADMIN_KEY) {
     return NextResponse.json({ error: "Demo reset is disabled." }, { status: 403 });
   }

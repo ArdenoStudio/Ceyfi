@@ -10,7 +10,7 @@ import re
 from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Request
 from pydantic import BaseModel, Field
 
 from app.config import settings
@@ -52,6 +52,42 @@ def _require_mpgs() -> None:
         raise HTTPException(status_code=503, detail=_503_MSG)
     if not settings.mpgs_merchant_id or not settings.mpgs_api_password:
         raise HTTPException(status_code=503, detail="MPGS credentials not configured.")
+
+
+def _public_payment_view(row: dict[str, Any]) -> dict[str, Any]:
+    """Return only client-safe payment fields (no raw gateway payloads)."""
+    gw = row.get("gateway_response") or {}
+    if isinstance(gw, str):
+        import json
+        try:
+            gw = json.loads(gw)
+        except json.JSONDecodeError:
+            gw = {}
+    amount = row.get("amount_lkr")
+    if amount is None and isinstance(gw, dict):
+        amount = gw.get("amount_lkr") or gw.get("amount")
+    return {
+        "order_id": row.get("order_id"),
+        "status": row.get("status", "PENDING"),
+        "amount_lkr": amount,
+        "currency": row.get("currency") or (gw.get("currency") if isinstance(gw, dict) else None) or "LKR",
+        "purpose": row.get("purpose") or (gw.get("purpose") if isinstance(gw, dict) else None),
+    }
+
+
+def _assert_payment_owner(row: dict[str, Any], session: dict[str, Any] | None) -> None:
+    if session is None:
+        return
+    meta = row.get("metadata") or {}
+    if isinstance(meta, str):
+        import json
+        try:
+            meta = json.loads(meta)
+        except json.JSONDecodeError:
+            meta = {}
+    owner = meta.get("user_id")
+    if owner and owner != session["user_id"]:
+        raise HTTPException(status_code=403, detail="Access denied for this payment")
 
 
 async def _fulfill(
@@ -146,9 +182,15 @@ async def _fulfill(
 # ---------------------------------------------------------------------------
 
 @router.post("/api/payments/session", response_model=CreateSessionResponse)
-async def create_payment_session(body: CreateSessionRequest):
+async def create_payment_session(body: CreateSessionRequest, request: Request):
     _require_mpgs()
+    session = getattr(request.state, "session", None)
+    if settings.demo_auth_required and not session:
+        raise HTTPException(status_code=401, detail="Authentication required")
 
+    metadata = dict(body.metadata)
+    if session:
+        metadata["user_id"] = session["user_id"]
     order_id = f"SH-{body.purpose.upper()}-{uuid4().hex[:10].upper()}"
     return_url = f"{settings.frontend_base_url}/payments/return?order_id={order_id}"
 
@@ -176,7 +218,7 @@ async def create_payment_session(body: CreateSessionRequest):
             "purpose": body.purpose,
             "description": body.description,
             "status": "PENDING",
-            "metadata": body.metadata,
+            "metadata": metadata,
             "gateway_response": session,
         })
     except Exception as exc:
@@ -190,35 +232,30 @@ async def create_payment_session(body: CreateSessionRequest):
 
 
 @router.get("/api/payments/{order_id}")
-async def get_payment(order_id: str = Path(..., min_length=8, max_length=64)):
+async def get_payment(request: Request, order_id: str = Path(..., min_length=8, max_length=64)):
     if not _ORDER_ID_RE.match(order_id):
         raise HTTPException(status_code=422, detail="Invalid order_id format")
+    session = getattr(request.state, "session", None)
+    if settings.demo_auth_required and not session:
+        raise HTTPException(status_code=401, detail="Authentication required")
     row = None
     try:
         row = supabase_client.get_payment(order_id)
     except Exception:
         row = None
 
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Payment {order_id} not found.")
+
+    if session:
+        _assert_payment_owner(row, session)
+
     if order_id.startswith("PH-"):
-        if not row:
-            raise HTTPException(status_code=404, detail=f"Payment {order_id} not found.")
-        gw = row.get("gateway_response") or {}
-        if isinstance(gw, str):
-            import json
-            gw = json.loads(gw)
-        return {
-            "order_id": order_id,
-            "status": row.get("status", "PENDING"),
-            "amount_lkr": gw.get("amount_lkr"),
-            "currency": gw.get("currency", "LKR"),
-            "purpose": gw.get("purpose"),
-            "metadata": gw.get("metadata") or {},
-            "gateway_response": gw,
-        }
+        return _public_payment_view(row)
 
     _require_mpgs()
 
-    if row and row.get("status") == "PENDING":
+    if row.get("status") == "PENDING":
         try:
             gateway = await mpgs.get_order_status(order_id)
             supabase_client.update_payment_status(
@@ -227,22 +264,10 @@ async def get_payment(order_id: str = Path(..., min_length=8, max_length=64)):
                 gateway_response=gateway,
             )
             row["status"] = gateway["status"]
-            row["gateway_response"] = gateway
         except Exception as exc:
             log.warning("MPGS status refresh failed for %s: %s", order_id, exc)
-        return row
 
-    try:
-        gateway = await mpgs.get_order_status(order_id)
-        return {
-            "order_id": order_id,
-            "status": gateway["status"],
-            "amount_lkr": gateway.get("amount"),
-            "currency": gateway.get("currency", "LKR"),
-            "gateway_response": gateway,
-        }
-    except Exception:
-        raise HTTPException(status_code=404, detail=f"Payment {order_id} not found.")
+    return _public_payment_view(row)
 
 
 @router.post("/api/payments/webhook", status_code=200)
@@ -274,6 +299,20 @@ async def mpgs_webhook(payload: dict[str, Any]):
         )
 
         if status == "CAPTURED":
+            verified = status
+            if settings.mpgs_webhook_verify and settings.mpgs_enable:
+                try:
+                    gateway = await mpgs.get_order_status(order_id)
+                    verified = gateway.get("status", "UNKNOWN")
+                except Exception as exc:
+                    log.warning("MPGS webhook verify failed for %s: %s", order_id, exc)
+                    return {"received": True, "processed": False, "reason": "verification_failed"}
+            if verified != "CAPTURED":
+                log.warning(
+                    "MPGS webhook rejected: order_id=%s claimed=%s verified=%s",
+                    order_id, status, verified,
+                )
+                return {"received": True, "processed": False, "reason": "status_mismatch"}
             row = supabase_client.get_payment(order_id)
             if row:
                 await _fulfill(

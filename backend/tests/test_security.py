@@ -166,3 +166,44 @@ def test_notify_hash_formula():
     expected_payload = "1212345" + "ORD-1" + "99.00" + "LKR" + "2" + _secret_hash(secret)
     expected = hashlib.md5(expected_payload.encode("utf-8")).hexdigest().upper()
     assert _notify_hash("1212345", "ORD-1", "99.00", "LKR", "2", secret) == expected
+
+
+@pytest.mark.asyncio
+async def test_mock_routes_require_auth_when_enabled(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    resp = await client.get("/mock/account-context/SEY-USR-001")
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_mock_routes_allow_persona_scoped_access(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    ok = await client.get("/mock/account-context/SEY-USR-001", headers=headers)
+    assert ok.status_code == 200
+
+    denied = await client.get("/mock/account-context/SEY-BIZ-001", headers=headers)
+    assert denied.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_admin_endpoints_disabled_without_key(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_admin_key", "")
+    resp = await client.post("/mock/seed")
+    assert resp.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_health_deep_requires_admin_key(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    resp = await client.get("/health/deep")
+    assert resp.status_code == 403
+
+    resp = await client.get(
+        "/health/deep",
+        headers={"X-Demo-Admin-Key": "ceyfi-demo-admin"},
+    )
+    assert resp.status_code == 200

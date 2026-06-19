@@ -53,7 +53,9 @@ npm run dev
 See `frontend/.env.example` and `backend/.env.example`.
 
 Key demo settings:
-- `DEMO_ADMIN_KEY` / `NEXT_PUBLIC_DEMO_ADMIN_KEY` — protects reset/seed endpoints
+- `DEMO_SESSION_SECRET` — signs persona login tokens (required in production)
+- `DEMO_ADMIN_KEY` — server-only; protects reset/seed/warm-up (set on backend **and** Vercel as `DEMO_ADMIN_KEY`, never `NEXT_PUBLIC_*`)
+- `DEMO_AUTH_REQUIRED=true` — enforces Bearer auth on API/mock routes (default)
 - `USE_SEYLAN_REAL=true` + `SEYLAN_ENABLE_TRANSFERS=true` — live sandbox transfers
 
 ## Demo Notes

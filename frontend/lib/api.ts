@@ -431,6 +431,7 @@ export async function prewarmDemoData() {
 export async function postDemoReset() {
   const res = await fetch("/api/admin/reset", {
     method: "POST",
+    headers: authHeaders(),
     signal: AbortSignal.timeout(10000),
   });
   if (!res.ok) throw new Error("Demo reset failed");

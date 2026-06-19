@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from app.config import settings
@@ -10,6 +10,7 @@ from app.models.schemas import ChatRequest
 from app.services import groq_client, supabase_client, claude_client
 from app.services.context_builder import build_assistant_system_prompt
 from app.services.chat_tools import TOOL_DEFINITIONS, execute_tool, execute_tool_async
+from app.services.auth import assert_user_access
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["chat"])
@@ -63,7 +64,9 @@ def _get_supplemental_context(user_id: str) -> tuple[dict | None, dict | None]:
 
 
 @router.post("/chat")
-async def chat(req: ChatRequest):
+async def chat(req: ChatRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
     account_ctx = _get_account_context(req.user_id)
     if settings.use_seylan_real:
         try:
@@ -152,8 +155,10 @@ async def chat(req: ChatRequest):
 
 
 @router.post("/chat/actions")
-async def chat_with_actions(req: ChatRequest):
+async def chat_with_actions(req: ChatRequest, request: Request):
     """Non-streaming chat that supports tool calling. Returns text + any actions taken."""
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
     account_ctx = _get_account_context(req.user_id)
     loans_detail, wallet = _get_supplemental_context(req.user_id)
     system_prompt = build_assistant_system_prompt(account_ctx, req.language, loans_detail=loans_detail, wallet=wallet)

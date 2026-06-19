@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from app.config import settings
 from app.services.auth import (
     DEMO_PERSONAS,
     create_session_token,
@@ -24,6 +25,8 @@ async def get_personas():
 
 @router.post("/login")
 async def login(req: LoginRequest):
+    if not settings.demo_session_secret:
+        raise HTTPException(status_code=503, detail="Demo authentication is not configured")
     if req.user_id not in DEMO_PERSONAS:
         raise HTTPException(status_code=404, detail="Unknown persona")
     persona = DEMO_PERSONAS[req.user_id]

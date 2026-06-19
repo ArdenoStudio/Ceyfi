@@ -110,6 +110,8 @@ export function AskAgent() {
                       .replace(/&/g, "&amp;")
                       .replace(/</g, "&lt;")
                       .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#39;")
                       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"),
                   }}
                 />
