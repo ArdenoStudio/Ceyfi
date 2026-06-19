@@ -7,7 +7,6 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
-from telegram import Update
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -24,7 +23,6 @@ from app.services.auth import (
     resolve_session,
 )
 from payhere import router as payhere_router
-from telegram_bot.bot import build_application as build_telegram_app
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 log = logging.getLogger(__name__)
@@ -105,6 +103,8 @@ async def lifespan(app: FastAPI):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     if token:
         try:
+            from telegram import Update  # noqa: PLC0415
+            from telegram_bot.bot import build_application as build_telegram_app  # noqa: PLC0415
             telegram_app = build_telegram_app(token)
             await telegram_app.initialize()
             await telegram_app.start()
