@@ -95,7 +95,17 @@ export default function WalletPage() {
   }, [wallet?.account_holder]);
 
   if (authLoading || walletAccountId === null) {
-    return null;
+    return (
+      <div
+        className="flex min-h-[50vh] items-center justify-center"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <p className="text-sm text-muted-foreground">
+          {authLoading ? "Loading CEYFI…" : "Opening your dashboard…"}
+        </p>
+      </div>
+    );
   }
 
   if (loading) {
