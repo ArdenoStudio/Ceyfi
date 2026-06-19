@@ -74,10 +74,14 @@ class Settings(BaseSettings):
     frontend_base_url: str = "https://seylan-hub-frontend.netlify.app"
     backend_base_url: str = "http://localhost:8000"
 
-    # Demo auth & admin
-    demo_session_secret: str = "ceyfi-demo-session-change-in-production"
+    # Demo auth & admin (set via env — no insecure defaults)
+    demo_session_secret: str = ""
     demo_session_ttl_seconds: int = 86400 * 7
-    demo_admin_key: str = "ceyfi-demo-admin"
+    demo_admin_key: str = ""
+    demo_auth_required: bool = True
+
+    # MPGS webhook: verify CAPTURED status with gateway API before fulfillment
+    mpgs_webhook_verify: bool = True
 
     @property
     def cors_list(self) -> list[str]:

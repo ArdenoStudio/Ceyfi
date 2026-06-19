@@ -6,7 +6,7 @@ import uuid
 from collections import defaultdict
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from telegram import Update
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -15,6 +15,14 @@ from app.services import metrics_store
 
 from app.config import settings
 from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot, banking_tools
+from app.services.auth import (
+    authorize_resource,
+    is_public_path,
+    match_path_resource,
+    require_admin,
+    requires_admin_path,
+    resolve_session,
+)
 from payhere import router as payhere_router
 from telegram_bot.bot import build_application as build_telegram_app
 
@@ -133,6 +141,40 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def demo_auth_middleware(request: Request, call_next):
+    """Require a valid demo session for protected API and mock routes."""
+    path = request.url.path
+
+    if not settings.demo_auth_required:
+        return await call_next(request)
+
+    if is_public_path(path):
+        return await call_next(request)
+
+    if requires_admin_path(path):
+        try:
+            require_admin(request.headers.get("X-Demo-Admin-Key"))
+        except HTTPException as exc:
+            return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
+        return await call_next(request)
+
+    session = resolve_session(request.headers.get("Authorization"))
+    if not session:
+        return JSONResponse(status_code=401, content={"error": "Authentication required"})
+
+    resource = match_path_resource(path)
+    if resource:
+        resource_type, resource_id = resource
+        try:
+            authorize_resource(session, resource_type, resource_id)
+        except HTTPException as exc:
+            return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
+
+    request.state.session = session
+    return await call_next(request)
 
 
 @app.middleware("http")
@@ -263,6 +305,7 @@ async def health_deep():
     deps["groq"] = "configured" if settings.groq_api_key else "not_configured"
     deps["elevenlabs"] = "configured" if settings.elevenlabs_api_key else "not_configured"
     deps["seylan_real"] = "enabled" if settings.use_seylan_real else "disabled"
+    deps["demo_auth"] = "enabled" if settings.demo_auth_required else "disabled"
 
     overall = "ok" if deps.get("groq") == "configured" or deps.get("openai") == "configured" else "degraded"
     return {"status": overall, "version": "0.2.0", "dependencies": deps}

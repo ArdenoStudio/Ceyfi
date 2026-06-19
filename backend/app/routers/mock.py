@@ -272,7 +272,7 @@ async def reset_demo():
         log.info("reset-demo complete: %s", result)
     except Exception as exc:
         log.warning("reset-demo supabase error: %s", exc)
-        result = {"error": str(exc)}
+        result = {"error": "reset_failed"}
     return {
         "reset": True,
         "tax_jar": 15070,
