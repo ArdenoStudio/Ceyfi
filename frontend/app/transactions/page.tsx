@@ -15,7 +15,6 @@ import {
 import { Search, Download, Receipt } from "lucide-react";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CeyfiTooltip } from "@/components/charts/CeyfiTooltip";
 import { ChartContainer } from "@/components/charts/ChartContainer";
 import { Badge } from "@/components/ui/badge";
@@ -104,7 +103,6 @@ export default function TransactionsPage() {
   const { userId } = useCurrentUser();
   const [transactions, setTransactions] = useState(FALLBACK_TRANSACTIONS);
   const [query, setQuery] = useState("");
-  const [month, setMonth] = useState("all");
   const [category, setCategory] = useState("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "debit" | "credit">("all");
   const [page, setPage] = useState(1);
@@ -114,13 +112,11 @@ export default function TransactionsPage() {
     weekday: number;
   } | null>(null);
   const [anomalyTip, setAnomalyTip] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const perPage = 15;
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     getAccountContext(userId)
       .then((data) => {
         if (cancelled) return;
@@ -134,9 +130,6 @@ export default function TransactionsPage() {
         if (!cancelled) {
           setLoadError("Using demo transactions — live account data unavailable.");
         }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
@@ -230,7 +223,6 @@ export default function TransactionsPage() {
     return transactions.filter((t) => {
       if (query && !t.description.toLowerCase().includes(query.toLowerCase()))
         return false;
-      if (month !== "all" && !t.date.startsWith(month)) return false;
       if (category !== "all" && t.category !== category) return false;
       if (typeFilter !== "all" && t.type !== typeFilter) return false;
       if (heatmapFilter) {
@@ -245,7 +237,7 @@ export default function TransactionsPage() {
       }
       return true;
     });
-  }, [transactions, query, month, category, typeFilter, heatmapFilter]);
+  }, [transactions, query, category, typeFilter, heatmapFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
@@ -296,16 +288,6 @@ export default function TransactionsPage() {
         ) : null}
       </header>
 
-      {loading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-64" />
-          <div className="grid gap-4 md:grid-cols-2">
-            <Skeleton className="h-56" />
-            <Skeleton className="h-56" />
-          </div>
-          <Skeleton className="h-72 w-full" />
-        </div>
-      ) : (
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-ceyfi-canvas">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -543,25 +525,8 @@ export default function TransactionsPage() {
                     <th className="px-4 py-3 text-right">Amount</th>
                   </tr>
                 </thead>
-              <tbody>
-                {paged.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-12 text-center">
-                      <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ceyfi-canvas dark:bg-white/5">
-                          <Receipt className="h-5 w-5 text-ceyfi-muted" />
-                        </div>
-                        <p className="text-sm font-medium text-ceyfi-ink dark:text-white">
-                          No transactions match your filters
-                        </p>
-                        <p className="text-xs text-ceyfi-muted">
-                          Try clearing search, category, or heatmap filters.
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                paged.map((t) => (
+                <tbody>
+                  {paged.map((t) => (
                     <tr key={t.id} className="border-b border-ceyfi-line/40 last:border-0 bg-ceyfi-paper/40">
                       <td className="px-4 py-3 font-mono text-ceyfi-faint">{t.date}</td>
                       <td className="px-4 py-3 font-medium text-ceyfi-ink">{t.description}</td>
@@ -578,10 +543,9 @@ export default function TransactionsPage() {
                         {t.type === "credit" ? "+" : "−"}
                         {formatters.currency({ number: Math.abs(t.amount_lkr), maxFractionDigits: 0 })}
                       </td>
-                  </tr>
-                ))
-                )}
-              </tbody>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
             )}
             <div className="flex items-center justify-between border-t border-ceyfi-line/60 bg-ceyfi-paper px-4 py-3">
@@ -598,7 +562,6 @@ export default function TransactionsPage() {
           </div>
         </TabsContent>
       </Tabs>
-      )}
     </div>
   );
 }

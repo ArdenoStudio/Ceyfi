@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Dialog,
@@ -235,7 +236,7 @@ export function SendMoneyModal({
             {/* Amount input */}
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center gap-1.5">
-                <img src={currency.flag} alt={currency.code} className="h-4 w-4 rounded-full object-cover" />
+                <Image src={currency.flag} alt={currency.code} width={20} height={20} className="rounded-full object-cover" />
                 <span className="text-xs font-semibold text-muted-foreground">{currency.code}</span>
               </div>
               <Input

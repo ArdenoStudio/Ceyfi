@@ -52,8 +52,15 @@ def _require_mpgs() -> None:
         raise HTTPException(status_code=503, detail="MPGS credentials not configured.")
 
 
-async def _fulfill(order_id: str, purpose: str, amount_lkr: float, metadata: dict) -> None:
+async def _fulfill(
+    order_id: str,
+    purpose: str,
+    amount_lkr: float,
+    metadata: dict,
+    gateway: str = "mpgs",
+) -> None:
     """Run the post-capture business action for each payment purpose."""
+    label = gateway.upper()
     try:
         if purpose == "remittance":
             buckets: list[dict] = metadata.get("buckets", [])
@@ -64,11 +71,11 @@ async def _fulfill(order_id: str, purpose: str, amount_lkr: float, metadata: dic
                 if bucket_amount > 0:
                     supabase_client.insert_transaction(
                         account_id=account_id,
-                        merchant="Remittance (MPGS)",
+                        merchant=f"Remittance ({label})",
                         amount_lkr=bucket_amount,
                         bucket_id=bucket.get("id"),
                         bucket_label=bucket.get("label"),
-                        source="mpgs",
+                        source=gateway,
                         txn_type="credit",
                     )
 
@@ -79,9 +86,9 @@ async def _fulfill(order_id: str, purpose: str, amount_lkr: float, metadata: dic
             # Business income transaction
             supabase_client.insert_transaction(
                 account_id=user_id,
-                merchant="Customer Payment (MPGS)",
+                merchant=f"Customer Payment ({label})",
                 amount_lkr=amount_lkr,
-                source="mpgs",
+                source=gateway,
                 txn_type="credit",
             )
             # Tax jar savings split
@@ -89,21 +96,21 @@ async def _fulfill(order_id: str, purpose: str, amount_lkr: float, metadata: dic
                 account_id=metadata.get("tax_account_id", "SEY-SAV-001"),
                 merchant="Tax Jar Auto-Split",
                 amount_lkr=tax_amount,
-                source="mpgs",
+                source=gateway,
                 txn_type="credit",
             )
             log.info(
-                "MPGS tax_jar_inbound captured order_id=%s amount=%.2f tax_saved=%.2f",
-                order_id, amount_lkr, tax_amount,
+                "%s tax_jar_inbound captured order_id=%s amount=%.2f tax_saved=%.2f",
+                label, order_id, amount_lkr, tax_amount,
             )
 
         elif purpose == "shop_sale":
             biz_id: str = metadata.get("user_id", "SEY-BIZ-001")
             supabase_client.insert_transaction(
                 account_id=biz_id,
-                merchant=metadata.get("merchant_name", "Shop Sale (MPGS)"),
+                merchant=metadata.get("merchant_name", f"Shop Sale ({label})"),
                 amount_lkr=amount_lkr,
-                source="mpgs",
+                source=gateway,
                 txn_type="credit",
             )
 
@@ -116,19 +123,20 @@ async def _fulfill(order_id: str, purpose: str, amount_lkr: float, metadata: dic
                 account_id=user_id_loan,
                 merchant="Loan Payment — " + loan_id,
                 amount_lkr=amount_lkr,
-                source="mpgs",
+                source=gateway,
                 txn_type="debit",
             )
             log.info(
-                "MPGS loan payment applied loan_id=%s user=%s amount=%.2f "
+                "%s loan payment applied loan_id=%s user=%s amount=%.2f "
                 "new_outstanding=%.2f health=%s",
+                label,
                 loan_id, user_id_loan, amount_lkr,
                 updated.get("outstanding_lkr", 0),
                 updated.get("health_score", "?"),
             )
 
     except Exception as exc:
-        log.error("MPGS fulfillment failed order_id=%s purpose=%s: %s", order_id, purpose, exc)
+        log.error("%s fulfillment failed order_id=%s purpose=%s: %s", label, order_id, purpose, exc)
 
 
 # ---------------------------------------------------------------------------
@@ -181,12 +189,30 @@ async def create_payment_session(body: CreateSessionRequest):
 
 @router.get("/api/payments/{order_id}")
 async def get_payment(order_id: str):
-    _require_mpgs()
-
+    row = None
     try:
         row = supabase_client.get_payment(order_id)
     except Exception:
         row = None
+
+    if order_id.startswith("PH-"):
+        if not row:
+            raise HTTPException(status_code=404, detail=f"Payment {order_id} not found.")
+        gw = row.get("gateway_response") or {}
+        if isinstance(gw, str):
+            import json
+            gw = json.loads(gw)
+        return {
+            "order_id": order_id,
+            "status": row.get("status", "PENDING"),
+            "amount_lkr": gw.get("amount_lkr"),
+            "currency": gw.get("currency", "LKR"),
+            "purpose": gw.get("purpose"),
+            "metadata": gw.get("metadata") or {},
+            "gateway_response": gw,
+        }
+
+    _require_mpgs()
 
     if row and row.get("status") == "PENDING":
         try:

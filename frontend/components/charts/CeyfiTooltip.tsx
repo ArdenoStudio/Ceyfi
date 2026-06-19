@@ -32,8 +32,8 @@ export function CeyfiTooltip({
       : null;
 
   return (
-    <div className="rounded-xl border border-ceyfi-line bg-white px-3.5 py-3 shadow-lg">
-      <div className="text-xs font-medium text-ceyfi-muted">{label}</div>
+    <div className="rounded-xl border border-ceyfi-line/40 bg-ceyfi-deep/95 px-3.5 py-3 text-white shadow-xl backdrop-blur-sm">
+      <div className="text-xs font-medium text-white/60">{label}</div>
       <div className="mt-2 space-y-1.5">
         {payload.map((entry, index) => (
           <div
@@ -45,17 +45,17 @@ export function CeyfiTooltip({
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: entry.color ?? "#059669" }}
               />
-              <span className="text-xs text-ceyfi-ink">{entry.name}</span>
+              <span className="text-xs text-white/80">{entry.name}</span>
             </div>
-            <span className="font-mono text-xs font-semibold tabular-nums text-ceyfi-ink">
+            <span className="font-mono text-xs font-semibold tabular-nums text-white">
               {formatValue(Number(entry.value ?? 0))}
             </span>
           </div>
         ))}
       </div>
       {comparison ? (
-        <div className="mt-2.5 flex items-center justify-between border-t border-ceyfi-line/60 pt-2.5">
-          <span className="text-[10px] text-ceyfi-faint">vs previous</span>
+        <div className="mt-2.5 flex items-center justify-between border-t border-white/10 pt-2.5">
+          <span className="text-[10px] text-white/40">vs previous</span>
           <span
             className={
               comparison.positive

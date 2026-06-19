@@ -64,15 +64,9 @@ function interestSaved(lumpSum: number) {
 }
 
 const PAYMENT_CALENDAR = [
-  { month: "Jul 2025", status: "paid" as const, amount: EMI },
-  { month: "Aug 2025", status: "paid" as const, amount: EMI },
-  { month: "Sep 2025", status: "late" as const, amount: EMI },
-  { month: "Oct 2025", status: "paid" as const, amount: EMI },
-  { month: "Nov 2025", status: "paid" as const, amount: EMI },
-  { month: "Dec 2025", status: "paid" as const, amount: EMI },
   { month: "Jan 2026", status: "paid" as const, amount: EMI },
-  { month: "Feb 2026", status: "missed" as const, amount: EMI },
-  { month: "Mar 2026", status: "paid" as const, amount: EMI },
+  { month: "Feb 2026", status: "paid" as const, amount: EMI },
+  { month: "Mar 2026", status: "late" as const, amount: EMI },
   { month: "Apr 2026", status: "paid" as const, amount: EMI },
   { month: "May 2026", status: "late" as const, amount: EMI },
   { month: "Jun 2026", status: "future" as const, amount: EMI },

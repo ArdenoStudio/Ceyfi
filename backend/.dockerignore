@@ -1,9 +1,11 @@
-.venv/
-__pycache__/
+__pycache__
 *.pyc
 *.pyo
 .env
-*.log
-.git/
-tests/
-scripts/
+.env.*
+!.env.example
+.git
+.pytest_cache
+*.egg-info
+.venv
+venv

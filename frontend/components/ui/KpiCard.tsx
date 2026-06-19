@@ -1,5 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { SparklineArea } from "@/components/charts/AreaChart";
+import { CHART_BRAND } from "@/lib/chartUtils";
 import { cn } from "@/lib/utils";
 
 interface KpiCardProps {
@@ -9,6 +13,7 @@ interface KpiCardProps {
   changeType: "positive" | "negative" | "neutral";
   subtitle?: string;
   icon?: ReactNode;
+  sparkline?: number[];
   className?: string;
 }
 
@@ -19,6 +24,7 @@ export function KpiCard({
   changeType,
   subtitle,
   icon,
+  sparkline,
   className,
 }: KpiCardProps) {
   const ChangeIcon =
@@ -27,6 +33,9 @@ export function KpiCard({
       : changeType === "negative"
         ? ArrowDownRight
         : Minus;
+
+  const sparklineData =
+    sparkline?.map((point, index) => ({ i: index, v: point })) ?? [];
 
   return (
     <article
@@ -52,16 +61,25 @@ export function KpiCard({
       {subtitle ? (
         <div className="mt-2 text-xs text-ceyfi-faint">{subtitle}</div>
       ) : null}
-      <div
-        className={cn(
-          "mt-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-          changeType === "positive" && "bg-emerald-50 text-emerald-700",
-          changeType === "negative" && "bg-rose-50 text-rose-700",
-          changeType === "neutral" && "bg-stone-100 text-stone-600"
-        )}
-      >
-        <ChangeIcon className="h-3 w-3" />
-        {change}
+      <div className="mt-4 flex items-end justify-between gap-3">
+        <div
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+            changeType === "positive" && "bg-emerald-50 text-emerald-700",
+            changeType === "negative" && "bg-rose-50 text-rose-700",
+            changeType === "neutral" && "bg-stone-100 text-stone-600"
+          )}
+        >
+          <ChangeIcon className="h-3 w-3" />
+          {change}
+        </div>
+        {sparklineData.length > 0 ? (
+          <SparklineArea
+            data={sparklineData}
+            dataKey="v"
+            color={CHART_BRAND.primary}
+          />
+        ) : null}
       </div>
     </article>
   );

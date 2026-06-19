@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ const CurrencySelector = ({
   if (disabled) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 text-lg font-medium">
-        <img src={selected.flag} alt={selected.name} className="h-6 w-6 rounded-full object-cover" />
+        <Image src={selected.flag} alt={selected.name} width={20} height={20} className="rounded-full object-cover" />
         <span>{selected.code}</span>
       </div>
     );
@@ -43,7 +44,7 @@ const CurrencySelector = ({
     <Select value={selected.code} onValueChange={onChange}>
       <SelectTrigger className="w-auto border-none bg-transparent shadow-none focus:ring-0 gap-1">
         <div className="flex items-center gap-2 text-lg font-medium">
-          <img src={selected.flag} alt={selected.name} className="h-6 w-6 rounded-full object-cover" />
+          <Image src={selected.flag} alt={selected.name} width={20} height={20} className="rounded-full object-cover" />
           <span>{selected.code}</span>
         </div>
       </SelectTrigger>
@@ -51,7 +52,7 @@ const CurrencySelector = ({
         {options.map((c) => (
           <SelectItem key={c.code} value={c.code}>
             <div className="flex items-center gap-3">
-              <img src={c.flag} alt={c.name} className="h-5 w-5 rounded-full object-cover" />
+              <Image src={c.flag} alt={c.name} width={20} height={20} className="rounded-full object-cover" />
               <span>{c.code} – {c.name}</span>
             </div>
           </SelectItem>

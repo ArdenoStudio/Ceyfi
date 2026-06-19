@@ -9,11 +9,11 @@
     "savings_balance": 125400,
     "current_balance": 34200,
     "recent_transactions": [
-      { "id": "txn_s001", "date": "2026-05-03", "description": "Keells Supermarket - Nugegoda",       "amount_lkr": -4200,  "type": "debit",  "bucket_id": null },
-      { "id": "txn_s002", "date": "2026-05-02", "description": "Salary Credit - Hayleys Group",        "amount_lkr": 185000, "type": "credit", "bucket_id": null },
-      { "id": "txn_s003", "date": "2026-05-01", "description": "Dialog Axiata - Bill Payment",         "amount_lkr": -2800,  "type": "debit",  "bucket_id": null },
-      { "id": "txn_s004", "date": "2026-04-30", "description": "Seylan Personal Loan - Instalment",    "amount_lkr": -22000, "type": "debit",  "bucket_id": null },
-      { "id": "txn_s005", "date": "2026-04-28", "description": "PickMe - Ride",                        "amount_lkr": -680,   "type": "debit",  "bucket_id": null }
+      { "id": "txn_s001", "date": "2026-06-17", "description": "Keells Supermarket - Nugegoda",       "amount_lkr": -4200,  "type": "debit",  "bucket_id": null },
+      { "id": "txn_s002", "date": "2026-06-12", "description": "Salary Credit - Hayleys Group",        "amount_lkr": 185000, "type": "credit", "bucket_id": null },
+      { "id": "txn_s003", "date": "2026-06-01", "description": "Dialog Axiata - Bill Payment",         "amount_lkr": -2800,  "type": "debit",  "bucket_id": null },
+      { "id": "txn_s004", "date": "2026-06-15", "description": "Seylan Personal Loan - Instalment",    "amount_lkr": -22000, "type": "debit",  "bucket_id": null },
+      { "id": "txn_s005", "date": "2026-06-10", "description": "PickMe - Ride",                        "amount_lkr": -680,   "type": "debit",  "bucket_id": null }
     ],
     "loans": [
       {
@@ -46,9 +46,9 @@
     "savings_balance": 18000,
     "current_balance": 24000,
     "recent_transactions": [
-      { "id": "txn_b001", "date": "2026-05-10", "description": "Seylan Business Loan - Instalment", "amount_lkr": -18500, "type": "debit",  "bucket_id": null },
-      { "id": "txn_b002", "date": "2026-05-08", "description": "Sales Revenue",                     "amount_lkr":  32000, "type": "credit", "bucket_id": null },
-      { "id": "txn_b003", "date": "2026-04-28", "description": "Seylan Business Loan - Instalment", "amount_lkr": -18500, "type": "debit",  "bucket_id": null }
+      { "id": "txn_b001", "date": "2026-06-10", "description": "Seylan Business Loan - Instalment", "amount_lkr": -18500, "type": "debit",  "bucket_id": null },
+      { "id": "txn_b002", "date": "2026-06-08", "description": "Sales Revenue",                     "amount_lkr":  32000, "type": "credit", "bucket_id": null },
+      { "id": "txn_b003", "date": "2026-05-28", "description": "Seylan Business Loan - Instalment", "amount_lkr": -18500, "type": "debit",  "bucket_id": null }
     ],
     "loans": [
       {

@@ -1,4 +1,9 @@
-/** Backend URL: env override, else Vercel API in production builds, else local dev. */
+/**
+ * Backend URL resolution (first match wins):
+ *   NEXT_PUBLIC_API_URL  — ECS / custom production backend (see frontend/.env.production.example)
+ *   NEXT_PUBLIC_API_BASE — legacy alias, local dev default in .env.example
+ *   fallback             — Vercel backend in production builds, localhost:8000 in dev
+ */
 import { adminHeaders, authHeaders } from "@/lib/auth";
 
 function jsonHeaders(extra?: Record<string, string>): Record<string, string> {
@@ -10,6 +15,7 @@ function jsonHeaders(extra?: Record<string, string>): Record<string, string> {
 }
 
 export const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
   process.env.NEXT_PUBLIC_API_BASE ??
   (process.env.NODE_ENV === "production"
     ? "https://seylan-hub-backend.vercel.app"

@@ -45,12 +45,8 @@ export default function LoginPage() {
   const [personas, setPersonas] = useState<DemoPersona[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
+  const ready = true;
   const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    setReady(true);
-  }, []);
 
   useEffect(() => {
     if (user) return;

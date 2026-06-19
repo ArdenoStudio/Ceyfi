@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     mpgs_api_version: str = "79"
     mpgs_enable: bool = False
 
+    # PayHere — Hosted Checkout (sandbox)
+    payhere_merchant_id: str = ""
+    payhere_secret: str = ""
+
     # AI
     openai_api_key: str = ""
     groq_api_key: str = ""
@@ -62,6 +66,7 @@ class Settings(BaseSettings):
         "https://seylan-hub-frontend.netlify.app"
     )
     frontend_base_url: str = "https://seylan-hub-frontend.netlify.app"
+    backend_base_url: str = "http://localhost:8000"
 
     # Demo auth & admin
     demo_session_secret: str = "ceyfi-demo-session-change-in-production"

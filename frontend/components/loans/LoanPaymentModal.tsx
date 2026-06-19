@@ -11,11 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loan } from "@/types";
-import { formatLKR } from "@/lib/utils";
+import { formatLKR, cn } from "@/lib/utils";
 import { createPaymentSession, postDemoLoanPayment } from "@/lib/api";
 import { toast } from "sonner";
 import { PaymentModeToggle } from "@/components/payments/PaymentModeToggle";
-import { CircleCheck } from "lucide-react";
+import { PayHereButton } from "@/components/payments/PayHereButton";
+import { CircleCheck, CreditCard, Wallet } from "lucide-react";
+import { motion } from "motion/react";
 
 interface LoanPaymentModalProps {
   loan: Loan;
@@ -24,32 +26,89 @@ interface LoanPaymentModalProps {
   onSuccess?: (amountLkr: number) => void;
 }
 
+type CardGateway = "mpgs" | "payhere";
+
+function CardGatewayTabs({
+  value,
+  onChange,
+}: {
+  value: CardGateway;
+  onChange: (gateway: CardGateway) => void;
+}) {
+  return (
+    <div className="relative flex rounded-lg bg-muted/80 p-1">
+      <motion.div
+        className="absolute inset-y-1 rounded-md bg-background shadow-sm ring-1 ring-border/60"
+        layout
+        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+        style={{
+          width: "calc(50% - 4px)",
+          left: value === "mpgs" ? 4 : "calc(50%)",
+        }}
+      />
+      {(["mpgs", "payhere"] as const).map((gateway) => (
+        <button
+          key={gateway}
+          type="button"
+          onClick={() => onChange(gateway)}
+          className={cn(
+            "relative z-10 flex flex-1 items-center justify-center gap-1 rounded-md py-1.5 text-[11px] font-medium transition-colors",
+            value === gateway ? "text-foreground" : "text-muted-foreground"
+          )}
+        >
+          {gateway === "mpgs" ? (
+            <CreditCard className="h-3 w-3" />
+          ) : (
+            <Wallet className="h-3 w-3" />
+          )}
+          {gateway === "mpgs" ? "Mastercard" : "PayHere"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPaymentModalProps) {
   const [paymentMode, setPaymentMode] = useState<"card" | "demo">("card");
+  const [cardGateway, setCardGateway] = useState<CardGateway>("mpgs");
   const [amount, setAmount] = useState(loan.monthly_payment_lkr);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit() {
+  const paymentMetadata = {
+    loan_id: loan.loan_id,
+    user_id: loan.user_id,
+    installment_number: loan.payments_made + 1,
+  };
+
+  async function handleMpgsSubmit() {
     if (!amount || amount <= 0) return;
     setSubmitting(true);
 
     try {
-      if (paymentMode === "card") {
-        const session = await createPaymentSession({
-          amount_lkr: amount,
-          purpose: "loan",
-          description: "Loan instalment -- " + loan.loan_id,
-          metadata: {
-            loan_id: loan.loan_id,
-            user_id: loan.user_id,
-            installment_number: loan.payments_made + 1,
-          },
-        });
-        window.location.href = session.checkout_url;
-        return;
-      }
+      const session = await createPaymentSession({
+        amount_lkr: amount,
+        purpose: "loan",
+        description: "Loan instalment -- " + loan.loan_id,
+        metadata: paymentMetadata,
+      });
+      window.location.href = session.checkout_url;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      const isUnconfigured = msg.includes("[503]") || msg.includes("not enabled");
+      toast.error(
+        isUnconfigured
+          ? "Card payments are not yet activated on this deployment."
+          : "Could not create payment session. Please try again."
+      );
+      setSubmitting(false);
+    }
+  }
 
-      // Demo mode — hit backend to update loan state + Supabase
+  async function handleDemoSubmit() {
+    if (!amount || amount <= 0) return;
+    setSubmitting(true);
+
+    try {
       await postDemoLoanPayment({
         user_id: loan.user_id,
         loan_id: loan.loan_id,
@@ -70,14 +129,8 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
       ), { duration: 5000 });
       onSuccess?.(amount);
       onClose();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "";
-      const isUnconfigured = msg.includes("[503]") || msg.includes("not enabled");
-      toast.error(
-        isUnconfigured
-          ? "Card payments are not yet activated on this deployment."
-          : "Could not create payment session. Please try again."
-      );
+    } catch {
+      toast.error("Could not simulate payment. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -91,6 +144,10 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <PaymentModeToggle value={paymentMode} onChange={setPaymentMode} />
+
+          {paymentMode === "card" ? (
+            <CardGatewayTabs value={cardGateway} onChange={setCardGateway} />
+          ) : null}
 
           {/* Loan summary */}
           <div className="rounded-lg border border-ceyfi-line bg-ceyfi-sprout/60 p-4 space-y-2 text-sm">
@@ -132,13 +189,19 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
 
           {/* Footer note */}
           {paymentMode === "card" ? (
-            <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Mastercard test gateway. Approved test card:{" "}
-              <span className="font-mono font-semibold text-ceyfi-ink">5123 4500 0000 0008</span>
-              , expiry <span className="font-mono font-semibold text-ceyfi-ink">01/39</span>,
-              CVV <span className="font-mono font-semibold text-ceyfi-ink">100</span>.
-              Real cards are not accepted on this test gateway.
-            </p>
+            cardGateway === "mpgs" ? (
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Mastercard test gateway. Approved test card:{" "}
+                <span className="font-mono font-semibold text-ceyfi-ink">5123 4500 0000 0008</span>
+                , expiry <span className="font-mono font-semibold text-ceyfi-ink">01/39</span>,
+                CVV <span className="font-mono font-semibold text-ceyfi-ink">100</span>.
+                Real cards are not accepted on this test gateway.
+              </p>
+            ) : (
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                PayHere sandbox — you will be redirected to PayHere to complete payment securely.
+              </p>
+            )
           ) : (
             <p className="text-[11px] leading-relaxed text-muted-foreground">
               Simulates an instalment payment internally. No card or real transaction required.
@@ -154,17 +217,34 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
             >
               Cancel
             </Button>
-            <Button
-              className="flex-1 bg-ceyfi-green hover:bg-ceyfi-green/90 text-white"
-              disabled={submitting || !amount || amount <= 0}
-              onClick={handleSubmit}
-            >
-              {submitting
-                ? paymentMode === "card" ? "Redirecting…" : "Processing…"
-                : paymentMode === "card"
-                  ? `Pay ${formatLKR(amount)}`
-                  : `Simulate ${formatLKR(amount)}`}
-            </Button>
+            {paymentMode === "demo" ? (
+              <Button
+                className="flex-1 bg-ceyfi-green hover:bg-ceyfi-green/90 text-white"
+                disabled={submitting || !amount || amount <= 0}
+                onClick={handleDemoSubmit}
+              >
+                {submitting ? "Processing…" : `Simulate ${formatLKR(amount)}`}
+              </Button>
+            ) : cardGateway === "payhere" ? (
+              <PayHereButton
+                amountLkr={amount}
+                purpose="loan"
+                description={"Loan instalment -- " + loan.loan_id}
+                metadata={paymentMetadata}
+                disabled={submitting || !amount || amount <= 0}
+                className="flex-1 bg-ceyfi-green hover:bg-ceyfi-green/90 text-white"
+              >
+                Pay {formatLKR(amount)}
+              </PayHereButton>
+            ) : (
+              <Button
+                className="flex-1 bg-ceyfi-green hover:bg-ceyfi-green/90 text-white"
+                disabled={submitting || !amount || amount <= 0}
+                onClick={handleMpgsSubmit}
+              >
+                {submitting ? "Redirecting…" : `Pay ${formatLKR(amount)}`}
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

@@ -15,6 +15,7 @@ from app.services import metrics_store
 
 from app.config import settings
 from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot, banking_tools
+from payhere import router as payhere_router
 from telegram_bot.bot import build_application as build_telegram_app
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
@@ -170,6 +171,7 @@ app.include_router(stt.router)
 app.include_router(loans.router)
 app.include_router(business.router)
 app.include_router(payments.router)
+app.include_router(payhere_router)
 
 
 app.include_router(banking_tools.router)
