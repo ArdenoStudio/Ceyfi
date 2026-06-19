@@ -6,10 +6,12 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatLKR } from "@/lib/utils";
 import {
   createPaymentSession,
@@ -181,10 +183,11 @@ export function SendMoneyModal({
   const isValid = Number.isFinite(amount) && amount > 0;
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange} modal="trap-focus">
       <DialogContent
         className="max-w-sm overflow-hidden border border-border bg-popover p-0 shadow-2xl"
         showCloseButton={false}
+        aria-modal="true"
       >
         {/* Top accent bar */}
         <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#E31821] via-[#E0AF49] to-[#E31821]" />
@@ -195,17 +198,20 @@ export function SendMoneyModal({
             <div className="flex items-start justify-between">
               <div>
                 <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#E31821]">
-                  Seylan Hub
+                  CEYFI
                 </p>
                 <DialogTitle className="font-heading text-lg font-semibold text-foreground">
                   Send to Sri Lanka
                 </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Send remittance to your Seylan Hub wallet recipient with card or demo transfer.
+                </DialogDescription>
               </div>
               <button
                 type="button"
                 onClick={() => handleDialogOpenChange(false)}
-                className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                aria-label="Close"
+                className="mt-0.5 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                aria-label="Close send money dialog"
               >
                 ×
               </button>
@@ -218,9 +224,9 @@ export function SendMoneyModal({
             {/* Recipient card */}
             <VerificationCard
               backgroundImage="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/ruixen_moon.png"
-              label="Seylan Hub · Recipient"
+              label="CEYFI · Family wallet"
               idNumber={recipientId}
-              name={recipientAccountHolder.trim() || "Hub Wallet"}
+              name={recipientAccountHolder.trim() || "Family Wallet"}
               validThru={`${currency.code}→LKR`}
             />
 
@@ -235,12 +241,15 @@ export function SendMoneyModal({
 
             {/* Amount input */}
             <div className="relative">
+              <Label htmlFor="send-amount" className="sr-only">
+                Amount in {currency.code}
+              </Label>
               <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center gap-1.5">
                 <Image src={currency.flag} alt={currency.code} width={20} height={20} className="rounded-full object-cover" />
                 <span className="text-xs font-semibold text-muted-foreground">{currency.code}</span>
               </div>
               <Input
-                id="amount"
+                id="send-amount"
                 type="number"
                 step="0.01"
                 min={0.01}
@@ -260,7 +269,8 @@ export function SendMoneyModal({
             <button
               type="button"
               onClick={() => setShowFxCalc(true)}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-gray-300 hover:text-gray-600"
+              aria-label="Open FX calculator"
+              className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-gray-300 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             >
               <RefreshCw className="h-3 w-3" />
               FX calculator
@@ -385,22 +395,24 @@ export function SendMoneyModal({
       </DialogContent>
 
       {/* FX calculator — separate popup */}
-      <Dialog open={showFxCalc} onOpenChange={setShowFxCalc}>
+      <Dialog open={showFxCalc} onOpenChange={setShowFxCalc} modal="trap-focus">
         <DialogContent
           className="max-w-lg border border-gray-100 p-0 shadow-2xl [background:#ffffff]"
           showCloseButton={false}
+          aria-modal="true"
         >
           <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#E31821] via-[#E0AF49] to-[#E31821]" />
           <div className="p-8">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#E31821]">Seylan Hub</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#E31821]">CEYFI</p>
                 <p className="mt-0.5 text-xl font-semibold text-foreground">FX Calculator</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowFxCalc(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-gray-100 hover:text-gray-600 text-lg"
+                aria-label="Close FX calculator"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-lg text-muted-foreground hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
               >
                 ×
               </button>

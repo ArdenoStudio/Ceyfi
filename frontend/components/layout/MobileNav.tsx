@@ -52,7 +52,10 @@ export function MobileNav() {
   const moreActive = MOBILE_MORE.some((item) => isActive(item.href));
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-30 flex rounded-[22px] border border-border/80 bg-card/92 p-1.5 shadow-[0_16px_44px_rgba(5,46,22,0.12)] backdrop-blur-xl dark:bg-card/88 dark:shadow-[0_16px_44px_rgba(0,0,0,0.45)] md:hidden">
+    <nav
+      aria-label="Mobile navigation"
+      className="fixed inset-x-3 bottom-3 z-30 flex rounded-[22px] border border-border/80 bg-card/92 p-1.5 shadow-[0_16px_44px_rgba(5,46,22,0.12)] backdrop-blur-xl dark:bg-card/88 dark:shadow-[0_16px_44px_rgba(0,0,0,0.45)] md:hidden"
+    >
       {MOBILE_PRIMARY.map((item) => {
         const active = isActive(item.href);
         return (
@@ -61,7 +64,7 @@ export function MobileNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[16px] py-2 text-[10px] font-medium transition-colors duration-200",
+              "relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[16px] py-2 text-[10px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
               active
                 ? "text-primary"
                 : "text-muted-foreground hover:text-foreground",
@@ -91,7 +94,7 @@ export function MobileNav() {
             <Button
               variant="ghost"
               className={cn(
-                "relative flex h-auto min-w-0 flex-1 flex-col items-center gap-1 rounded-[16px] py-2 text-[10px] font-medium",
+                "relative flex h-auto min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[16px] py-2 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
                 moreActive ? "text-primary" : "text-muted-foreground",
               )}
             />

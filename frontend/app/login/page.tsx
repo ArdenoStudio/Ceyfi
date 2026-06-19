@@ -78,7 +78,11 @@ export default function LoginPage() {
   const list = personas.length > 0 ? personas : FALLBACK_PERSONAS;
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-12">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-12 outline-none"
+    >
       <div className="ambient-login pointer-events-none absolute inset-0" aria-hidden />
 
       <motion.div
@@ -191,6 +195,6 @@ export default function LoginPage() {
           Demo data only · Not connected to live Internet Banking
         </p>
       </div>
-    </div>
+    </main>
   );
 }

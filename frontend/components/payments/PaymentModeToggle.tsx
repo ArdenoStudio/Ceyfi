@@ -27,7 +27,11 @@ export function PaymentModeToggle({
   const text = size === "sm" ? "text-sm" : "text-xs";
 
   return (
-    <div className={cn("relative flex rounded-xl bg-muted p-1", className)}>
+    <div
+      role="group"
+      aria-label="Payment mode"
+      className={cn("relative flex rounded-xl bg-muted p-1", className)}
+    >
       <motion.div
         className="absolute inset-y-1 rounded-lg bg-background shadow-sm ring-1 ring-border/60"
         layout
@@ -42,8 +46,9 @@ export function PaymentModeToggle({
           key={mode}
           type="button"
           onClick={() => onChange(mode)}
-      className={cn(
-        "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg font-medium transition-colors duration-200",
+          aria-pressed={value === mode}
+          className={cn(
+            "relative z-10 flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
             py,
             text,
             value === mode ? "text-foreground" : "text-muted-foreground",

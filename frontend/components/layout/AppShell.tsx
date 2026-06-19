@@ -7,6 +7,8 @@ import { DemoModeBadge } from "./DemoModeBadge";
 import { PageEnter } from "@/components/motion/PageEnter";
 import { SeylanBankHandoffBanner } from "@/components/seylan/SeylanBankHandoffBanner";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SkipToContent } from "@/components/layout/SkipToContent";
+import { GlobalKeyboardShortcuts } from "@/components/GlobalKeyboardShortcuts";
 import { usePathname } from "next/navigation";
 
 interface AppShellProps {
@@ -24,7 +26,12 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   if (isLoginPage) {
-    return <>{children}</>;
+    return (
+      <>
+        <SkipToContent />
+        {children}
+      </>
+    );
   }
 
   if (isPaymentGatewaySurface) {
@@ -38,8 +45,13 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <SkipToContent />
       <Sidebar />
-      <main className="flex min-w-0 flex-1 flex-col pb-24 md:ml-[17.5rem] md:pb-0">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex min-w-0 flex-1 flex-col pb-24 outline-none md:ml-[17.5rem] md:pb-0"
+      >
         <AppTopbar />
         <PageEnter key={pathname} className="flex-1">
           {children}
@@ -49,6 +61,7 @@ export function AppShell({ children }: AppShellProps) {
       </main>
       <MobileNav />
       <DemoModeBadge />
+      <GlobalKeyboardShortcuts />
     </div>
   );
 }

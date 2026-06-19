@@ -48,8 +48,16 @@ export function VoiceButton({ language, onTranscript, disabled }: VoiceButtonPro
         variant={isListening ? "destructive" : "outline"}
         onClick={handleClick}
         disabled={disabled}
+        aria-label={
+          errorLabel
+            ? errorLabel
+            : isListening
+              ? "Stop voice input"
+              : "Start voice input"
+        }
+        aria-pressed={isListening}
         className={cn(
-          "relative select-none touch-none",
+          "relative h-11 w-11 select-none touch-none",
           isListening && "ring-2 ring-red-500/50"
         )}
         title={

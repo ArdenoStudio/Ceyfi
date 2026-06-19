@@ -592,7 +592,12 @@ html.theme-transition *::after {
 @media (prefers-reduced-motion: reduce) {
   .interactive-card:hover { transform: none; }
   .interactive-press:active { transform: none; }
+  .interactive-card {
+    transition: none;
+  }
   .animate-pulse-soft { animation: none; }
+  .animate-ping-soft { animation: none; }
+  .animate-grid-drift { animation: none; }
   .btn-shimmer::after { animation: none; }
   .insight-fade-in,
   .insight-fade-out,
@@ -602,4 +607,13 @@ html.theme-transition *::after {
   .gradient-border-auto,
   .gradient-border-hover:hover,
   .gradient-border-stop-hover { animation: none; }
+  .persona-card-spotlight::before {
+    transition: none;
+  }
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition: none !important;
+  }
 }

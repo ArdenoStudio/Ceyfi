@@ -91,7 +91,7 @@ export function Sidebar() {
         </Link>
       </div>
 
-      <nav className="relative flex-1 overflow-y-auto px-4 py-5">
+      <nav aria-label="Main navigation" className="relative flex-1 overflow-y-auto px-4 py-5">
         <div className="absolute bottom-8 left-[2.05rem] top-8 w-px bg-gradient-to-b from-sidebar-ring/35 via-sidebar-border to-transparent" />
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="mb-5">

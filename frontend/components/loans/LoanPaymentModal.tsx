@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -36,7 +37,11 @@ function CardGatewayTabs({
   onChange: (gateway: CardGateway) => void;
 }) {
   return (
-    <div className="relative flex rounded-lg bg-muted/80 p-1">
+    <div
+      role="group"
+      aria-label="Card payment gateway"
+      className="relative flex rounded-lg bg-muted/80 p-1"
+    >
       <motion.div
         className="absolute inset-y-1 rounded-md bg-background shadow-sm ring-1 ring-border/60"
         layout
@@ -51,8 +56,9 @@ function CardGatewayTabs({
           key={gateway}
           type="button"
           onClick={() => onChange(gateway)}
+          aria-pressed={value === gateway}
           className={cn(
-            "relative z-10 flex flex-1 items-center justify-center gap-1 rounded-md py-1.5 text-[11px] font-medium transition-colors",
+            "relative z-10 flex min-h-11 flex-1 items-center justify-center gap-1 rounded-md py-1.5 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
             value === gateway ? "text-foreground" : "text-muted-foreground"
           )}
         >
@@ -137,10 +143,17 @@ export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPayme
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      modal="trap-focus"
+    >
+      <DialogContent aria-modal="true">
         <DialogHeader>
           <DialogTitle>Make Loan Payment</DialogTitle>
+          <DialogDescription>
+            Pay an instalment on loan {loan.loan_id} using card or demo simulation.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <PaymentModeToggle value={paymentMode} onChange={setPaymentMode} />

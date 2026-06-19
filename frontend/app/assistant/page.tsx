@@ -1,23 +1,36 @@
 "use client";
 
 import { Suspense, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useChat } from "@/hooks/useChat";
 import { ChatThread } from "@/components/assistant/ChatThread";
+import { AssistantStatusAnnouncer } from "@/components/assistant/AssistantStatusAnnouncer";
 import { ChatInput, type ChatInputHandle } from "@/components/assistant/ChatInput";
 import { LanguageToggle } from "@/components/assistant/LanguageToggle";
 import { SuggestedQuestions } from "@/components/assistant/SuggestedQuestions";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { FinanceConnectionDiagram } from "@/components/assistant/FinanceConnectionDiagram";
 import { GradientText } from "@/components/motion/GradientText";
 import { ShinyText } from "@/components/motion/ShinyText";
 import { TypewriterSubtitle } from "@/components/ui/TypewriterSubtitle";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConnectionDiagramSkeleton } from "@/components/lazy/LazySkeletons";
 import { FaqSection } from "@/components/blocks/FaqSection";
 import { getFamilyWallet } from "@/lib/api";
 import { WalletState } from "@/types";
+
+const FinanceConnectionDiagram = dynamic(
+  () =>
+    import("@/components/assistant/FinanceConnectionDiagram").then((m) => ({
+      default: m.FinanceConnectionDiagram,
+    })),
+  {
+    loading: () => <ConnectionDiagramSkeleton className="mt-8" />,
+    ssr: false,
+  }
+);
 
 const TYPEWRITER_PROMPTS = [
   "How much can I safely move to savings this week?",
@@ -96,6 +109,7 @@ function AssistantPageContent() {
       data-module="assistant"
       className="relative flex min-h-[100dvh] flex-col overflow-hidden text-foreground dark:text-white"
     >
+      <AssistantStatusAnnouncer messages={messages} isStreaming={isStreaming} />
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(5,150,105,0.08),transparent)] dark:bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(52,211,153,0.12),transparent)]" />
         <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(5,46,22,0.06),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(5,46,22,0.12),transparent)]" />
@@ -167,6 +181,8 @@ function AssistantPageContent() {
                 alt="CEYFI"
                 width={28}
                 height={28}
+                priority
+                sizes="28px"
                 className="h-7 w-7 dark:brightness-0 dark:invert"
               />
               <div>

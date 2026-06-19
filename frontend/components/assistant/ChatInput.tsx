@@ -84,6 +84,12 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
             }
             disabled={disabled}
             rows={1}
+            aria-label={
+              language === "si"
+                ? "ඔබේ මුල්‍ය ගැන CEYFI වෙත ප්‍රශ්නයක් අසන්න"
+                : "Ask CEYFI a question about your finances"
+            }
+            aria-describedby="chat-input-hint"
             className={cn(
               "w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-sm text-foreground dark:text-white",
               "placeholder:text-muted-foreground/70 focus:outline-none dark:placeholder:text-white/25",
@@ -109,7 +115,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
               aria-label="Send message"
               type="button"
               className={cn(
-                "h-8 w-8 rounded-xl transition-all duration-150",
+                "h-11 w-11 rounded-xl transition-all duration-150 focus-visible:ring-2 focus-visible:ring-ring/30",
                 canSend
                   ? "bg-seylan-red text-white shadow-md shadow-seylan-red/30 hover:bg-seylan-red/90 hover:shadow-seylan-red/40"
                   : "bg-muted text-muted-foreground cursor-not-allowed dark:bg-white/[0.08] dark:text-white/20"
@@ -120,7 +126,10 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
           </div>
         </div>
 
-        <p className="mt-2 text-center text-[10px] text-muted-foreground/70 dark:text-white/15">
+        <p
+          id="chat-input-hint"
+          className="mt-2 text-center text-[10px] text-muted-foreground/70 dark:text-white/15"
+        >
           Enter to send · Shift + Enter for new line · <kbd className="rounded border border-border/60 px-1 py-0.5 font-mono text-[9px] dark:border-white/10">/</kbd> to focus
         </p>
       </div>

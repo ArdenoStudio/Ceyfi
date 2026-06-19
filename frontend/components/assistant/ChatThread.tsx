@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useReducedMotion } from "motion/react";
 import { ChatMessage, Language } from "@/types";
 import { MessageBubble } from "./MessageBubble";
 import { ShiningText } from "@/components/ui/shining-text";
@@ -14,10 +15,13 @@ interface ChatThreadProps {
 
 export function ChatThread({ messages, isStreaming }: ChatThreadProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isStreaming]);
+    bottomRef.current?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  }, [messages, isStreaming, reduceMotion]);
 
   const lastMsg = messages[messages.length - 1];
   const isThinking =
@@ -43,7 +47,7 @@ export function ChatThread({ messages, isStreaming }: ChatThreadProps) {
 
       {/* Thinking indicator — shows before content starts streaming */}
       {isThinking && (
-          <div className="flex justify-start">
+          <div className="flex justify-start" role="status" aria-label="CEYFI AI is thinking">
           <div className="flex items-center gap-2.5 rounded-tr-[20px] rounded-br-[20px] rounded-bl-[20px] rounded-tl-md border border-border/80 bg-card/80 px-4 py-3 backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.06]">
             {/* Pulsing dots */}
             <span className="flex items-center gap-1">

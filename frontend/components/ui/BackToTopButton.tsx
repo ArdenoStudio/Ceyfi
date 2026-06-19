@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import { ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ interface BackToTopButtonProps {
 
 export function BackToTopButton({ threshold = 500 }: BackToTopButtonProps) {
   const [visible, setVisible] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     function onScroll() {
@@ -25,10 +27,15 @@ export function BackToTopButton({ threshold = 500 }: BackToTopButtonProps) {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() =>
+        window.scrollTo({
+          top: 0,
+          behavior: reduceMotion ? "auto" : "smooth",
+        })
+      }
       aria-label="Back to top"
       className={cn(
-        "fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full",
+        "fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2",
         "bg-ceyfi-deep text-white shadow-lg shadow-ceyfi-deep/25",
         "transition-all duration-200 hover:bg-ceyfi-green hover:shadow-ceyfi-green/30",
         "will-change-transform animate-fade-up dark:bg-ceyfi-green dark:hover:bg-ceyfi-mint dark:text-ceyfi-deep"
