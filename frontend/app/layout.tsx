@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Geist_Mono, Noto_Sans_Sinhala, Sora } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -139,6 +140,7 @@ export default function RootLayout({
           </ThemeProvider>
         </ErrorBoundary>
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
