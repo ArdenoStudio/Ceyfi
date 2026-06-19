@@ -98,11 +98,8 @@ async def lifespan(app: FastAPI):
     global telegram_app
     log.info("SEYLAN HUB API STARTING — USE_SEYLAN_REAL=%s", settings.use_seylan_real)
     if settings.database_url:
-        try:
-            from app.services import supabase_client
-            await asyncio.wait_for(asyncio.to_thread(supabase_client.run_migrations), timeout=25)
-        except Exception as exc:
-            log.error("DB migration failed: %s", exc)
+        from app.services import supabase_client
+        asyncio.create_task(asyncio.to_thread(supabase_client.run_migrations))
     asyncio.create_task(_prewarm())
 
     token = os.getenv("TELEGRAM_BOT_TOKEN")
