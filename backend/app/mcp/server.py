@@ -5,7 +5,26 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+    _MCP_AVAILABLE = True
+except ImportError:
+    import logging as _logging
+    _logging.getLogger(__name__).warning("mcp package unavailable — MCP stdio server disabled")
+    _MCP_AVAILABLE = False
+
+    class _Stub:
+        """No-op stand-in when the mcp package is not installed."""
+        def resource(self, *_a, **_kw):
+            return lambda f: f
+        def prompt(self, *_a, **_kw):
+            return lambda f: f
+        def add_tool(self, *_a, **_kw):
+            pass
+        def run(self, *_a, **_kw):
+            raise RuntimeError("mcp package is not installed")
+
+    FastMCP = _Stub  # type: ignore[assignment,misc]
 
 from app.mcp.handlers import execute_tool, get_prompt, read_resource
 from app.mcp.registry import PROMPT_CATALOG, RESOURCE_CATALOG, TOOL_CATALOG
@@ -19,7 +38,7 @@ mcp = FastMCP(
     "ceyfi-banking",
     instructions=INSTRUCTIONS,
     json_response=True,
-)
+) if _MCP_AVAILABLE else FastMCP()
 
 
 def _make_tool_handler(tool_name: str, tool_desc: str):

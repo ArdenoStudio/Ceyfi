@@ -83,7 +83,7 @@ async def lifespan(app: FastAPI):
     if settings.database_url:
         try:
             from app.services import supabase_client
-            await asyncio.to_thread(supabase_client.run_migrations)
+            await asyncio.wait_for(asyncio.to_thread(supabase_client.run_migrations), timeout=25)
         except Exception as exc:
             log.error("DB migration failed: %s", exc)
     asyncio.create_task(_prewarm())
