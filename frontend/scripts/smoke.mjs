@@ -59,7 +59,7 @@ const requiredSnippets = [
   ["components/layout/DemoModeBadge.tsx", "Demo environment"],
   ["app/demo/page.tsx", "Trigger wallet spend"],
   ["app/demo/page.tsx", "90-second script"],
-  ["public/manifest.json", "/favicon.ico"],
+  ["app/manifest.ts", "/favicon.ico"],
   ["lib/seylan-external-links.ts", "seylanbank.lk"],
   ["components/seylan/SeylanBankHandoffBanner.tsx", "Personal Internet Banking"],
   ["components/payments/PayHereButton.tsx", "Pay with PayHere"],
