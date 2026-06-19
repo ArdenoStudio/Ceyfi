@@ -41,8 +41,7 @@ export function SiteFooter() {
             </p>
 
             <p className="mt-4 text-xs text-ceyfi-muted dark:text-white/45">
-              Powered by{" "}
-              <span className="font-semibold text-seylan-red">Seylan Bank</span>
+              Built for clear, confident financial decisions.
             </p>
           </div>
 
@@ -76,8 +75,8 @@ export function SiteFooter() {
         </div>
 
         <p className="text-xs text-ceyfi-faint dark:text-white/35">
-          &copy; {new Date().getFullYear()} CEYFI. Demo environment — mock Seylan
-          fixtures only.
+          &copy; {new Date().getFullYear()} CEYFI. Demo environment — mock
+          financial data only.
         </p>
       </div>
     </footer>

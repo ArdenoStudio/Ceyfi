@@ -94,7 +94,7 @@ async def _prewarm():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global telegram_app
-    log.info("SEYLAN HUB API STARTING — USE_SEYLAN_REAL=%s", settings.use_seylan_real)
+    log.info("CEYFI API STARTING — legacy bank adapter enabled=%s", settings.use_seylan_real)
     if settings.database_url:
         from app.services import supabase_client
         asyncio.create_task(asyncio.to_thread(supabase_client.run_migrations))
@@ -129,7 +129,7 @@ async def lifespan(app: FastAPI):
     log.info("shutdown")
 
 
-app = FastAPI(title="CEYFI API — powered by Seylan", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="CEYFI API", version="0.2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

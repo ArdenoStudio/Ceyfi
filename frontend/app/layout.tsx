@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     "diaspora remittance",
     "SME bookkeeping",
     "AI financial assistant",
-    "Seylan Bank",
+    "financial intelligence",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,

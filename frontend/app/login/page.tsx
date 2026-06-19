@@ -108,8 +108,7 @@ export default function LoginPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">Clarity for every rupee</p>
           <p className="mt-3 text-xs text-muted-foreground/80">
-            Powered by{" "}
-            <span className="font-semibold text-seylan-red">Seylan Bank</span>
+            A CEYFI financial intelligence demo
           </p>
         </motion.div>
 

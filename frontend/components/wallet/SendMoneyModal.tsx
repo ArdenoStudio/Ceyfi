@@ -26,7 +26,6 @@ import {
 } from "@/lib/remittance-fx";
 // LKR_CURRENCY exported for CurrencyExchangeCard use
 import { toast } from "sonner";
-import { EXTERNAL_LINK_REL, SEYLAN_LINKS } from "@/lib/seylan-external-links";
 import { PaymentModeToggle } from "@/components/payments/PaymentModeToggle";
 import {
   ArrowRight,
@@ -350,18 +349,7 @@ export function SendMoneyModal({
                     . Real cards not accepted.
                   </>
                 ) : (
-                  <>
-                    Simulates transfer internally. Live payouts via{" "}
-                    <a
-                      href={SEYLAN_LINKS.internetBankingPersonalLogin}
-                      target="_blank"
-                      rel={EXTERNAL_LINK_REL}
-                      className="font-medium text-[#E31821] underline-offset-2 hover:underline"
-                    >
-                      Personal Internet Banking
-                    </a>
-                    .
-                  </>
+                  <>Simulates transfer internally. Live payouts require a configured banking provider.</>
                 )}
               </motion.p>
             </AnimatePresence>

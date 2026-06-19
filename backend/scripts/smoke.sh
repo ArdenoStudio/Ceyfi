@@ -34,7 +34,7 @@ check_post() {
   echo "$out" | grep -q "$expected" && pass "$label" || fail "$label (expected '$expected' in: $out)"
 }
 
-echo "=== Seylan Hub smoke tests against $BASE ==="
+echo "=== CEYFI backend smoke tests against $BASE ==="
 check "/health" "$BASE/health" "ok"
 
 # Detect whether demo auth is enforced (401 without a session).

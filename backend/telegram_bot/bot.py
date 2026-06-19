@@ -35,7 +35,7 @@ CEYFI_LIGHT = "#34D399"
 CEYFI_COLORS = [CEYFI_DARK, CEYFI_PRIMARY, CEYFI_LIGHT]
 
 HELP_TEXT = (
-    "CEYFI — your Seylan money assistant\n\n"
+    "CEYFI — your money assistant\n\n"
     "Commands:\n"
     "/balance — savings & current account balances\n"
     "/wallet — family wallet buckets\n"
@@ -111,8 +111,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     name = update.effective_user.first_name if update.effective_user else "there"
     await update.message.reply_text(
         f"Hi {name}! Welcome to CEYFI on Telegram.\n\n"
-        "Track balances, family wallet buckets, loans, and spending — "
-        "powered by Seylan.\n\n"
+        "Track balances, family wallet buckets, loans, and spending with CEYFI.\n\n"
         f"{HELP_TEXT}"
     )
 
