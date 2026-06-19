@@ -32,6 +32,8 @@ _RATE_LIMITS: dict[str, tuple[int, int]] = {
     "/api/stt": (10, 60),
     "/api/categorize-transactions": (5, 60),
     "/api/loans/advisor": (10, 60),
+    "/api/payhere": (30, 60),
+    "/api/payments": (30, 60),
 }
 
 
@@ -134,6 +136,30 @@ app.add_middleware(
 
 
 @app.middleware("http")
+async def body_size_limit_middleware(request: Request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length:
+        try:
+            if int(content_length) > settings.max_request_body_bytes:
+                return JSONResponse(
+                    status_code=413,
+                    content={"error": "Request body too large"},
+                )
+        except ValueError:
+            pass
+    return await call_next(request)
+
+
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
+@app.middleware("http")
 async def metrics_middleware(request: Request, call_next):
     t0 = time.perf_counter()
     agent_key = metrics_store.route_to_agent(request.url.path)
@@ -189,6 +215,32 @@ async def health():
     return {"status": "ok", "service": "ceyfi-backend"}
 
 
+@app.get("/health/ready")
+async def health_ready():
+    """ECS/Kubernetes readiness probe — verifies dependencies before accepting traffic."""
+    checks: dict[str, str] = {}
+    ready = True
+
+    if settings.database_url:
+        try:
+            from app.services import supabase_client
+            db_ok = supabase_client.ping()
+            checks["database"] = "ok" if db_ok else "error"
+            if not db_ok:
+                ready = False
+        except Exception:
+            checks["database"] = "error"
+            ready = False
+    else:
+        checks["database"] = "not_required"
+
+    status_code = 200 if ready else 503
+    return JSONResponse(
+        status_code=status_code,
+        content={"status": "ready" if ready else "not_ready", "checks": checks},
+    )
+
+
 @app.get("/api/metrics")
 async def get_metrics():
     return metrics_store.get_all_metrics()
@@ -213,4 +265,4 @@ async def health_deep():
     deps["seylan_real"] = "enabled" if settings.use_seylan_real else "disabled"
 
     overall = "ok" if deps.get("groq") == "configured" or deps.get("openai") == "configured" else "degraded"
-    return {"status": overall, "version": "0.1.0", "dependencies": deps}
+    return {"status": overall, "version": "0.2.0", "dependencies": deps}

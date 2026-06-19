@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     # PayHere — Hosted Checkout (sandbox)
     payhere_merchant_id: str = ""
     payhere_secret: str = ""
+    # Production: set PAYHERE_STRICT_NOTIFY_HASH=true to reject webhooks with invalid md5sig
+    payhere_strict_notify_hash: bool = False
+
+    # Request limits
+    max_request_body_bytes: int = 1_048_576  # 1 MiB
+    max_stt_upload_bytes: int = 5_242_880  # 5 MiB
 
     # AI
     openai_api_key: str = ""

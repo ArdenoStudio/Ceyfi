@@ -6,10 +6,11 @@ GET  /api/payments/{order_id}    poll payment status
 POST /api/payments/webhook       MPGS result notification
 """
 import logging
+import re
 from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel, Field
 
 from app.config import settings
@@ -22,6 +23,7 @@ router = APIRouter(tags=["payments"])
 PurposeType = Literal["remittance", "loan", "tax_jar_inbound", "shop_sale"]
 
 _503_MSG = "Payment gateway not enabled. Set MPGS_ENABLE=true and configure credentials."
+_ORDER_ID_RE = re.compile(r"^[A-Z0-9\-]{8,64}$")
 
 
 # ---------------------------------------------------------------------------
@@ -29,9 +31,9 @@ _503_MSG = "Payment gateway not enabled. Set MPGS_ENABLE=true and configure cred
 # ---------------------------------------------------------------------------
 
 class CreateSessionRequest(BaseModel):
-    amount_lkr: float = Field(..., gt=0)
+    amount_lkr: float = Field(..., gt=0, le=10_000_000)
     purpose: PurposeType
-    description: str
+    description: str = Field(..., min_length=1, max_length=500)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -188,7 +190,9 @@ async def create_payment_session(body: CreateSessionRequest):
 
 
 @router.get("/api/payments/{order_id}")
-async def get_payment(order_id: str):
+async def get_payment(order_id: str = Path(..., min_length=8, max_length=64)):
+    if not _ORDER_ID_RE.match(order_id):
+        raise HTTPException(status_code=422, detail="Invalid order_id format")
     row = None
     try:
         row = supabase_client.get_payment(order_id)

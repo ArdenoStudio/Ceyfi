@@ -3,7 +3,7 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from app.config import settings
@@ -97,12 +97,12 @@ def _apply_live_rows_to_wallet_buckets(wallet: dict, live_rows: list[dict]) -> N
 
 
 @router.get("/account-context/{user_id}")
-async def account_context(user_id: str):
+async def account_context(user_id: str, limit: int = Query(default=10, ge=1, le=100)):
     data = _load("account_context.json")
     if user_id not in data:
         return JSONResponse(status_code=404, content={"error": f"Unknown user {user_id}"})
     ctx = dict(data[user_id])
-    log.info("mock_call account-context user_id=%s real=%s", user_id, settings.use_seylan_real)
+    log.info("mock_call account-context user_id=%s real=%s limit=%s", user_id, settings.use_seylan_real, limit)
 
     if settings.use_seylan_real and user_id in _REAL_ACCOUNTS:
         account_number = _REAL_ACCOUNTS[user_id]
@@ -120,6 +120,10 @@ async def account_context(user_id: str):
                      account_number, bal.get("balance_lkr", 0), len(txns))
         except Exception as exc:
             log.warning("Seylan enrichment failed for %s: %s — using fixture", user_id, exc)
+
+    recent = ctx.get("recent_transactions")
+    if isinstance(recent, list) and limit < len(recent):
+        ctx["recent_transactions"] = recent[:limit]
 
     return ctx
 
@@ -209,17 +213,23 @@ async def pl_summary(user_id: str):
     return data[user_id]
 
 
+_BUCKET_LABELS = {"household": "Household", "school": "School Fees", "savings": "Savings"}
+
+
 @router.post("/trigger-spend")
 async def trigger_spend(req: TriggerSpendRequest):
     log.info("mock_call trigger-spend account=%s merchant=%s amount=%s",
              req.account_id, req.merchant, req.amount_lkr)
+    bucket_label = _BUCKET_LABELS.get(
+        req.bucket_id, req.bucket_id.replace("_", " ").title()
+    )
     try:
         row = supabase_client.insert_transaction(
             account_id=req.account_id,
             merchant=req.merchant,
             amount_lkr=req.amount_lkr,
             bucket_id=req.bucket_id,
-            bucket_label=req.bucket_id.replace("_", " ").title(),
+            bucket_label=bucket_label,
             source="mock",
         )
         txn_id = row.get("id", f"txn_demo_{uuid.uuid4().hex[:6]}")

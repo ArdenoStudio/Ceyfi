@@ -82,7 +82,7 @@ for persona_id in PERSONA_IDS:
     MATRIX_CASES.append((persona_id, "POST", "/api/auth/login", 200))
 
 # Global health / metrics (persona-agnostic)
-for path in ["/health", "/health/deep", "/api/metrics", "/api/auth/personas"]:
+for path in ["/health", "/health/deep", "/health/ready", "/api/metrics", "/api/auth/personas"]:
     MATRIX_CASES.append(("__global__", "GET", path, 200))
 
 # Invalid persona negative tests

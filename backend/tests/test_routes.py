@@ -270,3 +270,10 @@ async def test_auth_personas(client):
 async def test_request_id_header(client):
     resp = await client.get("/health")
     assert "x-request-id" in resp.headers
+
+
+@pytest.mark.asyncio
+async def test_health_ready_endpoint(client):
+    resp = await client.get("/health/ready")
+    assert resp.status_code in (200, 503)
+    assert "checks" in resp.json()

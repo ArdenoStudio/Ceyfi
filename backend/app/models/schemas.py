@@ -14,11 +14,11 @@ class SaveAllocationRulesRequest(BaseModel):
 
 
 class WalletTransferRequest(BaseModel):
-    sender_account_id: str
-    recipient_account_id: str
-    amount_lkr: float
-    corridor: str = "GBPLKR"
-    allocation_rules: list[AllocationRule]
+    sender_account_id: str = Field(..., min_length=1, max_length=64)
+    recipient_account_id: str = Field(..., min_length=1, max_length=64)
+    amount_lkr: float = Field(..., gt=0, le=50_000_000)
+    corridor: str = Field(default="GBPLKR", max_length=16)
+    allocation_rules: list[AllocationRule] = Field(..., min_length=1, max_length=20)
 
 
 class BucketCredit(BaseModel):
@@ -40,16 +40,16 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    user_id: str
-    session_id: str
-    message: str
-    language: str = "en"
-    history: list[ChatMessage] = []
+    user_id: str = Field(..., min_length=1, max_length=64)
+    session_id: str = Field(..., max_length=128)
+    message: str = Field(..., min_length=1, max_length=4096)
+    language: str = Field(default="en", max_length=8)
+    history: list[ChatMessage] = Field(default_factory=list, max_length=50)
 
 
 class TtsRequest(BaseModel):
-    text: str
-    language: str = "en"
+    text: str = Field(..., min_length=1, max_length=5000)
+    language: str = Field(default="en", max_length=8)
 
 
 class TtsResponse(BaseModel):

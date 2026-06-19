@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
+from app.config import settings
 from app.services import openai_client
 
 log = logging.getLogger(__name__)
@@ -16,6 +17,8 @@ async def speech_to_text(audio: UploadFile = File(...)):
         data = await audio.read()
         if not data:
             raise HTTPException(status_code=400, detail="Empty audio payload.")
+        if len(data) > settings.max_stt_upload_bytes:
+            raise HTTPException(status_code=413, detail="Audio file too large.")
         text = await openai_client.transcribe_audio_bytes(data, filename=audio.filename or "speech.webm")
         return {"text": text}
     except HTTPException:

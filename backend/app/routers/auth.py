@@ -1,7 +1,7 @@
 """Demo persona authentication endpoints."""
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.services.auth import (
     DEMO_PERSONAS,
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 class LoginRequest(BaseModel):
-    user_id: str
+    user_id: str = Field(..., min_length=1, max_length=64)
 
 
 @router.get("/personas")

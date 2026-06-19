@@ -33,19 +33,19 @@ _STATUS_MAP = {
 
 
 class PayHereCheckoutRequest(BaseModel):
-    amount_lkr: float = Field(..., gt=0)
+    amount_lkr: float = Field(..., gt=0, le=10_000_000)
     purpose: PurposeType
-    description: str
-    items: str | None = None
+    description: str = Field(..., min_length=1, max_length=500)
+    items: str | None = Field(default=None, max_length=500)
     metadata: dict[str, Any] = Field(default_factory=dict)
-    notify_url: str | None = None
-    first_name: str = "CEYFI"
-    last_name: str = "Customer"
-    email: str = "demo@ceyfi.lk"
-    phone: str = "0771234567"
-    address: str = "No.1, Galle Road"
-    city: str = "Colombo"
-    country: str = "Sri Lanka"
+    notify_url: str | None = Field(default=None, max_length=2048)
+    first_name: str = Field(default="CEYFI", max_length=100)
+    last_name: str = Field(default="Customer", max_length=100)
+    email: str = Field(default="demo@ceyfi.lk", max_length=254)
+    phone: str = Field(default="0771234567", max_length=20)
+    address: str = Field(default="No.1, Galle Road", max_length=200)
+    city: str = Field(default="Colombo", max_length=100)
+    country: str = Field(default="Sri Lanka", max_length=100)
 
 
 class PayHereCheckoutResponse(BaseModel):
@@ -165,6 +165,51 @@ async def create_payhere_checkout(body: PayHereCheckoutRequest):
     )
 
 
+def _verify_notify_signature(payload: dict[str, str]) -> bool:
+    """
+    Verify PayHere server notification md5sig.
+
+    Hash formula (PayHere docs):
+      MD5(merchant_id + order_id + payhere_amount + payhere_currency + status_code + MD5(secret).upper()).upper()
+
+    Production: set PAYHERE_STRICT_NOTIFY_HASH=true so invalid signatures skip fulfillment.
+    Always return HTTP 200 to the webhook — PayHere retries on non-2xx responses.
+    """
+    merchant_id = payload.get("merchant_id", "")
+    order_id = payload.get("order_id", "")
+    payhere_amount = payload.get("payhere_amount", "")
+    payhere_currency = payload.get("payhere_currency", "LKR")
+    status_code = payload.get("status_code", "")
+    md5sig = payload.get("md5sig", "")
+
+    if not settings.payhere_merchant_id or not settings.payhere_secret:
+        log.warning("PayHere notify: credentials not configured — skipping hash check (dev only)")
+        return True
+
+    if not md5sig:
+        log.warning("PayHere notify missing md5sig order_id=%s", order_id)
+        return not settings.payhere_strict_notify_hash
+
+    expected = _notify_hash(
+        merchant_id,
+        order_id,
+        payhere_amount,
+        payhere_currency,
+        status_code,
+        settings.payhere_secret,
+    )
+    if md5sig.upper() != expected:
+        log.warning(
+            "PayHere notify hash mismatch order_id=%s expected=%s got=%s strict=%s",
+            order_id,
+            expected,
+            md5sig,
+            settings.payhere_strict_notify_hash,
+        )
+        return False
+    return True
+
+
 @router.post("/api/payhere/notify", status_code=200)
 async def payhere_notify(request: Request):
     """
@@ -175,35 +220,17 @@ async def payhere_notify(request: Request):
         form = await request.form()
         payload = {k: str(v) for k, v in form.items()}
 
-        merchant_id = payload.get("merchant_id", "")
         order_id = payload.get("order_id", "")
-        payhere_amount = payload.get("payhere_amount", "")
-        payhere_currency = payload.get("payhere_currency", "LKR")
-        status_code = payload.get("status_code", "")
-        md5sig = payload.get("md5sig", "")
-
         if not order_id:
             log.warning("PayHere notify missing order_id: %s", payload)
-            return {"received": True}
+            return {"received": True, "processed": False}
 
-        if settings.payhere_merchant_id and settings.payhere_secret:
-            expected = _notify_hash(
-                merchant_id,
-                order_id,
-                payhere_amount,
-                payhere_currency,
-                status_code,
-                settings.payhere_secret,
-            )
-            if md5sig.upper() != expected:
-                log.warning(
-                    "PayHere notify hash mismatch order_id=%s expected=%s got=%s",
-                    order_id,
-                    expected,
-                    md5sig,
-                )
-                return {"received": True}
+        if not _verify_notify_signature(payload):
+            # PRODUCTION: PAYHERE_STRICT_NOTIFY_HASH=true rejects bad signatures here.
+            return {"received": True, "processed": False, "reason": "invalid_signature"}
 
+        status_code = payload.get("status_code", "")
+        payhere_amount = payload.get("payhere_amount", "")
         status = _STATUS_MAP.get(status_code, "UNKNOWN")
         amount_lkr = float(payhere_amount) if payhere_amount else 0.0
 
@@ -235,7 +262,8 @@ async def payhere_notify(request: Request):
             status_code,
             status,
         )
+        return {"received": True, "processed": True}
     except Exception as exc:
         log.error("PayHere notify handler error: %s", exc, exc_info=True)
 
-    return {"received": True}
+    return {"received": True, "processed": False}
