@@ -6,7 +6,6 @@ from app.config import settings
 log = logging.getLogger(__name__)
 _client: AsyncGroq | None = None
 
-# Primary model + ordered fallback chain
 _PRIMARY_MODEL = "llama-3.3-70b-versatile"
 _FALLBACK_MODELS = ["llama-3.1-8b-instant", "gemma2-9b-it"]
 
@@ -21,7 +20,6 @@ def _get_client() -> AsyncGroq:
 
 
 async def _try_models_stream(msgs: list[dict], max_tokens: int, temperature: float) -> AsyncIterator[str]:
-    """Try primary model then fallbacks for streaming, yielding tokens."""
     for model in [_PRIMARY_MODEL] + _FALLBACK_MODELS:
         try:
             stream = await _get_client().chat.completions.create(
@@ -39,7 +37,7 @@ async def _try_models_stream(msgs: list[dict], max_tokens: int, temperature: flo
                 delta = chunk.choices[0].delta.content
                 if delta:
                     yield delta
-            return  # success — stop trying
+            return
         except RateLimitError:
             log.warning("groq: rate limit on %s, trying next model", model)
             continue
@@ -49,31 +47,23 @@ async def _try_models_stream(msgs: list[dict], max_tokens: int, temperature: flo
     raise RuntimeError("All Groq models are rate-limited. Please try again shortly.")
 
 
-async def stream_chat(system_prompt: str, messages: list[dict],
-                      max_tokens: int = 512, temperature: float = 0.3) -> AsyncIterator[str]:
-    from app.services import openai_client
-    if openai_client.is_available():
-        try:
-            async for token in openai_client.stream_chat(system_prompt, messages, max_tokens, temperature):
-                yield token
-            return
-        except Exception as exc:
-            log.warning("openai: stream_chat failed (%s), falling back to Groq", exc)
-
+async def stream_chat(
+    system_prompt: str,
+    messages: list[dict],
+    max_tokens: int = 512,
+    temperature: float = 0.3,
+) -> AsyncIterator[str]:
     msgs = [{"role": "system", "content": system_prompt}] + messages
     async for token in _try_models_stream(msgs, max_tokens, temperature):
         yield token
 
 
-async def complete(system_prompt: str, messages: list[dict],
-                   max_tokens: int = 512, temperature: float = 0.3) -> str:
-    from app.services import openai_client
-    if openai_client.is_available():
-        try:
-            return await openai_client.complete(system_prompt, messages, max_tokens, temperature)
-        except Exception as exc:
-            log.warning("openai: complete failed (%s), falling back to Groq", exc)
-
+async def complete(
+    system_prompt: str,
+    messages: list[dict],
+    max_tokens: int = 512,
+    temperature: float = 0.3,
+) -> str:
     msgs = [{"role": "system", "content": system_prompt}] + messages
     for model in [_PRIMARY_MODEL] + _FALLBACK_MODELS:
         try:
@@ -96,8 +86,11 @@ async def complete(system_prompt: str, messages: list[dict],
 
 
 async def stream_chat_model(
-    model: str, system_prompt: str, messages: list[dict],
-    max_tokens: int = 2048, temperature: float = 0.6,
+    model: str,
+    system_prompt: str,
+    messages: list[dict],
+    max_tokens: int = 2048,
+    temperature: float = 0.6,
 ) -> AsyncIterator[str]:
     """Stream from an explicitly specified Groq model."""
     msgs = [{"role": "system", "content": system_prompt}] + messages
@@ -110,19 +103,14 @@ async def stream_chat_model(
             yield chunk.choices[0].delta.content
 
 
-async def complete_with_tools(system_prompt: str, messages: list[dict],
-                               tools: list[dict], max_tokens: int = 512,
-                               temperature: float = 0.3):
-    """Non-streaming completion with tool calling support. Returns the full response message."""
-    from app.services import openai_client
-    if openai_client.is_available():
-        try:
-            return await openai_client.complete_with_tools(
-                system_prompt, messages, tools, max_tokens, temperature
-            )
-        except Exception as exc:
-            log.warning("openai: complete_with_tools failed (%s), falling back to Groq", exc)
-
+async def complete_with_tools(
+    system_prompt: str,
+    messages: list[dict],
+    tools: list[dict],
+    max_tokens: int = 512,
+    temperature: float = 0.3,
+):
+    """Non-streaming completion with tool calling. Returns the full response message."""
     msgs = [{"role": "system", "content": system_prompt}] + messages
     for model in [_PRIMARY_MODEL] + _FALLBACK_MODELS:
         try:
@@ -141,3 +129,12 @@ async def complete_with_tools(system_prompt: str, messages: list[dict],
             log.warning("groq: rate limit on %s for complete_with_tools(), trying fallback", model)
             continue
     raise RuntimeError("All Groq models are rate-limited for tool calls.")
+
+
+async def transcribe_audio_bytes(audio_bytes: bytes, filename: str = "speech.webm") -> str:
+    """Transcribe audio using Groq Whisper."""
+    resp = await _get_client().audio.transcriptions.create(
+        file=(filename, audio_bytes),
+        model="whisper-large-v3-turbo",
+    )
+    return (getattr(resp, "text", "") or "").strip()

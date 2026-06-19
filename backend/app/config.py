@@ -42,17 +42,12 @@ class Settings(BaseSettings):
     mpgs_enable: bool = False
 
     # AI
-    openai_api_key: str = ""
     groq_api_key: str = ""
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = "EXAVITQu4vr4xnSDxMaL"
 
     # Database (Neon PostgreSQL)
     database_url: str = ""
-
-    # Supabase (legacy — unused, kept for env compat)
-    supabase_url: str = ""
-    supabase_service_key: str = ""
 
     # App
     cors_origins: str = (

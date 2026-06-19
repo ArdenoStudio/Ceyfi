@@ -175,10 +175,9 @@ async def health_deep():
     else:
         deps["database"] = "not_configured"
 
-    deps["openai"] = "configured" if settings.openai_api_key else "not_configured"
     deps["groq"] = "configured" if settings.groq_api_key else "not_configured"
     deps["elevenlabs"] = "configured" if settings.elevenlabs_api_key else "not_configured"
     deps["seylan_real"] = "enabled" if settings.use_seylan_real else "disabled"
 
-    overall = "ok" if deps.get("groq") == "configured" or deps.get("openai") == "configured" else "degraded"
+    overall = "ok" if deps.get("groq") == "configured" else "degraded"
     return {"status": overall, "version": "0.1.0", "dependencies": deps}
