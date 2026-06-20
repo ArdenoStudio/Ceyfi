@@ -100,7 +100,17 @@ export function SendMoneyModal({
     if (!open) return;
     let cancelled = false;
     getSandboxTransferAccounts()
-      .then((data) => { if (!cancelled) setSandboxRouting(data); })
+      .then((data) => {
+        if (cancelled) return;
+        if (data.source_account && data.destination_account) {
+          setSandboxRouting({
+            source_account: data.source_account,
+            destination_account: data.destination_account,
+          });
+        } else {
+          setSandboxRouting(null);
+        }
+      })
       .catch(() => { if (!cancelled) setSandboxRouting(null); })
       .finally(() => { if (!cancelled) setSandboxRoutingLoaded(true); });
     return () => { cancelled = true; };
