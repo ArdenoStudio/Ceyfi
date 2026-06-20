@@ -9,12 +9,7 @@
 import type { ReactNode } from "react";
 import { TrendingDown, TrendingUp, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface BusinessStatItem {
@@ -42,41 +37,46 @@ function StatCard({
   icon: Icon,
 }: BusinessStatItem) {
   const isPositive = change === undefined || change >= 0;
+  const showTrend = change !== undefined;
 
   return (
-    <Card className="border-white/10 bg-white/[0.06] py-0 ring-white/10 backdrop-blur-sm">
-      <CardHeader className="flex flex-row items-start justify-between gap-2 pb-0">
-        <CardTitle className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">
-          {title}
-        </CardTitle>
-        {Icon ? (
-          <span className="grid size-8 place-items-center rounded-full bg-ceyfi-green/15 text-ceyfi-mint">
-            <Icon className="size-4" aria-hidden />
-          </span>
-        ) : null}
-      </CardHeader>
-      <CardContent className="pt-2">
-        <div className="font-heading text-2xl font-semibold tabular-nums tracking-[-0.03em] text-white">
-          {value}
-        </div>
-        {change !== undefined ? (
-          <div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs">
-            {isPositive ? (
-              <TrendingUp className="size-3.5 text-ceyfi-mint" aria-hidden />
-            ) : (
-              <TrendingDown className="size-3.5 text-red-400" aria-hidden />
-            )}
-            <span className={isPositive ? "text-ceyfi-mint" : "text-red-400"}>
-              {isPositive ? "+" : ""}
-              {change}%
+    <Card className="h-full gap-0 border-white/10 bg-white/[0.06] py-0 ring-white/10 backdrop-blur-sm">
+      <CardContent className="flex h-full flex-col p-4">
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">
+            {title}
+          </CardTitle>
+          {Icon ? (
+            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-ceyfi-green/15 text-ceyfi-mint">
+              <Icon className="size-4 shrink-0" strokeWidth={2} aria-hidden />
             </span>
-            {changeLabel ? (
-              <span className="text-white/40">{changeLabel}</span>
-            ) : null}
-          </div>
-        ) : changeLabel ? (
-          <p className="mt-1.5 text-xs text-white/40">{changeLabel}</p>
-        ) : null}
+          ) : null}
+        </div>
+
+        <p className="mt-2 font-heading text-2xl font-semibold tabular-nums tracking-[-0.03em] text-white">
+          {value}
+        </p>
+
+        <div className="mt-3 flex min-h-5 items-center text-xs leading-5">
+          {showTrend ? (
+            <div className="flex flex-wrap items-center gap-1">
+              {isPositive ? (
+                <TrendingUp className="size-3.5 shrink-0 text-ceyfi-mint" aria-hidden />
+              ) : (
+                <TrendingDown className="size-3.5 shrink-0 text-red-400" aria-hidden />
+              )}
+              <span className={isPositive ? "text-ceyfi-mint" : "text-red-400"}>
+                {isPositive ? "+" : ""}
+                {change}%
+              </span>
+              {changeLabel ? (
+                <span className="text-white/40">{changeLabel}</span>
+              ) : null}
+            </div>
+          ) : changeLabel ? (
+            <span className="text-white/40">{changeLabel}</span>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );
@@ -139,7 +139,7 @@ export function BusinessHeroStats({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat) => (
             <StatCard key={stat.title} {...stat} />
           ))}
