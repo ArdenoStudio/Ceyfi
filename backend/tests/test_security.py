@@ -176,6 +176,19 @@ def test_default_cors_origins_only_include_live_frontends():
 
 
 @pytest.mark.asyncio
+async def test_cors_headers_on_auth_failure(client, monkeypatch):
+    """Browsers mask 401s as CORS failures when error responses omit ACAO."""
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    origin = "https://frontend-taupe-three-96.vercel.app"
+    resp = await client.get(
+        "/mock/pl-summary/SEY-BIZ-001",
+        headers={"Origin": origin},
+    )
+    assert resp.status_code == 401
+    assert resp.headers.get("access-control-allow-origin") == origin
+
+
+@pytest.mark.asyncio
 async def test_trigger_spend_denies_cross_persona_wallet(client, monkeypatch):
     monkeypatch.setattr(settings, "demo_auth_required", True)
     login = await client.post("/api/auth/login", json={"user_id": "SEY-BIZ-001"})

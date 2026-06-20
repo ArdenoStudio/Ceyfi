@@ -131,14 +131,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="CEYFI API", version="0.2.0", lifespan=lifespan)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 @app.middleware("http")
 async def demo_auth_middleware(request: Request, call_next):
@@ -227,6 +219,18 @@ async def rate_limit_middleware(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Request-Id"] = request_id
     return response
+
+
+# Register CORS last so it wraps all custom middleware. Earlier registration
+# leaves CORSMiddleware innermost, so auth 401/403 responses skip CORS headers
+# and browsers report a misleading cross-origin error.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 app.include_router(auth.router)
