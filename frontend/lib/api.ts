@@ -235,14 +235,18 @@ export async function getSandboxTransferAccounts() {
     typeof window !== "undefined"
       ? "/api/wallet/sandbox-transfer-accounts"
       : `${API_BASE}/api/wallet/sandbox-transfer-accounts`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(8000),
+    headers: authHeaders(),
+  });
   if (!res.ok) {
     const text = await res.text().catch(() => "Unknown error");
     throw new ApiError(res.status, text);
   }
   return res.json() as Promise<{
-    source_account: string;
-    destination_account: string;
+    configured?: boolean;
+    source_account?: string;
+    destination_account?: string;
   }>;
 }
 

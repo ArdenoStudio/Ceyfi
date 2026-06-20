@@ -6,11 +6,21 @@ const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_BASE ??
   PRODUCTION_BACKEND_URL;
 
+const ADMIN_KEY = process.env.DEMO_ADMIN_KEY;
+
 export async function GET() {
+  if (!ADMIN_KEY) {
+    return NextResponse.json(
+      { agents: [], phoenixConnected: false, generatedAt: new Date().toISOString() },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   try {
     const res = await fetch(`${BACKEND_URL}/api/metrics`, {
       cache: "no-store",
       signal: AbortSignal.timeout(5000),
+      headers: { "X-Demo-Admin-Key": ADMIN_KEY },
     });
     if (!res.ok) throw new Error(`Backend returned ${res.status}`);
     const data = await res.json();
@@ -18,7 +28,7 @@ export async function GET() {
   } catch {
     return NextResponse.json(
       { agents: [], phoenixConnected: false, generatedAt: new Date().toISOString() },
-      { headers: { "Cache-Control": "no-store" } }
+      { headers: { "Cache-Control": "no-store" } },
     );
   }
 }

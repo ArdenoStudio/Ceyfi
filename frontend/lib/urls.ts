@@ -1,9 +1,12 @@
 /**
- * Canonical production URLs for CEYFI.
- * Override via NEXT_PUBLIC_* / BACKEND_URL env vars in Vercel and Cloud Run.
+ * Production URL fallbacks — always prefer NEXT_PUBLIC_* / BACKEND_URL env vars in deploys.
  */
 export const PRODUCTION_FRONTEND_URL =
-  "https://frontend-taupe-three-96.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_APP_URL ??
+  (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "");
 
 export const PRODUCTION_BACKEND_URL =
-  "https://ceyfi-backend-98470559362.asia-southeast1.run.app";
+  process.env.NEXT_PUBLIC_API_BASE ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "");

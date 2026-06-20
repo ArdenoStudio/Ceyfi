@@ -109,8 +109,23 @@ async def test_sandbox_transfer_accounts(client):
     resp = await client.get("/api/wallet/sandbox-transfer-accounts")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["source_account"] == "064000012548001"
-    assert data["destination_account"] == "001213437904100"
+    assert data["configured"] is False
+
+
+@pytest.mark.asyncio
+async def test_sandbox_transfer_accounts_when_live_bank_enabled(client, monkeypatch):
+    monkeypatch.setattr(settings, "use_seylan_real", True)
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.get("/api/wallet/sandbox-transfer-accounts", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["configured"] is True
+    assert data["source_account"] == settings.seylan_sandbox_source_account
+    assert data["destination_account"] == settings.seylan_sandbox_destination_account
 
 
 @pytest.mark.asyncio

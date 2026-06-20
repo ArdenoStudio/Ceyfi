@@ -112,7 +112,7 @@ export function SendMoneyModal({
 
   function buildSuccessToastDescription(): string {
     const lines: string[] = [`Hub wallet: ${hubRecipientLine}`];
-    if (sandboxRouting) {
+    if (sandboxRouting?.source_account && sandboxRouting?.destination_account) {
       lines.push(`Sandbox: ${sandboxRouting.source_account} → ${sandboxRouting.destination_account}`);
     }
     return lines.join("\n");

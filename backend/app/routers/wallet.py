@@ -2,7 +2,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from app.config import settings
@@ -14,6 +14,7 @@ from app.models.schemas import (
     WalletTransferResponse,
 )
 from app.services import supabase_client
+from app.services.auth import assert_transfer_access, assert_user_access
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["wallet"])
@@ -36,9 +37,18 @@ def _split_transfer_amount_lkr(amount_lkr: float, rules: list[AllocationRule]) -
 
 
 @router.get("/wallet/sandbox-transfer-accounts")
-async def sandbox_transfer_accounts():
-    """Account numbers used for Seylan internal-transfer sandbox calls (same as transfer endpoint)."""
+async def sandbox_transfer_accounts(request: Request):
+    """Sandbox account numbers — only when live bank adapter is enabled for the session user."""
+    if not settings.use_seylan_real:
+        return {"configured": False}
+    session = getattr(request.state, "session", None)
+    if settings.demo_auth_required:
+        if not session:
+            raise HTTPException(status_code=401, detail="Authentication required")
+        if session.get("persona") != "diaspora":
+            raise HTTPException(status_code=403, detail="Sandbox transfers are diaspora-only")
     return {
+        "configured": True,
         "source_account": settings.seylan_sandbox_source_account,
         "destination_account": settings.seylan_sandbox_destination_account,
     }
@@ -62,7 +72,9 @@ async def get_fx_rate(from_currency: str = "GBP", to_currency: str = "LKR"):
 
 
 @router.post("/wallet/transfer", response_model=WalletTransferResponse)
-async def wallet_transfer(req: WalletTransferRequest):
+async def wallet_transfer(req: WalletTransferRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_transfer_access(session, req.sender_account_id, req.recipient_account_id)
     total_pct = sum(r.pct for r in req.allocation_rules)
     if abs(total_pct - 100) > 0.01:
         from fastapi import HTTPException
@@ -126,7 +138,9 @@ async def wallet_transfer(req: WalletTransferRequest):
 
 
 @router.post("/wallet/rules/{sender_id}")
-async def save_wallet_rules_by_sender(sender_id: str, req: SaveAllocationRulesRequest):
+async def save_wallet_rules_by_sender(sender_id: str, req: SaveAllocationRulesRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, sender_id)
     total_pct = sum(r.pct for r in req.allocation_rules)
     if abs(total_pct - 100) > 0.01:
         from fastapi import HTTPException
@@ -145,7 +159,9 @@ async def save_wallet_rules_by_sender(sender_id: str, req: SaveAllocationRulesRe
 
 
 @router.get("/wallet/rules/{sender_id}")
-async def get_wallet_rules(sender_id: str, account_id: str = "SEY-ACC-002"):
+async def get_wallet_rules(sender_id: str, request: Request, account_id: str = "SEY-ACC-002"):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, sender_id)
     try:
         rule = supabase_client.get_allocation_rules(sender_id, account_id)
     except Exception as exc:
@@ -171,7 +187,9 @@ class SaveRulesRequest(BaseModel):
 
 
 @router.post("/wallet/rules")
-async def save_wallet_rules_legacy_body(req: SaveRulesRequest):
+async def save_wallet_rules_legacy_body(req: SaveRulesRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.sender_id)
     total_pct = sum(b.get("pct", 0) for b in req.buckets)
     if abs(total_pct - 100) > 0.01:
         from fastapi import HTTPException

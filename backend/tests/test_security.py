@@ -170,9 +170,100 @@ def test_notify_hash_formula():
 
 def test_default_cors_origins_only_include_live_frontends():
     assert "https://frontend-taupe-three-96.vercel.app" in settings.cors_list
-    assert "https://frontend-cookie-cat21s-projects.vercel.app" in settings.cors_list
-    assert "https://ceyfi.app" not in settings.cors_list
+    assert "https://ceyfi.app" in settings.cors_list
+    assert all("cookie-cat21s" not in origin for origin in settings.cors_list)
     assert all("seylan-hub" not in origin for origin in settings.cors_list)
+
+
+@pytest.mark.asyncio
+async def test_trigger_spend_denies_cross_persona_wallet(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-BIZ-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/mock/trigger-spend",
+        headers=headers,
+        json={
+            "account_id": "SEY-ACC-002",
+            "merchant": "Test",
+            "amount_lkr": 500,
+            "bucket_id": "household",
+        },
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_tax_jar_trigger_denies_cross_user(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/mock/tax-jar/trigger",
+        headers=headers,
+        json={
+            "user_id": "SEY-BIZ-001",
+            "incoming_amount_lkr": 8200,
+            "description": "Test",
+        },
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_wallet_transfer_denies_cross_persona(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-BIZ-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/api/wallet/transfer",
+        headers=headers,
+        json={
+            "sender_account_id": "SEY-USR-001",
+            "recipient_account_id": "SEY-ACC-002",
+            "amount_lkr": 10000,
+            "corridor": "GBPLKR",
+            "allocation_rules": [
+                {"bucket_id": "school", "pct": 50},
+                {"bucket_id": "household", "pct": 50},
+            ],
+        },
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_categorize_denies_cross_user(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/api/categorize-transactions",
+        headers=headers,
+        json={"user_id": "SEY-BIZ-001", "transaction_ids": ["biz_039"]},
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_sandbox_transfer_accounts_hidden_without_live_bank(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    monkeypatch.setattr(settings, "use_seylan_real", False)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.get("/api/wallet/sandbox-transfer-accounts", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["configured"] is False
 
 
 @pytest.mark.asyncio
