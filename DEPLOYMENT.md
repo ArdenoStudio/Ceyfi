@@ -55,6 +55,16 @@ MPGS_ENABLE=false
 
 `CORS_ORIGINS` must include every frontend origin that calls the API. The Cloud Run value should contain only production aliases. Code defaults also cover local dev ports `3000`/`3003`/`3005`; add a specific preview origin temporarily only when browser testing that preview against the production API.
 
+## Google Cloud Build (backend)
+
+The single canonical `main` branch trigger is:
+
+`rmgpgab-ceyfi-backend-asia-southeast1-ArdenoStudio-Ceyfi--mamsl`
+
+It builds the backend with Dockerfile `backend/Dockerfile` and build context `backend/`, pushes the image to Artifact Registry, and deploys Cloud Run service `ceyfi-backend` in `asia-southeast1`.
+
+Do not create a duplicate trigger that expects a repository-root `Dockerfile`; this monorepo has no root Dockerfile, so that configuration fails before the image build starts.
+
 ## Local dev
 
 ```bash
@@ -82,4 +92,4 @@ HTTP bridge (when API is running):
 
 ## CI
 
-GitHub Actions on `main`: frontend lint/smoke/e2e + backend pytest. No auto-deploy — Vercel Git integration handles deploys.
+GitHub Actions on `main`: frontend lint/smoke/e2e + backend pytest. Vercel Git integration deploys the frontend, and the canonical Google Cloud Build trigger above deploys the backend.
