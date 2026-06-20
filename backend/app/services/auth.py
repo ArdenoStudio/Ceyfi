@@ -193,3 +193,42 @@ def assert_user_access(session: dict[str, Any] | None, user_id: str) -> None:
     if session is None:
         raise HTTPException(status_code=401, detail="Authentication required")
     ensure_can_access_user(session, user_id)
+
+
+def assert_account_access(session: dict[str, Any] | None, account_id: str) -> None:
+    """Enforce account_id belongs to the logged-in persona (user id or linked wallet)."""
+    if not settings.demo_auth_required:
+        return
+    if session is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    allowed = {session["user_id"], session.get("wallet_account_id")} - {None}
+    if account_id not in allowed:
+        raise HTTPException(status_code=403, detail="Access denied for this account")
+
+
+def assert_wallet_access(session: dict[str, Any] | None, account_id: str) -> None:
+    """Enforce session can access a wallet account when demo auth is enabled."""
+    if not settings.demo_auth_required:
+        return
+    if session is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    ensure_can_access_wallet(session, account_id)
+
+
+def assert_transfer_access(
+    session: dict[str, Any] | None,
+    sender_account_id: str,
+    recipient_account_id: str,
+) -> None:
+    """Enforce remittance transfer sender/recipient match the logged-in persona."""
+    if not settings.demo_auth_required:
+        return
+    if session is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    user_id = session["user_id"]
+    wallet_id = session.get("wallet_account_id")
+    allowed_ids = {user_id, wallet_id} - {None}
+    if sender_account_id not in allowed_ids:
+        raise HTTPException(status_code=403, detail="Access denied for sender account")
+    if recipient_account_id not in allowed_ids:
+        raise HTTPException(status_code=403, detail="Access denied for recipient account")

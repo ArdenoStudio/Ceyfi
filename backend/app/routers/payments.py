@@ -86,7 +86,7 @@ def _assert_payment_owner(row: dict[str, Any], session: dict[str, Any] | None) -
         except json.JSONDecodeError:
             meta = {}
     owner = meta.get("user_id")
-    if owner and owner != session["user_id"]:
+    if not owner or owner != session["user_id"]:
         raise HTTPException(status_code=403, detail="Access denied for this payment")
 
 
@@ -207,7 +207,7 @@ async def create_payment_session(body: CreateSessionRequest, request: Request):
         log.error("MPGS session creation failed: %s", msg)
         if "[401]" in msg:
             raise HTTPException(status_code=502, detail="MPGS authentication failed — check MPGS_MERCHANT_ID and MPGS_API_PASSWORD credentials.")
-        raise HTTPException(status_code=502, detail=f"MPGS gateway error: {msg}")
+        raise HTTPException(status_code=502, detail="MPGS gateway error")
 
     try:
         supabase_client.save_payment({

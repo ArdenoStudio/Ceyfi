@@ -18,10 +18,6 @@ router = APIRouter(prefix="/api", tags=["chat"])
 # In-process fixture cache
 _ctx_cache: dict[str, dict] = {}
 _fixture_cache: dict[str, dict] = {}
-_REAL_ACCOUNTS = {
-    "SEY-USR-001": "064000012548001",
-    "SEY-USR-003": "064000012548001",
-}
 
 
 def _load_fixture(name: str) -> dict:
@@ -71,7 +67,7 @@ async def chat(req: ChatRequest, request: Request):
     if settings.use_seylan_real:
         try:
             from app.seylan import account as seylan_acct
-            account_number = _REAL_ACCOUNTS.get(req.user_id)
+            account_number = settings.seylan_sandbox_source_account
             if account_number:
                 bal = await seylan_acct.get_balance(account_number)
                 txns = await seylan_acct.get_recent_transactions(account_number, n=5)

@@ -1,18 +1,20 @@
 import { NextResponse } from "next/server";
 
 const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8000";
+const DEMO_RESET_ENABLED = process.env.DEMO_RESET_ENABLED === "true";
+const ADMIN_KEY = process.env.DEMO_ADMIN_KEY;
 
 /**
  * Demo-only proxy for POST /mock/reset-demo.
  *
- * Requires a valid demo session (Bearer token). The admin key stays server-side
- * in DEMO_ADMIN_KEY — never use NEXT_PUBLIC_* for secrets.
+ * Disabled unless DEMO_RESET_ENABLED=true. Requires a valid demo session.
+ * The admin key stays server-side in DEMO_ADMIN_KEY — never use NEXT_PUBLIC_*.
  */
-const ADMIN_KEY =
-  process.env.DEMO_ADMIN_KEY ??
-  (process.env.NODE_ENV === "development" ? "ceyfi-demo-admin" : undefined);
-
 export async function POST(request: Request) {
+  if (!DEMO_RESET_ENABLED) {
+    return NextResponse.json({ error: "Demo reset is disabled." }, { status: 403 });
+  }
+
   const auth = request.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
   }
 
   if (!ADMIN_KEY) {
-    return NextResponse.json({ error: "Demo reset is disabled." }, { status: 403 });
+    return NextResponse.json({ error: "Demo reset is not configured." }, { status: 503 });
   }
 
   try {

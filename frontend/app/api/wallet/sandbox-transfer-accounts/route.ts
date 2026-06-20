@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 
 const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8000";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = request.headers.get("authorization");
+  const headers: Record<string, string> = {};
+  if (auth) {
+    headers.Authorization = auth;
+  }
+
   try {
     const res = await fetch(`${BACKEND}/api/wallet/sandbox-transfer-accounts`, {
       cache: "no-store",
       signal: AbortSignal.timeout(8000),
+      headers,
     });
     const text = await res.text();
     return new NextResponse(text, {
@@ -18,7 +25,7 @@ export async function GET() {
   } catch {
     return NextResponse.json(
       { error: "Could not reach backend for sandbox account numbers." },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }

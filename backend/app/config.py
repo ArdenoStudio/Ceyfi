@@ -44,8 +44,8 @@ class Settings(BaseSettings):
     # PayHere — Hosted Checkout (sandbox)
     payhere_merchant_id: str = ""
     payhere_secret: str = ""
-    # Production: set PAYHERE_STRICT_NOTIFY_HASH=true to reject webhooks with invalid md5sig
-    payhere_strict_notify_hash: bool = False
+    # Reject PayHere webhooks with missing or invalid md5sig when credentials are configured
+    payhere_strict_notify_hash: bool = True
 
     # Request limits
     max_request_body_bytes: int = 1_048_576  # 1 MiB
@@ -70,7 +70,7 @@ class Settings(BaseSettings):
         "http://localhost:3003,"
         "http://localhost:3005,"
         "https://frontend-taupe-three-96.vercel.app,"
-        "https://frontend-cookie-cat21s-projects.vercel.app"
+        "https://ceyfi.app"
     )
     frontend_base_url: str = "https://frontend-taupe-three-96.vercel.app"
     backend_base_url: str = "http://localhost:8000"

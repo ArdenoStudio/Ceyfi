@@ -4,11 +4,11 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
 
 from app.config import settings
-from app.services.auth import require_admin
+from app.services.auth import DEMO_PERSONAS, assert_account_access, assert_user_access, require_admin
 from app.models.schemas import TriggerSpendRequest, TaxJarTriggerRequest
 from app.services import supabase_client
 
@@ -16,13 +16,6 @@ log = logging.getLogger(__name__)
 router = APIRouter(prefix="/mock", tags=["mock"])
 
 _FX = Path(__file__).parent.parent.parent / "fixtures"
-
-# Map demo user_id → real sandbox account number
-_REAL_ACCOUNTS = {
-    "SEY-USR-001": "064000012548001",
-    "SEY-USR-003": "064000012548001",
-}
-
 
 _fixture_cache: dict[str, dict] = {}
 
@@ -105,8 +98,8 @@ async def account_context(user_id: str, limit: int = Query(default=10, ge=1, le=
     ctx = dict(data[user_id])
     log.info("mock_call account-context user_id=%s real=%s limit=%s", user_id, settings.use_seylan_real, limit)
 
-    if settings.use_seylan_real and user_id in _REAL_ACCOUNTS:
-        account_number = _REAL_ACCOUNTS[user_id]
+    if settings.use_seylan_real and user_id in DEMO_PERSONAS:
+        account_number = settings.seylan_sandbox_source_account
         try:
             from app.seylan import account as seylan_acct
             # Real balance
@@ -231,7 +224,9 @@ _BUCKET_LABELS = {"household": "Household", "school": "School Fees", "savings": 
 
 
 @router.post("/trigger-spend")
-async def trigger_spend(req: TriggerSpendRequest):
+async def trigger_spend(req: TriggerSpendRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_account_access(session, req.account_id)
     log.info("mock_call trigger-spend account=%s merchant=%s amount=%s",
              req.account_id, req.merchant, req.amount_lkr)
     bucket_label = _BUCKET_LABELS.get(
@@ -261,7 +256,9 @@ async def trigger_spend(req: TriggerSpendRequest):
 
 
 @router.post("/tax-jar/trigger")
-async def tax_jar_trigger(req: TaxJarTriggerRequest):
+async def tax_jar_trigger(req: TaxJarTriggerRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
     log.info("mock_call tax-jar/trigger user=%s amount=%s", req.user_id, req.incoming_amount_lkr)
     tax_amount = round(req.incoming_amount_lkr * 0.10)
     base_balance = 15070

@@ -3,7 +3,7 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.config import settings
 from app.models.schemas import (
@@ -12,6 +12,7 @@ from app.models.schemas import (
 )
 from app.services.categorizer import categorize_transactions
 from app.services import supabase_client
+from app.services.auth import assert_user_access
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["business"])
@@ -19,11 +20,10 @@ router = APIRouter(prefix="/api", tags=["business"])
 _FX = Path(__file__).parent.parent.parent / "fixtures"
 
 
-_BIZ_ACCOUNT_MAP = {"SEY-BIZ-001": "064000012548001"}
-
-
 @router.post("/categorize-transactions", response_model=CategorizeResponse)
-async def categorize(req: CategorizeRequest):
+async def categorize(req: CategorizeRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
     all_txns: list[dict] = []
 
     # Prefer Supabase (seeded fixture rows + any live activity)
@@ -52,7 +52,9 @@ _insight_cache: dict[str, str] = {}
 
 
 @router.get("/business/insight")
-async def business_insight(user_id: str = "SEY-BIZ-001"):
+async def business_insight(request: Request, user_id: str = "SEY-BIZ-001"):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, user_id)
     if user_id in _insight_cache:
         return {"insight_text": _insight_cache[user_id], "language": "en"}
 
@@ -98,7 +100,9 @@ async def business_insight(user_id: str = "SEY-BIZ-001"):
 
 
 @router.post("/tax-jar/rule", response_model=TaxJarRuleResponse)
-async def tax_jar_rule(req: TaxJarRuleRequest):
+async def tax_jar_rule(req: TaxJarRuleRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
     rule_id = f"TAX-RULE-{uuid.uuid4().hex[:6].upper()}"
     try:
         supabase_client.save_tax_jar_rule(
