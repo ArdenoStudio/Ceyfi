@@ -1,17 +1,25 @@
 import { NextResponse } from "next/server";
 
 const BACKEND =
+  process.env.BACKEND_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
   process.env.NEXT_PUBLIC_API_BASE ??
-  process.env.BACKEND_URL ??
   "http://localhost:8000";
 
 export async function POST(req: Request) {
   try {
     const body = await req.text();
+    const auth = req.headers.get("authorization");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (auth) {
+      headers.Authorization = auth;
+    }
+
     const res = await fetch(`${BACKEND}/api/payhere/checkout`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body,
       signal: AbortSignal.timeout(30000),
     });

@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.config import settings
-from app.routers.payments import _fulfill
+from app.routers.payments import _fulfill, bind_payment_metadata
 from app.services import supabase_client
 
 log = logging.getLogger(__name__)
@@ -38,7 +38,6 @@ class PayHereCheckoutRequest(BaseModel):
     description: str = Field(..., min_length=1, max_length=500)
     items: str | None = Field(default=None, max_length=500)
     metadata: dict[str, Any] = Field(default_factory=dict)
-    notify_url: str | None = Field(default=None, max_length=2048)
     first_name: str = Field(default="CEYFI", max_length=100)
     last_name: str = Field(default="Customer", max_length=100)
     email: str = Field(default="demo@ceyfi.lk", max_length=254)
@@ -106,15 +105,20 @@ def _default_notify_url() -> str:
 
 
 @router.post("/api/payhere/checkout", response_model=PayHereCheckoutResponse)
-async def create_payhere_checkout(body: PayHereCheckoutRequest):
+async def create_payhere_checkout(body: PayHereCheckoutRequest, request: Request):
     _require_payhere()
+    auth_session = getattr(request.state, "session", None)
+    if settings.demo_auth_required and not auth_session:
+        raise HTTPException(status_code=401, detail="Authentication required")
 
     order_id = f"PH-{body.purpose.upper()}-{uuid4().hex[:10].upper()}"
     amount = _format_amount(body.amount_lkr)
     currency = "LKR"
     merchant_id = settings.payhere_merchant_id
     items = body.items or body.description
-    notify_url = (body.notify_url or _default_notify_url()).strip()
+    # Always use the server-configured notify URL — never accept client override.
+    notify_url = _default_notify_url()
+    metadata = bind_payment_metadata(auth_session, body.metadata, body.purpose)
 
     checkout_hash = _checkout_hash(
         merchant_id, order_id, amount, currency, settings.payhere_secret
@@ -144,13 +148,18 @@ async def create_payhere_checkout(body: PayHereCheckoutRequest):
         supabase_client.save_payment({
             "order_id": order_id,
             "status": "PENDING",
+            "purpose": body.purpose,
+            "amount_lkr": body.amount_lkr,
+            "currency": currency,
+            "description": body.description,
+            "metadata": metadata,
             "gateway_response": {
                 "gateway": "payhere",
                 "amount_lkr": body.amount_lkr,
                 "currency": currency,
                 "purpose": body.purpose,
                 "description": body.description,
-                "metadata": body.metadata,
+                "metadata": metadata,
                 "checkout_params": params,
             },
         })
@@ -242,16 +251,28 @@ async def payhere_notify(request: Request):
 
         if status == "CAPTURED":
             row = supabase_client.get_payment(order_id)
+            # Prefer top-level metadata (session-bound at checkout); fall back to gateway blob.
+            metadata = (row or {}).get("metadata") or {}
+            if isinstance(metadata, str):
+                import json
+                try:
+                    metadata = json.loads(metadata)
+                except json.JSONDecodeError:
+                    metadata = {}
             gw = (row or {}).get("gateway_response") or {}
             if isinstance(gw, str):
                 import json
-                gw = json.loads(gw)
-            purpose = gw.get("purpose", "")
-            metadata = gw.get("metadata") or {}
+                try:
+                    gw = json.loads(gw)
+                except json.JSONDecodeError:
+                    gw = {}
+            if not metadata:
+                metadata = gw.get("metadata") or {}
+            purpose = (row or {}).get("purpose") or gw.get("purpose", "")
             await _fulfill(
                 order_id=order_id,
                 purpose=purpose,
-                amount_lkr=amount_lkr or float(gw.get("amount_lkr", 0)),
+                amount_lkr=amount_lkr or float(gw.get("amount_lkr", 0) or (row or {}).get("amount_lkr", 0) or 0),
                 metadata=metadata,
                 gateway="payhere",
             )

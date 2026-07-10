@@ -7,8 +7,9 @@ const ADMIN_KEY = process.env.DEMO_ADMIN_KEY;
 /**
  * Demo-only proxy for POST /mock/reset-demo.
  *
- * Disabled unless DEMO_RESET_ENABLED=true. Requires a valid demo session.
- * The admin key stays server-side in DEMO_ADMIN_KEY — never use NEXT_PUBLIC_*.
+ * Disabled unless DEMO_RESET_ENABLED=true (kiosk/demo builds only).
+ * Requires a valid demo session. The admin key stays server-side in
+ * DEMO_ADMIN_KEY — never use NEXT_PUBLIC_*.
  */
 export async function POST(request: Request) {
   if (!DEMO_RESET_ENABLED) {
