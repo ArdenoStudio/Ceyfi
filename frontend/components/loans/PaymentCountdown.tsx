@@ -3,17 +3,16 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarClock } from "lucide-react";
 import { Loan } from "@/types";
-import { formatLKR } from "@/lib/utils";
+import { formatLKR, cn } from "@/lib/utils";
+import { daysUntil, dueLabel, formatLongDate } from "@/lib/dates";
 
 interface PaymentCountdownProps {
   loan: Loan;
 }
 
 export function PaymentCountdown({ loan }: PaymentCountdownProps) {
-  const nextDate = new Date(loan.next_payment_date);
-  const now = new Date();
-  const diffMs = nextDate.getTime() - now.getTime();
-  const daysUntil = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+  const days = daysUntil(loan.next_payment_date);
+  const overdue = days < 0;
 
   return (
     <Card className="border-ceyfi-line bg-[linear-gradient(135deg,#064e3b_0%,#03130c_100%)] text-white shadow-lg shadow-ceyfi-deep/20">
@@ -27,19 +26,30 @@ export function PaymentCountdown({ loan }: PaymentCountdownProps) {
         <div className="mt-1 text-3xl font-semibold">
           {formatLKR(loan.monthly_payment_lkr)}
         </div>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-ceyfi-deep">
+        <div
+          className={cn(
+            "mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold",
+            overdue ? "bg-rose-100 text-rose-800" : "bg-white text-ceyfi-deep"
+          )}
+        >
           <span className="relative flex h-2 w-2 will-change-transform">
-            <span className="live-pulse-ring absolute inline-flex h-full w-full rounded-full bg-ceyfi-green" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-ceyfi-green" />
+            <span
+              className={cn(
+                "live-pulse-ring absolute inline-flex h-full w-full rounded-full",
+                overdue ? "bg-rose-500" : "bg-ceyfi-green"
+              )}
+            />
+            <span
+              className={cn(
+                "relative inline-flex h-2 w-2 rounded-full",
+                overdue ? "bg-rose-500" : "bg-ceyfi-green"
+              )}
+            />
           </span>
-          due in {daysUntil} days
+          {dueLabel(loan.next_payment_date)}
         </div>
         <div className="mt-3 text-xs text-white/60">
-          {nextDate.toLocaleDateString("en-LK", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
+          {formatLongDate(loan.next_payment_date)}
         </div>
       </CardContent>
     </Card>

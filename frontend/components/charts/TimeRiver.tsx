@@ -38,6 +38,8 @@ interface TimeRiverProps {
   data?: TimeRiverPoint[];
   dangerThreshold?: number;
   height?: number;
+  /** LKR added to future forecast after a plan is selected (demo twin loop). */
+  balanceBoost?: number;
   onPlanSelect?: (plan: ActionPlan) => void;
 }
 
@@ -117,9 +119,27 @@ export function TimeRiver({
   data: dataProp,
   dangerThreshold = 20_000,
   height = 280,
+  balanceBoost = 0,
   onPlanSelect,
 }: TimeRiverProps) {
-  const data = useMemo(() => dataProp ?? generateFallbackData(), [dataProp]);
+  const baseData = useMemo(() => dataProp ?? generateFallbackData(), [dataProp]);
+  const data = useMemo(() => {
+    if (!balanceBoost) return baseData;
+    return baseData.map((point) => {
+      if (!point.isFuture) return point;
+      const forecast =
+        point.forecast != null ? point.forecast + balanceBoost : null;
+      const upper = point.upper != null ? point.upper + balanceBoost : null;
+      const lower = point.lower != null ? point.lower + balanceBoost : null;
+      return {
+        ...point,
+        forecast,
+        upper,
+        lower,
+        isDanger: forecast != null ? forecast < dangerThreshold : point.isDanger,
+      };
+    });
+  }, [baseData, balanceBoost, dangerThreshold]);
   const todayLabel = data.find((p) => p.isToday)?.date ?? "Today";
 
   const [panelOpen, setPanelOpen] = useState(false);
@@ -302,7 +322,10 @@ export function TimeRiver({
         projectedBalance={selectedPoint?.forecast ?? 0}
         events={causality.events}
         actionPlans={causality.actionPlans}
-        onPlanSelect={onPlanSelect}
+        onPlanSelect={(plan) => {
+          onPlanSelect?.(plan);
+          setPanelOpen(false);
+        }}
       />
     </>
   );

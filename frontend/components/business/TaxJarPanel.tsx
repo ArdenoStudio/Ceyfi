@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatLKR } from "@/lib/utils";
-import { createPaymentSession, postTaxJarTrigger } from "@/lib/api";
+import { createPaymentSession, postTaxJarRule, postTaxJarTrigger } from "@/lib/api";
 import { toast } from "sonner";
 import { Transaction } from "@/types";
 import { PaymentModeToggle } from "@/components/payments/PaymentModeToggle";
@@ -43,6 +43,9 @@ export function TaxJarPanel({
   const [cardAmount, setCardAmount] = useState(8200);
   const [submitting, setSubmitting] = useState(false);
   const [paymentMode, setPaymentMode] = useState<"card" | "demo">("card");
+  const [taxPct, setTaxPct] = useState(10);
+  const [savedPct, setSavedPct] = useState(10);
+  const [savingRule, setSavingRule] = useState(false);
   const animRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   useEffect(() => {
@@ -67,23 +70,43 @@ export function TaxJarPanel({
     return () => clearInterval(animRef.current);
   }, [initialBalance, displayBalance]);
 
+  async function handleSaveRule() {
+    const pct = Math.min(100, Math.max(1, Math.round(taxPct)));
+    setSavingRule(true);
+    try {
+      await postTaxJarRule({
+        user_id: userId,
+        rule: "auto_save",
+        percentage: pct,
+      });
+      setTaxPct(pct);
+      setSavedPct(pct);
+      toast.success(`Tax jar rule saved — ${pct}% auto-save`);
+    } catch {
+      toast.error("Could not save tax jar rule.");
+    } finally {
+      setSavingRule(false);
+    }
+  }
+
   async function handlePayment() {
     if (!cardAmount || cardAmount <= 0) return;
     setSubmitting(true);
+    const rate = savedPct / 100;
     try {
       if (paymentMode === "card") {
         const session = await createPaymentSession({
           amount_lkr: cardAmount,
           purpose: "tax_jar_inbound",
           description: "Customer payment — Silva Hardware",
-          metadata: { user_id: userId, tax_rate_pct: 10 },
+          metadata: { user_id: userId, tax_rate_pct: savedPct },
         });
         window.location.href = session.checkout_url;
         return;
       }
 
       // Demo mode — hit mock endpoint to simulate inbound payment
-      const taxSaved = Math.round(cardAmount * 0.1);
+      const taxSaved = Math.round(cardAmount * rate);
       await postTaxJarTrigger({
         user_id: userId,
         incoming_amount_lkr: cardAmount,
@@ -119,6 +142,8 @@ export function TaxJarPanel({
     }
   }
 
+  const previewTax = cardAmount > 0 ? Math.round(cardAmount * (savedPct / 100)) : 0;
+
   return (
     <>
     <Card className="border-ceyfi-line dark:border-[#34D399]/20 bg-[linear-gradient(135deg,#f7fdfa_0%,#dcf3e6_100%)] dark:bg-[linear-gradient(135deg,#0b1a10_0%,#06120a_100%)] shadow-lg shadow-ceyfi-mint/10">
@@ -144,15 +169,46 @@ export function TaxJarPanel({
           deltaLabel={
             projectedTaxNeed > 0
               ? `${coveragePct}% of projected need`
-              : "10% auto-save active"
+              : `${savedPct}% auto-save active`
           }
           isIncreasePositive
           className="mb-3"
           valueClassName="text-3xl sm:text-4xl"
         />
 
-        <div className="text-xs text-muted-foreground dark:text-white/40 mb-4">
-          Rule: 10% of every incoming payment
+        <div className="mb-4 space-y-2">
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <Label htmlFor="tax-pct" className="text-xs text-muted-foreground dark:text-white/40">
+                Auto-save %
+              </Label>
+              <Input
+                id="tax-pct"
+                type="number"
+                min={1}
+                max={100}
+                step={1}
+                value={Number.isFinite(taxPct) ? taxPct : 10}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  setTaxPct(Number.isFinite(v) ? v : 10);
+                }}
+                className="mt-1 bg-white/80 dark:bg-white/5"
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mb-0.5"
+              disabled={savingRule}
+              onClick={() => void handleSaveRule()}
+            >
+              {savingRule ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground dark:text-white/40">
+            Current rule: {savedPct}% of every incoming payment
+          </p>
         </div>
 
         {projectedTaxNeed > 0 ? (
@@ -204,7 +260,9 @@ export function TaxJarPanel({
 
           <div className="rounded-lg bg-ceyfi-sprout/60 border border-ceyfi-line p-3 text-sm">
             <p className="font-medium text-ceyfi-ink">Silva Hardware &amp; Electricals</p>
-            <p className="text-xs text-muted-foreground mt-0.5">10% auto-saved to Tax Jar on receipt</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {savedPct}% auto-saved to Tax Jar on receipt
+            </p>
           </div>
           <div>
             <Label htmlFor="card-amount">Amount (LKR)</Label>
@@ -224,7 +282,7 @@ export function TaxJarPanel({
               <p className="mt-1 text-xs text-muted-foreground">
                 Tax Jar will receive:{" "}
                 <span className="font-semibold text-ceyfi-ink">
-                  {formatLKR(Math.round(cardAmount * 0.1))}
+                  {formatLKR(previewTax)}
                 </span>
               </p>
             )}

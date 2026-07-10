@@ -12,15 +12,19 @@ const BUCKET_DOT: Record<string, string> = {
 
 interface TransactionRowProps {
   transaction: Transaction;
+  onClick?: () => void;
 }
 
-export function TransactionRow({ transaction }: TransactionRowProps) {
+export function TransactionRow({ transaction, onClick }: TransactionRowProps) {
   const isDebit = transaction.type === "debit";
   const bucketKey = (transaction.bucket_label ?? "").toLowerCase();
   const dotColour = BUCKET_DOT[bucketKey] ?? "bg-slate-400";
 
-  return (
-    <div className="group flex items-center gap-3 py-3 border-b border-ceyfi-line/60 last:border-0 transition-colors hover:bg-ceyfi-sprout/50 dark:border-white/[0.06] dark:hover:bg-white/[0.04] -mx-1 px-1 rounded-xl">
+  const className =
+    "group flex w-full items-center gap-3 py-3 border-b border-ceyfi-line/60 last:border-0 transition-colors hover:bg-ceyfi-sprout/50 dark:border-white/[0.06] dark:hover:bg-white/[0.04] -mx-1 px-1 rounded-xl text-left";
+
+  const body = (
+    <>
       {/* Direction icon */}
       <div
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
@@ -62,6 +66,16 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
         {isDebit ? "−" : "+"}
         {formatLKR(transaction.amount_lkr)}
       </div>
-    </div>
+    </>
   );
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={className}>
+        {body}
+      </button>
+    );
+  }
+
+  return <div className={className}>{body}</div>;
 }

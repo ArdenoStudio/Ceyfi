@@ -37,6 +37,8 @@ import {
 } from "lucide-react";
 import { VerificationCard } from "@/components/ui/verification-card";
 import { CurrencyExchangeCard } from "@/components/wallet/CurrencyExchangeCard";
+import { PinGate } from "@/components/payments/PinGate";
+import { PaymentReceipt } from "@/components/payments/PaymentReceipt";
 
 interface SendMoneyModalProps {
   senderId: string;
@@ -78,6 +80,12 @@ export function SendMoneyModal({
   const [currency, setCurrency] = useState<RemittanceCurrency>(DEFAULT_CURRENCY);
   const [showFxCalc, setShowFxCalc] = useState(false);
   const [sending, setSending] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [receipt, setReceipt] = useState<{
+    amountLkr: number;
+    reference: string;
+    detail: string;
+  } | null>(null);
   const [sandboxRouting, setSandboxRouting] = useState<{
     source_account: string;
     destination_account: string;
@@ -87,13 +95,21 @@ export function SendMoneyModal({
   const amountLkr = toLkr(amount, currency);
   // For API compatibility: always pass GBP equivalent
   const amountGbpEquiv = Math.round((amountLkr / GBP_LKR_RATE) * 100) / 100;
+  const isValid = Number.isFinite(amount) && amount > 0;
 
   function handleDialogOpenChange(next: boolean) {
     if (!next) {
       setSandboxRouting(null);
       setSandboxRoutingLoaded(false);
+      setPinOpen(false);
+      setReceipt(null);
     }
     onOpenChange(next);
+  }
+
+  function requestSend() {
+    if (!isValid || sending) return;
+    setPinOpen(true);
   }
 
   useEffect(() => {
@@ -146,16 +162,30 @@ export function SendMoneyModal({
             fx_rate: currency.lkrRate,
           },
         });
+        setPinOpen(false);
         // eslint-disable-next-line react-hooks/immutability -- external MPGS redirect
         window.location.href = session.checkout_url;
         return;
       }
-      await postWalletTransfer({
+      const transfer = await postWalletTransfer({
         sender_account_id: senderId,
         recipient_account_id: recipientId,
         amount_lkr: amountLkr,
         corridor: `${currency.code}->LKR`,
         allocation_rules: allocations,
+      }) as { transfer_id?: string; status?: string; note?: string };
+      if (transfer?.status === "FAILED") {
+        toast.error(transfer.note || "Transfer failed. Please try again.");
+        return;
+      }
+      const reference =
+        transfer?.transfer_id ||
+        `TRF-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+      setPinOpen(false);
+      setReceipt({
+        amountLkr: amountLkr,
+        reference,
+        detail: buildSuccessToastDescription(),
       });
       toast.custom(() => (
         <div className="flex items-start gap-3 rounded-xl border border-[#E31821]/30 bg-[#0c0407] px-4 py-3.5 shadow-[0_8px_32px_rgba(227,24,33,0.25)] w-[356px]">
@@ -171,8 +201,7 @@ export function SendMoneyModal({
             </p>
           </div>
         </div>
-      ), { duration: 5000 });
-      handleDialogOpenChange(false);
+      ), { duration: 4000 });
       onSuccess(amountLkr, amountGbpEquiv, currency);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
@@ -189,10 +218,9 @@ export function SendMoneyModal({
     }
   }
 
-  const isValid = Number.isFinite(amount) && amount > 0;
-
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange} modal="trap-focus">
+    <>
+    <Dialog open={open && !receipt} onOpenChange={handleDialogOpenChange} modal="trap-focus">
       <DialogContent
         className="max-w-sm overflow-hidden border border-border bg-popover p-0 shadow-2xl"
         showCloseButton={false}
@@ -368,7 +396,7 @@ export function SendMoneyModal({
             <button
               type="button"
               disabled={sending || !isValid}
-              onClick={handleSubmit}
+              onClick={requestSend}
               className="group relative w-full overflow-hidden rounded-xl bg-[#E31821] py-3.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(227,24,33,0.3)] transition-all hover:bg-[#c41219] hover:shadow-[0_6px_24px_rgba(227,24,33,0.4)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               <span className="relative flex items-center justify-center gap-2">
@@ -427,5 +455,41 @@ export function SendMoneyModal({
         </DialogContent>
       </Dialog>
     </Dialog>
+
+    <PinGate
+      open={pinOpen}
+      onOpenChange={setPinOpen}
+      title="Confirm remittance"
+      description={`Enter your PIN to send ${formatLKR(amountLkr)} to the family wallet.`}
+      confirmLabel={paymentMode === "card" ? "Continue to card" : "Send money"}
+      loading={sending}
+      onConfirm={handleSubmit}
+    />
+
+    <Dialog
+      open={!!receipt}
+      onOpenChange={(next) => {
+        if (!next) {
+          setReceipt(null);
+          handleDialogOpenChange(false);
+        }
+      }}
+    >
+      <DialogContent className="max-w-sm">
+        {receipt ? (
+          <PaymentReceipt
+            title="Remittance sent"
+            amountLkr={receipt.amountLkr}
+            reference={receipt.reference}
+            detail={receipt.detail}
+            onDone={() => {
+              setReceipt(null);
+              handleDialogOpenChange(false);
+            }}
+          />
+        ) : null}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

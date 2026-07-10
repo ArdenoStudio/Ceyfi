@@ -13,6 +13,7 @@ import {
   Lightbulb,
   MoreHorizontal,
   Sparkles,
+  User,
   Wallet,
   Zap,
 } from "lucide-react";
@@ -28,17 +29,18 @@ import { Button } from "@/components/ui/button";
 
 const MOBILE_PRIMARY = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
-  { href: "/transactions", label: "Activity", icon: ArrowUpDown },
-  { href: "/decisions", label: "Decisions", icon: Zap },
-  { href: "/intelligence", label: "Intel", icon: Lightbulb },
-  { href: "/assistant", label: "CEYFI AI", icon: Sparkles },
+  { href: "/wallet", label: "Wallet", icon: Wallet },
+  { href: "/decisions", label: "Decide", icon: Zap },
+  { href: "/assistant", label: "AI", icon: Sparkles },
 ];
 
 const MOBILE_MORE = [
-  { href: "/wallet", label: "Wallet", icon: Wallet },
+  { href: "/transactions", label: "Activity", icon: ArrowUpDown },
   { href: "/loans", label: "Loans", icon: CreditCard },
   { href: "/business", label: "Business", icon: BriefcaseBusiness },
+  { href: "/intelligence", label: "Intel", icon: Lightbulb },
   { href: "/scenarios", label: "Scenarios", icon: FlaskConical },
+  { href: "/profile", label: "Profile", icon: User },
   { href: "/metrics", label: "Metrics", icon: Activity },
 ];
 

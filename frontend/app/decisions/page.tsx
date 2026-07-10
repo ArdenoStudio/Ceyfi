@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -26,9 +27,9 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { getFinancialSnapshot, executeDecision, type FinancialSnapshot } from "@/lib/api";
+import { shareText } from "@/lib/share";
 import { cn, formatters } from "@/lib/utils";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 type Decision = FinancialSnapshot["decisions"][0];
 
@@ -45,9 +46,11 @@ const URGENCY_DOT = {
   Low: "bg-emerald-500",
 };
 
-export default function DecisionsPage() {
+function DecisionsPageInner() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const planParam = searchParams.get("plan");
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,10 +65,17 @@ export default function DecisionsPage() {
     setLoading(true);
     setError(null);
     getFinancialSnapshot(user.user_id)
-      .then((s) => setDecisions(s.decisions))
+      .then((s) => {
+        setDecisions(s.decisions);
+        if (planParam) {
+          const match =
+            s.decisions.find((d) => d.id === planParam) ?? s.decisions[0];
+          if (match) setExpanded(match.id);
+        }
+      })
       .catch(() => setError("Could not load financial recommendations."))
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, planParam]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -100,18 +110,57 @@ export default function DecisionsPage() {
     try {
       const result = await executeDecision(user.user_id, executeTarget.id);
       setExecuteTarget(null);
-      if (result.recovery_messages) {
+      const action = result.action_type;
+      const amountLabel =
+        result.amount_lkr != null
+          ? formatters.currency({ number: result.amount_lkr, maxFractionDigits: 0 })
+          : null;
+
+      if (action === "recovery" || result.recovery_messages) {
+        const msg = result.recovery_messages?.en ?? result.message;
         toast.success("Recovery message ready", {
-          description: result.recovery_messages.en.slice(0, 120) + "…",
+          description: msg.slice(0, 140) + (msg.length > 140 ? "…" : ""),
           action: {
-            label: "Open business",
-            onClick: () => router.push("/business"),
+            label: "WhatsApp",
+            onClick: () => {
+              void shareText({
+                title: `CEYFI recovery · ${result.client ?? "client"}`,
+                text: msg,
+              });
+            },
           },
         });
-      } else {
-        toast.success("Action confirmed", { description: result.message });
-        if (result.redirect) router.push(result.redirect);
+        return;
       }
+
+      if (action === "loan_payment") {
+        toast.success("Loan payment recorded", {
+          description: [
+            amountLabel ? `${amountLabel} applied` : result.message,
+            result.reference ? `Ref ${result.reference}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        });
+        if (result.redirect) router.push(result.redirect);
+        return;
+      }
+
+      if (action === "wallet_credit") {
+        toast.success("Wallet credited", {
+          description: [
+            amountLabel ? `${amountLabel} moved to Savings` : result.message,
+            result.reference ? `Ref ${result.reference}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        });
+        if (result.redirect) router.push(result.redirect);
+        return;
+      }
+
+      toast.success("Action confirmed", { description: result.message });
+      if (result.redirect) router.push(result.redirect);
     } catch {
       toast.error("Could not execute action");
     } finally {
@@ -297,5 +346,20 @@ export default function DecisionsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function DecisionsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-[900px] space-y-6 p-4 sm:p-6">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      }
+    >
+      <DecisionsPageInner />
+    </Suspense>
   );
 }
