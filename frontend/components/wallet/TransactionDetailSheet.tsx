@@ -28,24 +28,22 @@ export function TransactionDetailSheet({
 }: TransactionDetailSheetProps) {
   if (!transaction) return null;
 
-  const isDebit = transaction.type === "debit";
-  const title = transaction.merchant || transaction.description || "Transaction";
+  const tx = transaction;
+  const isDebit = tx.type === "debit";
+  const title = tx.merchant || tx.description || "Transaction";
   const reference =
-    transaction.transaction_id ||
-    `TXN-${Math.abs(transaction.amount_lkr).toString(36).toUpperCase()}`;
+    tx.transaction_id ||
+    `TXN-${Math.abs(tx.amount_lkr).toString(36).toUpperCase()}`;
 
   async function handleShare() {
     const text = formatReceiptMessage({
       title,
-      amountLkr: Math.abs(transaction.amount_lkr),
+      amountLkr: Math.abs(tx.amount_lkr),
       reference,
-      detail: [
-        transaction.bucket_label,
-        transaction.category_en ?? transaction.category,
-      ]
+      detail: [tx.bucket_label, tx.category_en ?? tx.category]
         .filter(Boolean)
         .join(" · "),
-      when: new Date(transaction.timestamp).toLocaleString("en-LK"),
+      when: new Date(tx.timestamp).toLocaleString("en-LK"),
     });
     const result = await shareText({ title: `CEYFI — ${title}`, text });
     if (result === "copied") toast.success("Copied");
@@ -67,7 +65,7 @@ export function TransactionDetailSheet({
         <SheetHeader>
           <SheetTitle className="font-heading text-ceyfi-ink">{title}</SheetTitle>
           <SheetDescription>
-            {new Date(transaction.timestamp).toLocaleString("en-LK", {
+            {new Date(tx.timestamp).toLocaleString("en-LK", {
               dateStyle: "medium",
               timeStyle: "short",
             })}
@@ -96,17 +94,17 @@ export function TransactionDetailSheet({
                 )}
               >
                 {isDebit ? "−" : "+"}
-                {formatLKR(Math.abs(transaction.amount_lkr))}
+                {formatLKR(Math.abs(tx.amount_lkr))}
               </p>
               <div className="mt-1 flex flex-wrap gap-1.5">
-                {transaction.bucket_label ? (
+                {tx.bucket_label ? (
                   <Badge variant="secondary" className="text-[10px]">
-                    {transaction.bucket_label}
+                    {tx.bucket_label}
                   </Badge>
                 ) : null}
-                {(transaction.category_en ?? transaction.category) ? (
+                {(tx.category_en ?? tx.category) ? (
                   <Badge variant="outline" className="text-[10px]">
-                    {transaction.category_en ?? transaction.category}
+                    {tx.category_en ?? tx.category}
                   </Badge>
                 ) : null}
               </div>
@@ -122,10 +120,10 @@ export function TransactionDetailSheet({
               <dt className="text-ceyfi-muted">Paid via</dt>
               <dd>CEYFI wallet / bank transfer</dd>
             </div>
-            {transaction.description && transaction.description !== title ? (
+            {tx.description && tx.description !== title ? (
               <div className="flex justify-between gap-3">
                 <dt className="text-ceyfi-muted">Note</dt>
-                <dd className="text-right">{transaction.description}</dd>
+                <dd className="text-right">{tx.description}</dd>
               </div>
             ) : null}
           </dl>

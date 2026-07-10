@@ -267,7 +267,6 @@ export function TimeRiver({
               connectNulls={false}
               name="Balance"
               activeDot={{ r: 5, strokeWidth: 2, stroke: "#E8F7EE" }}
-              onClick={handleChartClick}
             />
 
             {/* Forecast */}
@@ -281,7 +280,6 @@ export function TimeRiver({
               connectNulls={false}
               name="Forecast"
               activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
-              onClick={handleChartClick}
             />
 
             <ReferenceLine
