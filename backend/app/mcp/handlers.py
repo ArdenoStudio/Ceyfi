@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from app.services import auth as auth_service
-from app.services import business_intelligence, chat_tools, loan_state
+from app.services import business_intelligence, chat_tools
 from app.services import supabase_client
 from app.services.financial_snapshot import build_financial_snapshot
 from app.mcp.registry import PROMPT_CATALOG, RESOURCE_CATALOG, TOOL_CATALOG
@@ -365,34 +365,11 @@ async def _execute_decision(arguments: dict[str, Any]) -> dict[str, Any]:
             "decision": decision,
         }
 
-    title_l = str(decision.get("title", "")).lower()
     benefit = float(decision.get("benefit_lkr") or 0)
     category = decision.get("category")
 
-    # Loan / EMI protection — apply a demo payment against the first loan.
-    if category == "Protect" or "emi" in title_l or "loan" in title_l or "instalment" in title_l:
-        fixture_loans = (_load("loans.json").get(user_id) or {}).get("loans") or []
-        live = (loan_state.get_loan_data(user_id) or {}).get("loans") or []
-        target = (live or fixture_loans)
-        if target:
-            loan = target[0]
-            loan_id = loan["loan_id"]
-            monthly = float(loan.get("monthly_payment_lkr", 22000))
-            amount = min(benefit or monthly, monthly)
-            updated = loan_state.apply_payment(user_id, loan_id, amount)
-            return {
-                "ok": True,
-                "action_type": "loan_payment",
-                "redirect": "/loans",
-                "message": f"Recorded LKR {amount:,.0f} towards {loan_id}",
-                "decision": decision,
-                "loan": updated,
-                "amount_lkr": amount,
-                "reference": f"DEC-{decision_id.upper()}-{loan_id}",
-            }
-
-    # Savings / move — credit family wallet savings bucket (demo mutation).
-    if category in ("Save", "Move", "Grow") or "sav" in title_l or "wallet" in title_l:
+    # ID-based routing for demo decisions.
+    if decision_id in ("d1", "d6"):
         amount = benefit if benefit > 0 else 8400
         account_id = "SEY-ACC-002"
         try:
@@ -415,6 +392,33 @@ async def _execute_decision(arguments: dict[str, Any]) -> dict[str, Any]:
             "decision": decision,
             "amount_lkr": amount,
             "reference": f"DEC-{decision_id.upper()}-SAVE",
+        }
+
+    if decision_id == "d2":
+        return {
+            "ok": True,
+            "action_type": "redirect",
+            "redirect": "/loans",
+            "message": "EMI date shift request opened — review your repayment schedule",
+            "decision": decision,
+        }
+
+    if decision_id == "d3":
+        return {
+            "ok": True,
+            "action_type": "redirect",
+            "redirect": "/wallet",
+            "message": "Remittance timing tip — check wallet buckets before the next send",
+            "decision": decision,
+        }
+
+    if decision_id == "d5":
+        return {
+            "ok": True,
+            "action_type": "redirect",
+            "redirect": "/loans",
+            "message": "Refinance options opened — compare rates against your current facility",
+            "decision": decision,
         }
 
     redirect = "/assistant"

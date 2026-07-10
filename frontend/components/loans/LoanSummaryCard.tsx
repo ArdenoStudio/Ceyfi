@@ -8,6 +8,7 @@ import { LoanIcon } from "@/components/icons/CeyfiIconSet";
 import { IconWell } from "@/components/ui/IconWell";
 import { ProgressCircle } from "@/components/charts/ProgressCircle";
 import { Loan } from "@/types";
+import { dueLabel } from "@/lib/dates";
 import { formatLKR } from "@/lib/utils";
 import { HealthScoreBadge } from "./HealthScoreBadge";
 import { LoanPaymentModal } from "./LoanPaymentModal";
@@ -20,11 +21,7 @@ interface LoanSummaryCardProps {
 export function LoanSummaryCard({ loan, onPaymentSuccess }: LoanSummaryCardProps) {
   const [payModalOpen, setPayModalOpen] = useState(false);
   const progressPct = Math.round((loan.payments_made / loan.total_payments) * 100);
-  const nextDate = new Date(loan.next_payment_date);
-  const daysUntil = Math.max(
-    0,
-    Math.ceil((nextDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-  );
+  const dueCopy = dueLabel(loan.next_payment_date);
 
   return (
     <>
@@ -42,9 +39,9 @@ export function LoanSummaryCard({ loan, onPaymentSuccess }: LoanSummaryCardProps
               <h2 className="mt-1 font-heading text-2xl font-semibold text-ceyfi-ink dark:text-white">
                 {loan.type} &middot; {loan.purpose}
               </h2>
-              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ceyfi-sprout px-3 py-1 text-xs font-semibold text-ceyfi-deep dark:bg-white/10 dark:text-white">
+              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ceyfi-sprout px-3 py-1 text-xs font-semibold capitalize text-ceyfi-deep dark:bg-white/10 dark:text-white">
                 <CalendarClock className="h-3.5 w-3.5 text-ceyfi-green" />
-                {daysUntil} days until next payment
+                {dueCopy}
               </span>
               </div>
             </div>

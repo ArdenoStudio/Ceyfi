@@ -270,9 +270,9 @@ export default function OverviewPage() {
   ).split(" ")[0];
   const loanDueAmount = loan?.monthly_payment_lkr ?? 22000;
   const loanDueDate = loan?.next_payment_date ?? "2026-07-25";
-  const committed =
-    loanDueAmount + 15000 + 2800; // EMI + school fees + Dialog
-  const safeToMove = Math.max(0, current - committed - 15000);
+  // Everyday-account commitments only (school fees come from family wallet buckets).
+  const committed = loanDueAmount + 2800; // EMI + Dialog
+  const safeToMove = Math.max(0, current - committed - 5000); // keep a small buffer
   const balance30dAgo = Math.round(personalTotal / 1.024);
   const balanceDelta = periodDelta(personalTotal, balance30dAgo);
 
@@ -490,6 +490,7 @@ export default function OverviewPage() {
           dangerThreshold={20000}
           height={280}
           balanceBoost={riverBoost}
+          baseBalance={personalTotal}
           onPlanSelect={handlePlanSelect}
         />
       </ChartCard>

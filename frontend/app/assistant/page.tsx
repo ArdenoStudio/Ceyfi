@@ -154,7 +154,7 @@ function AssistantPageContent() {
             <FinanceConnectionDiagram className="mt-8" />
           </div>
 
-          <div className="w-full max-w-2xl">
+          <div className="w-full max-w-2xl pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-2">
             <ChatInput
               ref={chatInputRef}
               onSend={send}
@@ -205,7 +205,7 @@ function AssistantPageContent() {
             onSuggestedSelect={send}
           />
 
-          <div className="relative z-10 mx-auto w-full max-w-2xl space-y-3 px-4 pb-2">
+          <div className="relative z-10 mx-auto w-full max-w-2xl space-y-3 px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-2">
             <FaqSection variant="collapsible" />
             <ChatInput
               ref={chatInputRef}

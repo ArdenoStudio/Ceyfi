@@ -76,7 +76,7 @@ const DEMO_SCRIPT: DemoStep[] = [
   {
     step: 5,
     label: "Decisions",
-    path: "/decisions?plan=move-savings",
+    path: "/decisions?plan=d1",
     hint: "Execute a ranked action — real demo side-effect",
     seconds: 16,
   },
@@ -99,7 +99,7 @@ function DemoStepIndicator({
   completedThrough: number;
 }) {
   return (
-    <ol className="grid gap-3 sm:grid-cols-5">
+    <ol className="grid gap-3 sm:grid-cols-6">
       {steps.map((item, index) => {
         const done = item.step <= completedThrough;
         const active = activeStep === item.step;
@@ -261,8 +261,8 @@ export default function DemoControlPage() {
           {
             label: "Demo script",
             metric: "90s",
-            subLabel: "5-step narrative",
-            description: "Overview → wallet spend → assistant → decisions → reset",
+            subLabel: "6-step narrative",
+            description: "Overview → wallet spend → scenarios → assistant → decisions → reset",
             icon: Timer,
             accent: "ceyfi",
           },
@@ -347,7 +347,7 @@ export default function DemoControlPage() {
             <div>
               <h2 className="font-semibold text-ceyfi-ink">Run demo script</h2>
               <p className="text-sm text-ceyfi-muted">
-                Automated 5-step narrative with route changes and live wallet spend
+                Automated 6-step narrative with route changes and live wallet spend
               </p>
             </div>
           </div>

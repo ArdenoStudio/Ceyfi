@@ -175,6 +175,7 @@ export function SendMoneyModal({
         allocation_rules: allocations,
       }) as { transfer_id?: string; status?: string; note?: string };
       if (transfer?.status === "FAILED") {
+        setPinOpen(false);
         toast.error(transfer.note || "Transfer failed. Please try again.");
         return;
       }
@@ -204,6 +205,7 @@ export function SendMoneyModal({
       ), { duration: 4000 });
       onSuccess(amountLkr, amountGbpEquiv, currency);
     } catch (err) {
+      setPinOpen(false);
       const msg = err instanceof Error ? err.message : "";
       const isUnconfigured = msg.includes("[503]") || msg.includes("not enabled");
       toast.error(
@@ -457,6 +459,7 @@ export function SendMoneyModal({
     </Dialog>
 
     <PinGate
+      key={`${open}-${pinOpen}`}
       open={pinOpen}
       onOpenChange={setPinOpen}
       title="Confirm remittance"

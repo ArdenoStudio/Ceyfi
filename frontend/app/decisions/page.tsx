@@ -130,6 +130,7 @@ function DecisionsPageInner() {
             },
           },
         });
+        if (result.redirect) router.push(result.redirect);
         return;
       }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,7 @@ export function TaxJarPanel({
   onNewTransaction,
 }: TaxJarPanelProps) {
   const [displayBalance, setDisplayBalance] = useState(initialBalance);
+  const [prevInitial, setPrevInitial] = useState(initialBalance);
   const [cardModalOpen, setCardModalOpen] = useState(false);
   const [cardAmount, setCardAmount] = useState(8200);
   const [submitting, setSubmitting] = useState(false);
@@ -46,29 +47,11 @@ export function TaxJarPanel({
   const [taxPct, setTaxPct] = useState(10);
   const [savedPct, setSavedPct] = useState(10);
   const [savingRule, setSavingRule] = useState(false);
-  const animRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
-  useEffect(() => {
-    if (displayBalance === initialBalance) return;
-    const diff = initialBalance - displayBalance;
-    const steps = 30;
-    const increment = diff / steps;
-    let current = displayBalance;
-    let step = 0;
-
-    animRef.current = setInterval(() => {
-      step++;
-      current += increment;
-      if (step >= steps) {
-        setDisplayBalance(initialBalance);
-        clearInterval(animRef.current);
-      } else {
-        setDisplayBalance(Math.round(current));
-      }
-    }, 800 / steps);
-
-    return () => clearInterval(animRef.current);
-  }, [initialBalance, displayBalance]);
+  if (initialBalance !== prevInitial) {
+    setPrevInitial(initialBalance);
+    setDisplayBalance(initialBalance);
+  }
 
   async function handleSaveRule() {
     const pct = Math.min(100, Math.max(1, Math.round(taxPct)));
@@ -106,12 +89,20 @@ export function TaxJarPanel({
       }
 
       // Demo mode — hit mock endpoint to simulate inbound payment
-      const taxSaved = Math.round(cardAmount * rate);
-      await postTaxJarTrigger({
+      const result = await postTaxJarTrigger({
         user_id: userId,
         incoming_amount_lkr: cardAmount,
         description: "Customer payment — Silva Hardware (demo)",
       });
+      const taxSaved =
+        result.tax_saved > 0
+          ? result.tax_saved
+          : Math.round(cardAmount * rate);
+      if (result.new_balance > 0) {
+        setDisplayBalance(result.new_balance);
+      } else {
+        setDisplayBalance((prev) => prev + taxSaved);
+      }
       onNewTransaction?.({
         transaction_id: `biz_demo_tax_${Date.now()}`,
         type: "credit",

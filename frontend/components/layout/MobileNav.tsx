@@ -28,8 +28,8 @@ import {
 import { Button } from "@/components/ui/button";
 
 const MOBILE_PRIMARY = [
-  { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/wallet", label: "Wallet", icon: Wallet },
+  { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/decisions", label: "Decide", icon: Zap },
   { href: "/assistant", label: "AI", icon: Sparkles },
 ];
