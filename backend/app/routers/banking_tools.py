@@ -6,13 +6,15 @@ import json
 import logging
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from app.config import settings
 from app.mcp.handlers import execute_tool, get_prompt, read_resource
 from app.mcp.registry import PROMPT_CATALOG, RESOURCE_CATALOG, TOOL_CATALOG
 from app.mcp.server import catalog_summary
 from app.services import auth as auth_service
+from app.services.auth import assert_user_access
 from app.services import business_intelligence
 
 log = logging.getLogger(__name__)
@@ -35,11 +37,29 @@ class RecoveryMessageRequest(BaseModel):
     amount: float
     overdue_days: int
     tone: str = "friendly"
+    user_id: str = "SEY-BIZ-001"
 
 
 class PromptRequest(BaseModel):
     name: str
     arguments: dict[str, Any] = Field(default_factory=dict)
+
+
+def _assert_tool_user_access(session: dict[str, Any] | None, arguments: dict[str, Any]) -> None:
+    """When a tool/prompt names a user_id, require the session to own it."""
+    user_id = arguments.get("user_id")
+    if user_id:
+        assert_user_access(session, str(user_id))
+
+
+def _require_sme_session(session: dict[str, Any] | None) -> None:
+    """SME-only business intelligence endpoints."""
+    if not settings.demo_auth_required:
+        return
+    if session is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    if session.get("persona") != "sme":
+        raise HTTPException(status_code=403, detail="Access denied for this resource")
 
 
 @router.get("/mcp")
@@ -62,13 +82,22 @@ async def list_mcp_resources():
 
 
 @router.get("/mcp/resources/{uri:path}")
-async def read_mcp_resource(uri: str):
+async def read_mcp_resource(uri: str, request: Request):
     """Read an MCP resource by URI path (e.g. catalog/personas or ceyfi://catalog/personas)."""
     if uri.startswith("ceyfi://"):
         full_uri = uri
     else:
         path = uri.removeprefix("ceyfi/").lstrip("/")
         full_uri = f"ceyfi://{path}"
+
+    # Block cross-persona user context reads when auth is on.
+    if "/user/" in full_uri:
+        session = getattr(request.state, "session", None)
+        # ceyfi://user/{user_id}/context
+        parts = full_uri.removeprefix("ceyfi://").split("/")
+        if len(parts) >= 2 and parts[0] == "user":
+            assert_user_access(session, parts[1])
+
     try:
         mime, body = read_resource(full_uri)
     except ValueError as exc:
@@ -87,8 +116,10 @@ async def list_mcp_prompts():
 
 
 @router.post("/mcp/prompts/get")
-async def get_mcp_prompt(req: PromptRequest):
+async def get_mcp_prompt(req: PromptRequest, request: Request):
     """Resolve an MCP prompt to message list."""
+    session = getattr(request.state, "session", None)
+    _assert_tool_user_access(session, req.arguments)
     try:
         messages = await get_prompt(req.name, req.arguments)
     except ValueError as exc:
@@ -97,7 +128,9 @@ async def get_mcp_prompt(req: PromptRequest):
 
 
 @router.post("/mcp/call")
-async def call_mcp_tool(req: ToolCallRequest):
+async def call_mcp_tool(req: ToolCallRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    _assert_tool_user_access(session, req.arguments)
     result = await execute_tool(req.name, req.arguments)
     try:
         parsed = json.loads(result)
@@ -107,12 +140,17 @@ async def call_mcp_tool(req: ToolCallRequest):
 
 
 @router.get("/business/cfo-brief")
-async def cfo_brief(user_id: str = "SEY-BIZ-001"):
+async def cfo_brief(request: Request, user_id: str = "SEY-BIZ-001"):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, user_id)
+    _require_sme_session(session)
     return await business_intelligence.build_cfo_brief(user_id)
 
 
 @router.get("/business/receivables")
-async def receivables():
+async def receivables(request: Request):
+    session = getattr(request.state, "session", None)
+    _require_sme_session(session)
     return {
         "receivables": business_intelligence.list_receivables_with_trust(),
         "predictions": business_intelligence.predict_payment_dates("SEY-BIZ-001"),
@@ -120,7 +158,10 @@ async def receivables():
 
 
 @router.post("/business/recovery-message")
-async def recovery_message(req: RecoveryMessageRequest):
+async def recovery_message(req: RecoveryMessageRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
+    _require_sme_session(session)
     messages = await business_intelligence.generate_recovery_messages(
         client=req.client,
         invoice=req.invoice,
@@ -132,8 +173,11 @@ async def recovery_message(req: RecoveryMessageRequest):
 
 
 @router.post("/decisions/execute")
-async def execute_decision(req: ExecuteDecisionRequest):
+async def execute_decision(req: ExecuteDecisionRequest, request: Request):
     """Map a ranked decision to a concrete demo action."""
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
+
     result = await execute_tool(
         "execute_decision",
         {"user_id": req.user_id, "decision_id": req.decision_id},

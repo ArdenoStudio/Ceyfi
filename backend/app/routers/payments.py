@@ -90,6 +90,57 @@ def _assert_payment_owner(row: dict[str, Any], session: dict[str, Any] | None) -
         raise HTTPException(status_code=403, detail="Access denied for this payment")
 
 
+# Client-supplied metadata keys that are safe to keep (non-ownership).
+_SAFE_METADATA_KEYS = frozenset({
+    "buckets",
+    "tax_rate_pct",
+    "merchant_name",
+    "loan_id",
+    "sender_amount_gbp",
+    "fx_rate",
+    "description",
+})
+
+
+def bind_payment_metadata(
+    session: dict[str, Any] | None,
+    body_metadata: dict[str, Any] | None,
+    purpose: str,
+) -> dict[str, Any]:
+    """Build payment metadata with ownership fields derived from the session.
+
+    Client-supplied user_id / account_id / tax_account_id are ignored so
+    fulfillment cannot credit another persona's wallet.
+    """
+    raw = body_metadata or {}
+    metadata = {k: v for k, v in raw.items() if k in _SAFE_METADATA_KEYS}
+
+    if session:
+        metadata["user_id"] = session["user_id"]
+        wallet_id = session.get("wallet_account_id")
+        if purpose == "remittance":
+            metadata["account_id"] = wallet_id or "SEY-ACC-002"
+        elif purpose in ("tax_jar_inbound", "shop_sale"):
+            metadata["account_id"] = session["user_id"]
+            metadata["tax_account_id"] = "SEY-SAV-001"
+        elif purpose == "loan":
+            metadata["account_id"] = session["user_id"]
+    else:
+        # Auth disabled (tests / local): keep demo defaults only.
+        if purpose == "remittance":
+            metadata.setdefault("user_id", "SEY-USR-001")
+            metadata.setdefault("account_id", "SEY-ACC-002")
+        elif purpose in ("tax_jar_inbound", "shop_sale"):
+            metadata.setdefault("user_id", "SEY-BIZ-001")
+            metadata.setdefault("account_id", "SEY-BIZ-001")
+            metadata.setdefault("tax_account_id", "SEY-SAV-001")
+        elif purpose == "loan":
+            metadata.setdefault("user_id", "SEY-USR-003")
+            metadata.setdefault("account_id", "SEY-USR-003")
+
+    return metadata
+
+
 async def _fulfill(
     order_id: str,
     purpose: str,
@@ -102,7 +153,8 @@ async def _fulfill(
     try:
         if purpose == "remittance":
             buckets: list[dict] = metadata.get("buckets", [])
-            account_id: str = metadata.get("account_id", "SEY-ACC-002")
+            # Prefer session-bound account_id; never trust a missing/empty client value.
+            account_id: str = metadata.get("account_id") or "SEY-ACC-002"
             for bucket in buckets:
                 pct = bucket.get("pct", 0)
                 bucket_amount = round(amount_lkr * pct / 100, 2)
@@ -118,7 +170,7 @@ async def _fulfill(
                     )
 
         elif purpose == "tax_jar_inbound":
-            user_id: str = metadata.get("user_id", "SEY-BIZ-001")
+            user_id: str = metadata.get("user_id") or "SEY-BIZ-001"
             tax_rate = float(metadata.get("tax_rate_pct", 10)) / 100
             tax_amount = round(amount_lkr * tax_rate, 2)
             # Business income transaction
@@ -129,9 +181,9 @@ async def _fulfill(
                 source=gateway,
                 txn_type="credit",
             )
-            # Tax jar savings split
+            # Tax jar savings split — fixed demo tax jar, not client-controlled.
             supabase_client.insert_transaction(
-                account_id=metadata.get("tax_account_id", "SEY-SAV-001"),
+                account_id=metadata.get("tax_account_id") or "SEY-SAV-001",
                 merchant="Tax Jar Auto-Split",
                 amount_lkr=tax_amount,
                 source=gateway,
@@ -143,7 +195,7 @@ async def _fulfill(
             )
 
         elif purpose == "shop_sale":
-            biz_id: str = metadata.get("user_id", "SEY-BIZ-001")
+            biz_id: str = metadata.get("user_id") or "SEY-BIZ-001"
             supabase_client.insert_transaction(
                 account_id=biz_id,
                 merchant=metadata.get("merchant_name", f"Shop Sale ({label})"),
@@ -155,7 +207,7 @@ async def _fulfill(
         elif purpose == "loan":
             from app.services import loan_state
             loan_id: str = metadata.get("loan_id", "")
-            user_id_loan: str = metadata.get("user_id", "SEY-USR-001")
+            user_id_loan: str = metadata.get("user_id") or "SEY-USR-003"
             updated = loan_state.apply_payment(user_id_loan, loan_id, amount_lkr)
             supabase_client.insert_transaction(
                 account_id=user_id_loan,
@@ -184,18 +236,16 @@ async def _fulfill(
 @router.post("/api/payments/session", response_model=CreateSessionResponse)
 async def create_payment_session(body: CreateSessionRequest, request: Request):
     _require_mpgs()
-    session = getattr(request.state, "session", None)
-    if settings.demo_auth_required and not session:
+    auth_session = getattr(request.state, "session", None)
+    if settings.demo_auth_required and not auth_session:
         raise HTTPException(status_code=401, detail="Authentication required")
 
-    metadata = dict(body.metadata)
-    if session:
-        metadata["user_id"] = session["user_id"]
+    metadata = bind_payment_metadata(auth_session, body.metadata, body.purpose)
     order_id = f"SH-{body.purpose.upper()}-{uuid4().hex[:10].upper()}"
     return_url = f"{settings.frontend_base_url}/payments/return?order_id={order_id}"
 
     try:
-        session = await mpgs.create_checkout_session(
+        checkout = await mpgs.create_checkout_session(
             order_id=order_id,
             amount_lkr=body.amount_lkr,
             description=body.description,
@@ -206,28 +256,28 @@ async def create_payment_session(body: CreateSessionRequest, request: Request):
         msg = str(exc)
         log.error("MPGS session creation failed: %s", msg)
         if "[401]" in msg:
-            raise HTTPException(status_code=502, detail="MPGS authentication failed — check MPGS_MERCHANT_ID and MPGS_API_PASSWORD credentials.")
+            raise HTTPException(status_code=502, detail="MPGS authentication failed")
         raise HTTPException(status_code=502, detail="MPGS gateway error")
 
     try:
         supabase_client.save_payment({
             "order_id": order_id,
-            "session_id": session["session_id"],
+            "session_id": checkout["session_id"],
             "amount_lkr": body.amount_lkr,
             "currency": "LKR",
             "purpose": body.purpose,
             "description": body.description,
             "status": "PENDING",
             "metadata": metadata,
-            "gateway_response": session,
+            "gateway_response": checkout,
         })
     except Exception as exc:
         log.warning("Could not persist payment to Supabase (non-fatal): %s", exc)
 
     return CreateSessionResponse(
         order_id=order_id,
-        session_id=session["session_id"],
-        checkout_url=session["checkout_url"],
+        session_id=checkout["session_id"],
+        checkout_url=checkout["checkout_url"],
     )
 
 

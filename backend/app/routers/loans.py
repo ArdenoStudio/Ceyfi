@@ -2,11 +2,12 @@ import json
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.models.schemas import LoanAdvisorRequest, LoanAdvisorResponse, LoanHealthResponse
 from app.services import groq_client, supabase_client
+from app.services.auth import assert_user_access
 from app.services.context_builder import build_loan_advisor_prompt
 from app.services.health_score import compute_health_score, HEALTH_SUMMARY
 
@@ -51,11 +52,13 @@ class DemoPaymentRequest(BaseModel):
 
 
 @router.post("/loans/demo-payment")
-async def demo_loan_payment(req: DemoPaymentRequest):
+async def demo_loan_payment(req: DemoPaymentRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
+
     from app.services import loan_state
     updated = loan_state.apply_payment(req.user_id, req.loan_id, req.amount_lkr)
     if not updated:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail=f"Loan {req.loan_id} not found for user {req.user_id}")
 
     try:
@@ -80,7 +83,10 @@ async def demo_loan_payment(req: DemoPaymentRequest):
 
 
 @router.post("/loans/advisor", response_model=LoanAdvisorResponse)
-async def loan_advisor(req: LoanAdvisorRequest):
+async def loan_advisor(req: LoanAdvisorRequest, request: Request):
+    session = getattr(request.state, "session", None)
+    assert_user_access(session, req.user_id)
+
     cache_key = f"{req.user_id}:{req.loan_id or 'primary'}"
     if cache_key in _advisor_cache:
         loans = _get_loans(req.user_id)

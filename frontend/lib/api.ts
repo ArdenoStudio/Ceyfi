@@ -225,6 +225,7 @@ export async function createPaymentSession(args: {
 export async function getPaymentStatus(orderId: string) {
   const res = await fetch(`${API_BASE}/api/payments/${orderId}`, {
     signal: AbortSignal.timeout(10000),
+    headers: authHeaders(),
   });
   if (!res.ok) throw new Error("Failed to fetch payment status");
   return res.json();

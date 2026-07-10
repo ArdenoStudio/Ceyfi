@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ErrorState";
 import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { authHeaders } from "@/lib/auth";
 import { AgentCard } from "./components/AgentCard";
 import { ResponseTimeChart } from "./components/ResponseTimeChart";
 import { SuccessErrorChart } from "./components/SuccessErrorChart";
@@ -70,7 +71,10 @@ export default function MetricsPage() {
     }
     if (isManual) setRefreshing(true);
     try {
-      const res = await fetch("/api/metrics", { cache: "no-store" });
+      const res = await fetch("/api/metrics", {
+        cache: "no-store",
+        headers: authHeaders(),
+      });
       if (!res.ok) throw new Error("Failed to fetch metrics");
       const json: MetricsData = await res.json();
       setData(json);

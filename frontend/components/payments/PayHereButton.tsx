@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { API_BASE } from "@/lib/api";
+import { authHeaders } from "@/lib/auth";
 
 export type PaymentPurpose = "remittance" | "loan" | "tax_jar_inbound" | "shop_sale";
 
@@ -44,14 +44,13 @@ export function PayHereButton({
     try {
       const res = await fetch("/api/payhere/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           amount_lkr: amountLkr,
           purpose,
           description,
           items: items ?? description,
           metadata,
-          notify_url: `${API_BASE.replace(/\/$/, "")}/api/payhere/notify`,
         }),
         signal: AbortSignal.timeout(15000),
       });

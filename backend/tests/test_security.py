@@ -318,3 +318,144 @@ async def test_health_deep_requires_admin_key(client, monkeypatch):
         headers={"X-Demo-Admin-Key": "ceyfi-demo-admin"},
     )
     assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_demo_loan_payment_denies_cross_user(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/api/loans/demo-payment",
+        headers=headers,
+        json={"user_id": "SEY-USR-003", "loan_id": "LN-001", "amount_lkr": 1000},
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_loan_advisor_denies_cross_user(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/api/loans/advisor",
+        headers=headers,
+        json={"user_id": "SEY-USR-003"},
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_cfo_brief_denies_non_sme(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.get(
+        "/api/business/cfo-brief?user_id=SEY-BIZ-001",
+        headers=headers,
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_decisions_execute_denies_cross_user(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/api/decisions/execute",
+        headers=headers,
+        json={"user_id": "SEY-BIZ-001", "decision_id": "anything"},
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_mcp_call_denies_cross_user(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    resp = await client.post(
+        "/api/mcp/call",
+        headers=headers,
+        json={"name": "get_spending_summary", "arguments": {"user_id": "SEY-BIZ-001"}},
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_payhere_checkout_ignores_client_notify_url_and_binds_owner(client, monkeypatch):
+    monkeypatch.setattr(settings, "demo_auth_required", True)
+    monkeypatch.setattr(settings, "payhere_merchant_id", "1212345")
+    monkeypatch.setattr(settings, "payhere_secret", "test-secret")
+    monkeypatch.setattr(settings, "backend_base_url", "https://api.ceyfi.test")
+
+    login = await client.post("/api/auth/login", json={"user_id": "SEY-USR-001"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    captured: dict = {}
+
+    def fake_save(payment: dict):
+        captured.update(payment)
+        return payment
+
+    monkeypatch.setattr("app.services.supabase_client.save_payment", fake_save)
+    monkeypatch.setattr("payhere.supabase_client.save_payment", fake_save)
+
+    resp = await client.post(
+        "/api/payhere/checkout",
+        headers=headers,
+        json={
+            "amount_lkr": 1500,
+            "purpose": "remittance",
+            "description": "Home transfer",
+            "metadata": {
+                "user_id": "SEY-BIZ-001",
+                "account_id": "ATTACKER-WALLET",
+                "buckets": [{"id": "household", "pct": 100}],
+            },
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["params"]["notify_url"] == "https://api.ceyfi.test/api/payhere/notify"
+    assert captured.get("metadata", {}).get("user_id") == "SEY-USR-001"
+    assert captured.get("metadata", {}).get("account_id") == "SEY-ACC-002"
+
+
+def test_bind_payment_metadata_strips_client_ownership():
+    from app.routers.payments import bind_payment_metadata
+
+    session = {
+        "user_id": "SEY-USR-001",
+        "wallet_account_id": "SEY-ACC-002",
+        "persona": "diaspora",
+    }
+    meta = bind_payment_metadata(
+        session,
+        {
+            "user_id": "SEY-BIZ-001",
+            "account_id": "EVIL",
+            "tax_account_id": "EVIL-TAX",
+            "buckets": [{"id": "school", "pct": 100}],
+            "fx_rate": 400,
+        },
+        "remittance",
+    )
+    assert meta["user_id"] == "SEY-USR-001"
+    assert meta["account_id"] == "SEY-ACC-002"
+    assert "tax_account_id" not in meta or meta.get("tax_account_id") != "EVIL-TAX"
+    assert meta["buckets"] == [{"id": "school", "pct": 100}]
+    assert meta["fx_rate"] == 400

@@ -1,6 +1,7 @@
 /**
  * Production URL fallbacks — always prefer NEXT_PUBLIC_* / BACKEND_URL env vars in deploys.
- * Frontend uses the public brand domain so builds succeed without Vercel env at compile time.
+ * Do not hardcode Cloud Run / Vercel project hostnames here (avoids baking infra into the bundle).
+ * Frontend brand domain is used only as a last-resort metadata base for production builds.
  */
 export const PRODUCTION_FRONTEND_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
