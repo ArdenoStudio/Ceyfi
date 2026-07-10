@@ -27,8 +27,9 @@ import {
 import { CHART_COLORS, seriesColor } from "@/lib/chartUtils";
 import { formatters } from "@/lib/utils";
 import { getReceivables, postRecoveryMessage, type ReceivableRow } from "@/lib/api";
+import { shareText } from "@/lib/share";
 import { toast } from "sonner";
-import { Copy, Loader2 } from "lucide-react";
+import { Copy, Loader2, MessageCircle } from "lucide-react";
 
 const WATERFALL_STEPS = [
   { name: "Revenue", value: 450000 },
@@ -152,6 +153,20 @@ function RecoveryDialog({ row }: { row: ReceivableRow }) {
               <p className={lang === "si" ? "sinhala text-ceyfi-ink" : "text-ceyfi-ink"}>{messages[lang]}</p>
             </div>
           ))}
+          <Button
+            className="w-full bg-[#25D366] text-white hover:bg-[#1ebe57]"
+            onClick={() => {
+              void shareText({
+                title: `CEYFI recovery · ${row.client}`,
+                text: messages.en,
+              }).then((result) => {
+                if (result === "copied") toast.success("Copied");
+              });
+            }}
+          >
+            <MessageCircle className="mr-2 h-4 w-4" />
+            Share on WhatsApp
+          </Button>
         </div>
       )}
     </DialogContent>

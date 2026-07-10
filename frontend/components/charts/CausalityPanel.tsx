@@ -246,7 +246,7 @@ export function buildCausalityForPoint(
 
   const actionPlans: ActionPlan[] = [
     {
-      id: "move-savings",
+      id: "d1",
       title: `Move LKR ${Math.min(22000, Math.round(balance * 0.1)).toLocaleString()} from savings bucket`,
       benefit: Math.min(22000, Math.round(balance * 0.1)),
       risk: "Low",
@@ -254,7 +254,7 @@ export function buildCausalityForPoint(
       effort: "2 minutes",
     },
     {
-      id: "delay-subscription",
+      id: "d1",
       title: "Pause Netflix and defer non-essential subscriptions",
       benefit: 1750,
       risk: "Low",
@@ -262,7 +262,7 @@ export function buildCausalityForPoint(
       effort: "5 minutes",
     },
     {
-      id: "emi-reschedule",
+      id: "d2",
       title: "Request EMI date shift by 5 days",
       benefit: 22000,
       risk: "Medium",

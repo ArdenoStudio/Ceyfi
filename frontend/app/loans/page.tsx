@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { daysUntil, dueLabel } from "@/lib/dates";
 import { StatCard, StatGrid } from "@/components/hyperui";
 import { AlertTriangle, Bot, CalendarCheck, Gauge, Wallet, WalletCards } from "lucide-react";
 
@@ -107,11 +108,8 @@ export default function LoansPage() {
   }
 
   const progressPct = Math.round((loan.payments_made / loan.total_payments) * 100);
-  const nextDate = new Date(loan.next_payment_date);
-  const daysUntil = Math.max(
-    0,
-    Math.ceil((nextDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-  );
+  const daysLeft = daysUntil(loan.next_payment_date);
+  const dueCopy = dueLabel(loan.next_payment_date);
   const riskCopy =
     loan.health_score === "ON_TRACK"
       ? "On track"
@@ -163,8 +161,8 @@ export default function LoansPage() {
           icon={CalendarCheck}
           iconTone="blue"
           trend="neutral"
-          trendValue={`${daysUntil} days`}
-          trendLabel="until next due"
+          trendValue={dueCopy}
+          trendLabel="next payment"
         />
         <StatCard
           label="Repayment progress"
@@ -212,7 +210,7 @@ export default function LoansPage() {
           {
             label: "Risk",
             value: riskCopy,
-            detail: `Next payment LKR ${loan.monthly_payment_lkr.toLocaleString()} in ${daysUntil} days.`,
+            detail: `Next payment LKR ${loan.monthly_payment_lkr.toLocaleString()} — ${dueCopy}.`,
             tone: loan.health_score === "ON_TRACK" ? "success" : "alert",
             icon: AlertTriangle,
           },
@@ -243,9 +241,12 @@ export default function LoansPage() {
           },
           {
             label: "Due window",
-            value: `${daysUntil} days`,
-            detail: "Paying before the due date keeps the account from sliding into risk.",
-            tone: daysUntil <= 3 ? "alert" : "info",
+            value: dueCopy,
+            detail:
+              daysLeft < 0
+                ? "This payment is overdue — settle soon to protect loan health."
+                : "Paying before the due date keeps the account from sliding into risk.",
+            tone: daysLeft <= 3 ? "alert" : "info",
             icon: CalendarCheck,
           },
           {

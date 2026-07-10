@@ -547,6 +547,8 @@ export async function executeDecision(userId: string, decisionId: string) {
     action_type: string;
     redirect: string;
     message: string;
+    amount_lkr?: number;
+    reference?: string;
     recovery_messages?: { en: string; si: string; ta: string };
     client?: string;
   }>("/api/decisions/execute", {

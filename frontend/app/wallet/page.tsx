@@ -15,12 +15,12 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Transaction } from "@/types";
-import { saveAllocationRules, ApiError } from "@/lib/api";
+import { saveAllocationRules, ApiError, postTriggerSpend } from "@/lib/api";
 import { toast } from "sonner";
 import { GBP_LKR_RATE, type RemittanceCurrency } from "@/lib/remittance-fx";
 import { formatLKR } from "@/lib/utils";
 import { AlertBanner } from "@/components/hyperui";
-import { ArrowRightLeft, Bot, PieChart, ShieldCheck, Send, TrendingUp } from "lucide-react";
+import { ArrowRightLeft, Bot, PieChart, ShieldCheck, Send, TrendingUp, ShoppingCart } from "lucide-react";
 import { WalletBalanceHeader } from "@/components/wallet/WalletBalanceHeader";
 import { ErrorState } from "@/components/ErrorState";
 import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSections";
@@ -36,6 +36,7 @@ export default function WalletPage() {
   const router = useRouter();
   const { offline } = useNetworkStatus();
   const [modalOpen, setModalOpen] = useState(false);
+  const [spendSimulating, setSpendSimulating] = useState(false);
   const [allocationFromHash, setAllocationFromHash] = useState(false);
   const [remittanceOverride, setRemittanceOverride] = useState<{
     amount_lkr: number;
@@ -173,9 +174,38 @@ export default function WalletPage() {
         description="See the latest remittance, how the family is using each bucket, and adjust the next split before sending again."
         
         action={
-          <Button onClick={() => setModalOpen(true)} className="interactive-press rounded-full shadow-brand">
-            Send Money
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={spendSimulating}
+              onClick={async () => {
+                setSpendSimulating(true);
+                try {
+                  await postTriggerSpend({
+                    account_id: accountId,
+                    amount_lkr: 12400,
+                    merchant: "Softlogic Glomark",
+                    bucket_id: "household",
+                  });
+                  toast.success("Family spend simulated", {
+                    description: "Softlogic Glomark · LKR 12,400 from Household",
+                  });
+                  await refetch(true);
+                } catch {
+                  toast.error("Could not simulate spend.");
+                } finally {
+                  setSpendSimulating(false);
+                }
+              }}
+              className="interactive-press rounded-full"
+            >
+              <ShoppingCart className="mr-1.5 h-4 w-4" />
+              {spendSimulating ? "Simulating…" : "Simulate family spend"}
+            </Button>
+            <Button onClick={() => setModalOpen(true)} className="interactive-press rounded-full shadow-brand">
+              Send Money
+            </Button>
+          </div>
         }
       />
 

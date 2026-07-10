@@ -45,36 +45,43 @@ type DemoStep = {
 const DEMO_SCRIPT: DemoStep[] = [
   {
     step: 1,
-    label: "Overview",
+    label: "Time River",
     path: "/",
-    hint: "TimeRiver — financial future, not just balance",
-    seconds: 18,
+    hint: "Pick a plan on Time River — forecast updates",
+    seconds: 16,
   },
   {
     step: 2,
     label: "Wallet spend",
     path: "/wallet",
     action: "spend",
-    hint: "Household bucket drops LKR 12,400 at Softlogic Glomark",
-    seconds: 22,
+    hint: "Simulate family spend — Household −LKR 12,400",
+    seconds: 18,
     persona: "Login as Nimal Fernando (diaspora)",
   },
   {
     step: 3,
-    label: "Assistant",
-    path: "/assistant",
-    hint: "Ask in Sinhala or English with live account context",
-    seconds: 20,
+    label: "Scenarios",
+    path: "/scenarios",
+    hint: "Stress-test salary delay + FX before you commit",
+    seconds: 14,
   },
   {
     step: 4,
-    label: "Decisions",
-    path: "/decisions",
-    hint: "One ranked action card with evidence",
-    seconds: 18,
+    label: "Assistant",
+    path: "/assistant?lang=si&prompt=" + encodeURIComponent("මගේ ණය ගෙවීම කවදාද?"),
+    hint: "Ask in Sinhala — live balances and loan context",
+    seconds: 14,
   },
   {
     step: 5,
+    label: "Decisions",
+    path: "/decisions?plan=d1",
+    hint: "Execute a ranked action — real demo side-effect",
+    seconds: 16,
+  },
+  {
+    step: 6,
     label: "Reset",
     action: "reset",
     hint: "Clean slate for the next audience",
@@ -92,7 +99,7 @@ function DemoStepIndicator({
   completedThrough: number;
 }) {
   return (
-    <ol className="grid gap-3 sm:grid-cols-5">
+    <ol className="grid gap-3 sm:grid-cols-6">
       {steps.map((item, index) => {
         const done = item.step <= completedThrough;
         const active = activeStep === item.step;
@@ -254,8 +261,8 @@ export default function DemoControlPage() {
           {
             label: "Demo script",
             metric: "90s",
-            subLabel: "5-step narrative",
-            description: "Overview → wallet spend → assistant → decisions → reset",
+            subLabel: "6-step narrative",
+            description: "Overview → wallet spend → scenarios → assistant → decisions → reset",
             icon: Timer,
             accent: "ceyfi",
           },
@@ -340,7 +347,7 @@ export default function DemoControlPage() {
             <div>
               <h2 className="font-semibold text-ceyfi-ink">Run demo script</h2>
               <p className="text-sm text-ceyfi-muted">
-                Automated 5-step narrative with route changes and live wallet spend
+                Automated 6-step narrative with route changes and live wallet spend
               </p>
             </div>
           </div>

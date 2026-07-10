@@ -32,6 +32,7 @@ class WalletTransferResponse(BaseModel):
     amount_lkr: float
     timestamp: str
     buckets_credited: list[BucketCredit]
+    note: str | None = None
 
 
 class ChatMessage(BaseModel):

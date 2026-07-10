@@ -9,7 +9,7 @@
 
 The core idea is simple: banking in Sri Lanka still feels like it was designed in 2005. You can't see where your money actually went. You don't understand your loan. You definitely don't have an accountant. And if you're sending money home from abroad, you're basically flying blind.
 
-We picked four real personas — the diaspora expat, the digital-native customer, the anxious borrower, and the small business owner — and built one unified platform that speaks to all of them. In English. Or Sinhala."
+We picked three real personas — the diaspora expat, the anxious borrower, and the small business owner — and built one unified platform that speaks to all of them. In English. Or Sinhala."
 
 ---
 
@@ -33,7 +33,7 @@ Everything's live right now at ceyfi.app."
 
 The problem is: you send £500, and two weeks later you have no idea if it paid for school fees or got spent on something else. There's no visibility. No control.
 
-So we built **allocation buckets**. When you send money, you split it: 40% Education, 25% Food, 20% Savings, 15% Rent — whatever the family needs. Those rules stick.
+So we built **allocation buckets**. When you send money, you split it: 40% School, 40% Household, 20% Savings — whatever the family needs. Those rules stick.
 
 The moment your family member spends from a bucket — say Mum buys groceries — you get a **live notification**. Not a day later. Instantly. That's powered by **Supabase Realtime**: we're listening to Postgres changes on the transactions table and pushing updates to the frontend the second they hit the database. There's also a polling fallback so nothing breaks if the websocket drops.
 
@@ -76,7 +76,7 @@ Alongside that you get:
 - A **countdown** to your next due date — e.g. "6 days until payment" for Nimal's personal loan
 - Outstanding balance and next payment amount front and center — **LKR 22,000** for Nimal Fernando (`SEY-USR-001`)
 
-Then there's the **AI Advisor panel** — powered by Groq, cached so it loads instantly. It reads your loan profile and gives you a plain-English summary: 'You're on track. Your next payment is LKR 22,000 on 25 June. You've paid 67% of your total loan.' For Sunil Bandara's business loan, the score shows **AT RISK** with LKR 18,500 overdue — that's the anxious-borrower moment. Actionable, specific, not scary.
+Then there's the **AI Advisor panel** — powered by Groq, cached so it loads instantly. It reads your loan profile and gives you a plain-English summary: 'You're on track. Your next payment is LKR 22,000 on 25 July. You've paid 67% of your total loan.' For Sunil Bandara's business loan, the score shows **AT RISK** with LKR 18,500 overdue — that's the anxious-borrower moment. Actionable, specific, not scary.
 
 And if you're ready to pay — you click **Pay Now**, and it opens **MPGS Hosted Checkout**. That's Mastercard's payment gateway, fully integrated. You pay, you're redirected back with `?paid=1`, we fire a success toast, update your loan state, and insert the transaction into Supabase. The whole loop, end to end."
 

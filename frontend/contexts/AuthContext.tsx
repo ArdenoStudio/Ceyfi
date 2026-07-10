@@ -39,6 +39,34 @@ const E2E_USER: DemoPersona = {
   language_preference: "en",
 };
 
+const SKIP_AUTH_PERSONAS: Record<string, DemoPersona> = {
+  "SEY-USR-001": E2E_USER,
+  "SEY-USR-003": {
+    user_id: "SEY-USR-003",
+    name: "Sunil Bandara",
+    persona: "borrower",
+    tagline: "Business borrower · loan clarity",
+    wallet_account_id: null,
+    avatar: "/nimal-avatar.jpg",
+    language_preference: "si",
+  },
+  "SEY-BIZ-001": {
+    user_id: "SEY-BIZ-001",
+    name: "Suresh Silva",
+    persona: "sme",
+    tagline: "SME owner · Silva Hardware",
+    wallet_account_id: null,
+    avatar: "/nimal-avatar.jpg",
+    language_preference: "en",
+  },
+};
+
+function personaDestination(persona: DemoPersona): string {
+  if (persona.persona === "sme") return "/business";
+  if (persona.persona === "borrower") return "/loans";
+  return "/wallet";
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<DemoPersona | null>(() =>
     SKIP_AUTH ? E2E_USER : getStoredSession()
@@ -65,6 +93,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (userId: string) => {
+    if (SKIP_AUTH) {
+      const persona = SKIP_AUTH_PERSONAS[userId] ?? E2E_USER;
+      storeSession(persona, "skip-auth");
+      setUser(persona);
+      router.push(personaDestination(persona));
+      return;
+    }
+
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,14 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await res.json();
     storeSession(data.user, data.token);
     setUser(data.user);
-    const persona = data.user as DemoPersona;
-    const dest =
-      persona.persona === "sme"
-        ? "/business"
-        : persona.persona === "borrower"
-          ? "/loans"
-          : "/wallet";
-    router.push(dest);
+    router.push(personaDestination(data.user as DemoPersona));
   }, [router]);
 
   const logout = useCallback(() => {

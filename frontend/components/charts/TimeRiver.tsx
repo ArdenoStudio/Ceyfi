@@ -38,24 +38,28 @@ interface TimeRiverProps {
   data?: TimeRiverPoint[];
   dangerThreshold?: number;
   height?: number;
+  /** Starting balance for fallback forecast generation. */
+  baseBalance?: number;
+  /** LKR added to future forecast after a plan is selected (demo twin loop). */
+  balanceBoost?: number;
   onPlanSelect?: (plan: ActionPlan) => void;
 }
 
 const SALARY = 185_000;
 const EMI = 22_000;
 const SCHOOL_FEES = 15_000;
-const BASE_BALANCE = 245_000;
+const DEFAULT_BASE_BALANCE = 245_000;
 
 function formatShortDate(date: Date): string {
   return date.toLocaleDateString("en", { month: "short", day: "numeric" });
 }
 
-function generateFallbackData(): TimeRiverPoint[] {
+function generateFallbackData(baseBalance = DEFAULT_BASE_BALANCE): TimeRiverPoint[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const points: TimeRiverPoint[] = [];
 
-  let balance = BASE_BALANCE - 18_000;
+  let balance = baseBalance - 18_000;
 
   for (let i = -89; i <= 90; i++) {
     const date = new Date(today);
@@ -79,7 +83,7 @@ function generateFallbackData(): TimeRiverPoint[] {
     const forecastBase = isFuture
       ? Math.max(
           12_000,
-          BASE_BALANCE +
+          baseBalance +
             i * -180 +
             (day === 1 ? SALARY : 0) -
             (day === 5 ? SCHOOL_FEES : 0) -
@@ -117,9 +121,31 @@ export function TimeRiver({
   data: dataProp,
   dangerThreshold = 20_000,
   height = 280,
+  baseBalance = DEFAULT_BASE_BALANCE,
+  balanceBoost = 0,
   onPlanSelect,
 }: TimeRiverProps) {
-  const data = useMemo(() => dataProp ?? generateFallbackData(), [dataProp]);
+  const baseData = useMemo(
+    () => dataProp ?? generateFallbackData(baseBalance),
+    [dataProp, baseBalance]
+  );
+  const data = useMemo(() => {
+    if (!balanceBoost) return baseData;
+    return baseData.map((point) => {
+      if (!point.isFuture) return point;
+      const forecast =
+        point.forecast != null ? point.forecast + balanceBoost : null;
+      const upper = point.upper != null ? point.upper + balanceBoost : null;
+      const lower = point.lower != null ? point.lower + balanceBoost : null;
+      return {
+        ...point,
+        forecast,
+        upper,
+        lower,
+        isDanger: forecast != null ? forecast < dangerThreshold : point.isDanger,
+      };
+    });
+  }, [baseData, balanceBoost, dangerThreshold]);
   const todayLabel = data.find((p) => p.isToday)?.date ?? "Today";
 
   const [panelOpen, setPanelOpen] = useState(false);
@@ -144,18 +170,27 @@ export function TimeRiver({
 
   const eventPoints = data.filter((p) => p.event);
 
+  const openPoint = useCallback((point: TimeRiverPoint | undefined) => {
+    if (point?.isFuture && point.forecast != null) {
+      setSelectedPoint(point);
+      setPanelOpen(true);
+    }
+  }, []);
+
   const handleChartClick = useCallback(
     (state: MouseHandlerDataParam) => {
       const index = state.activeTooltipIndex ?? state.activeIndex;
       if (typeof index !== "number") return;
-      const point = data[index];
-      if (point?.isFuture && point.forecast != null) {
-        setSelectedPoint(point);
-        setPanelOpen(true);
-      }
+      openPoint(data[index]);
     },
-    [data]
+    [data, openPoint]
   );
+
+  const handleInspectNextRisk = useCallback(() => {
+    const danger = data.find((p) => p.isFuture && p.isDanger && p.forecast != null);
+    const nextFuture = data.find((p) => p.isFuture && p.forecast != null);
+    openPoint(danger ?? nextFuture);
+  }, [data, openPoint]);
 
   const causality = useMemo(() => {
     if (!selectedPoint?.forecast) {
@@ -291,9 +326,18 @@ export function TimeRiver({
         </ChartContainer>
       </div>
 
-      <p className="mt-2 text-center text-[10px] text-ceyfi-faint">
-        Tap a future point to see what caused the projected dip
-      </p>
+      <div className="mt-2 flex flex-col items-center gap-2">
+        <p className="text-center text-[10px] text-ceyfi-faint">
+          Tap a future point to see what caused the projected dip
+        </p>
+        <button
+          type="button"
+          onClick={handleInspectNextRisk}
+          className="rounded-lg border border-ceyfi-line/80 bg-ceyfi-paper px-3 py-1.5 text-[11px] font-semibold text-ceyfi-green transition hover:border-ceyfi-green/40 hover:bg-ceyfi-sprout/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30"
+        >
+          Inspect next risk
+        </button>
+      </div>
 
       <CausalityPanel
         open={panelOpen}
@@ -302,7 +346,10 @@ export function TimeRiver({
         projectedBalance={selectedPoint?.forecast ?? 0}
         events={causality.events}
         actionPlans={causality.actionPlans}
-        onPlanSelect={onPlanSelect}
+        onPlanSelect={(plan) => {
+          onPlanSelect?.(plan);
+          setPanelOpen(false);
+        }}
       />
     </>
   );

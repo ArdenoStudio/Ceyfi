@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Banknote,
@@ -25,6 +26,7 @@ import { PeriodBadge } from "@/components/charts/PeriodBadge";
 import {
   ProgressCircle,
 } from "@/components/charts/OverviewCharts";
+import type { ActionPlan } from "@/components/charts/CausalityPanel";
 import { ChartSkeleton } from "@/components/lazy/LazySkeletons";
 import { RotatingInsightsCard } from "@/components/insights/RotatingInsightsCard";
 import { GradientText } from "@/components/motion/GradientText";
@@ -37,7 +39,15 @@ import { KpiCard } from "@/components/ui/KpiCard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getAccountContext, getFamilyWallet, getLoans } from "@/lib/api";
 import { buildSparkline, periodDelta } from "@/lib/chartUtils";
+import {
+  currentMonthLabel,
+  daysUntil,
+  dueLabel,
+  formatShortDate,
+  timeOfDayGreeting,
+} from "@/lib/dates";
 import { cn, formatters } from "@/lib/utils";
+import { toast } from "sonner";
 import type { AccountContext, Loan, WalletState } from "@/types";
 
 const TimeRiver = dynamic(
@@ -74,28 +84,28 @@ const FALLBACK_CONTEXT: AccountContext = {
   recent_transactions: [
     {
       id: "txn_s001",
-      date: "2026-05-03",
+      date: "2026-07-03",
       description: "Keells Supermarket · Nugegoda",
       amount_lkr: -4200,
       type: "debit",
     },
     {
       id: "txn_s002",
-      date: "2026-05-02",
+      date: "2026-07-01",
       description: "Salary Credit · Hayleys Group",
       amount_lkr: 185000,
       type: "credit",
     },
     {
       id: "txn_s003",
-      date: "2026-05-01",
+      date: "2026-06-28",
       description: "Dialog Axiata · Bill Payment",
       amount_lkr: -2800,
       type: "debit",
     },
     {
       id: "txn_s004",
-      date: "2026-06-15",
+      date: "2026-06-25",
       description: "Personal Loan · Instalment",
       amount_lkr: -22000,
       type: "debit",
@@ -137,15 +147,20 @@ const FALLBACK_WALLET: Pick<WalletState, "buckets" | "total_balance_lkr"> = {
 };
 
 const CASHFLOW = [
-  { month: "Jan", Income: 185000, Expenses: 92000 },
   { month: "Feb", Income: 185000, Expenses: 108000 },
   { month: "Mar", Income: 185000, Expenses: 87500 },
   { month: "Apr", Income: 207000, Expenses: 115000 },
   { month: "May", Income: 185000, Expenses: 98000 },
   { month: "Jun", Income: 185000, Expenses: 104000 },
+  { month: "Jul", Income: 185000, Expenses: 99000 },
 ];
 
-const UPCOMING_OBLIGATIONS = 22000 + 15000 + 2800;
+function badgeForDue(iso: string): string {
+  const d = daysUntil(iso);
+  if (d < 0) return "Overdue";
+  if (d <= 7) return "Due soon";
+  return "Upcoming";
+}
 
 function relativeDate(date: string) {
   return new Intl.DateTimeFormat("en-LK", {
@@ -184,6 +199,7 @@ function TransactionIcon({
 
 export default function OverviewPage() {
   const { userId, walletAccountId, loanUserId, user } = useCurrentUser();
+  const router = useRouter();
   const [context, setContext] = useState<AccountContext>(FALLBACK_CONTEXT);
   const [wallet, setWallet] =
     useState<Pick<WalletState, "buckets" | "total_balance_lkr">>(
@@ -191,6 +207,28 @@ export default function OverviewPage() {
     );
   const [loan, setLoan] = useState<Loan | null>(null);
   const [isLive, setIsLive] = useState(false);
+  const [syncedAt, setSyncedAt] = useState<Date | null>(null);
+  const [riverBoost, setRiverBoost] = useState(0);
+  const greeting = timeOfDayGreeting();
+  const monthLabel = currentMonthLabel();
+
+  const handlePlanSelect = useCallback(
+    (plan: ActionPlan) => {
+      setRiverBoost((prev) => prev + plan.benefit);
+      toast.success("Plan selected", {
+        description: `${plan.title} — Time River updated. Review in Decisions.`,
+        action: {
+          label: "Open Decisions",
+          onClick: () =>
+            router.push(`/decisions?plan=${encodeURIComponent(plan.id)}`),
+        },
+      });
+      window.dispatchEvent(
+        new CustomEvent("ceyfi:plan-selected", { detail: plan })
+      );
+    },
+    [router]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -204,6 +242,7 @@ export default function OverviewPage() {
       if (contextResult.status === "fulfilled") {
         setContext(contextResult.value as AccountContext);
         setIsLive(true);
+        setSyncedAt(new Date());
       }
       if (walletResult.status === "fulfilled") {
         setWallet(walletResult.value as WalletState);
@@ -218,18 +257,24 @@ export default function OverviewPage() {
     };
   }, [userId, walletAccountId, loanUserId]);
 
-  const balance = context.balance_lkr ?? 245000;
   const savings = context.savings_balance ?? 125400;
-  const current = context.current_balance ?? Math.max(0, balance - savings);
+  const current = context.current_balance ?? 34200;
+  const familyWallet = wallet.total_balance_lkr ?? 245000;
+  // Everyday + savings = personal accounts; family wallet is separate remittance pool.
+  const personalTotal = savings + current;
   const firstName = (
     user?.name ??
     context.name ??
     context.account_holder ??
     "there"
   ).split(" ")[0];
-  const safeToMove = Math.max(0, current - UPCOMING_OBLIGATIONS - 20000);
-  const balance30dAgo = Math.round(balance / 1.024);
-  const balanceDelta = periodDelta(balance, balance30dAgo);
+  const loanDueAmount = loan?.monthly_payment_lkr ?? 22000;
+  const loanDueDate = loan?.next_payment_date ?? "2026-07-25";
+  // Everyday-account commitments only (school fees come from family wallet buckets).
+  const committed = loanDueAmount + 2800; // EMI + Dialog
+  const safeToMove = Math.max(0, current - committed - 5000); // keep a small buffer
+  const balance30dAgo = Math.round(personalTotal / 1.024);
+  const balanceDelta = periodDelta(personalTotal, balance30dAgo);
 
   const loanHealth =
     loan?.health_score === "ON_TRACK"
@@ -239,9 +284,12 @@ export default function OverviewPage() {
         : loan?.health_score === "CRITICAL"
           ? 34
           : 78;
-  const spentThisMonth = CASHFLOW.at(-1)?.Expenses ?? 104000;
+  const spentThisMonth = CASHFLOW.at(-1)?.Expenses ?? 99000;
   const transactions =
     context.recent_transactions ?? FALLBACK_CONTEXT.recent_transactions ?? [];
+  const syncedLabel = syncedAt
+    ? `Synced ${syncedAt.toLocaleTimeString("en-LK", { hour: "2-digit", minute: "2-digit" })}`
+    : "Demo snapshot · offline fallback";
 
   const safeToSpendChips = useMemo(
     () => [
@@ -257,7 +305,7 @@ export default function OverviewPage() {
       },
       {
         label: "Committed",
-        value: UPCOMING_OBLIGATIONS,
+        value: committed,
         color: "text-amber-700",
       },
       {
@@ -266,7 +314,7 @@ export default function OverviewPage() {
         color: "text-ceyfi-green",
       },
     ],
-    [current, savings, safeToMove]
+    [current, savings, committed, safeToMove]
   );
 
   return (
@@ -297,7 +345,7 @@ export default function OverviewPage() {
               </span>
             </div>
             <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-ceyfi-ink">
-              Good morning, {firstName}
+              {greeting}, {firstName}
             </h1>
             <p className="mt-2 text-sm text-ceyfi-muted">
               Here&apos;s what moved, what&apos;s protected, and what needs your
@@ -358,24 +406,24 @@ export default function OverviewPage() {
         <div className="relative grid gap-8 lg:grid-cols-[1.1fr_1.9fr] lg:items-end">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
-              Total financial position
+              Personal accounts
             </div>
             <GradientText
               className="mt-1 font-heading text-[10px] font-semibold uppercase tracking-[0.18em]"
               colors={["#34D399", "#059669", "#F4F8F3"]}
               animationSpeed={6}
             >
-              Live balance overview
+              Everyday + savings
             </GradientText>
             <div className="mt-3 font-heading text-4xl font-semibold tracking-[-0.055em] tabular-nums sm:text-5xl">
               {formatters.currency({
-                number: balance,
+                number: personalTotal,
                 maxFractionDigits: 0,
               })}
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-white/50">
               <ShieldCheck className="h-4 w-4 text-ceyfi-mint" />
-              Accounts synced · Last checked moments ago
+              {syncedLabel}
             </div>
           </div>
 
@@ -395,8 +443,8 @@ export default function OverviewPage() {
               },
               {
                 label: "Family wallet",
-                value: wallet.total_balance_lkr,
-                note: "Allocated at home",
+                value: familyWallet,
+                note: "Separate remittance pool",
                 icon: ShieldCheck,
               },
             ].map((item) => (
@@ -438,22 +486,28 @@ export default function OverviewPage() {
           />
         }
       >
-        <TimeRiver dangerThreshold={20000} height={280} />
+        <TimeRiver
+          dangerThreshold={20000}
+          height={280}
+          balanceBoost={riverBoost}
+          baseBalance={personalTotal}
+          onPlanSelect={handlePlanSelect}
+        />
       </ChartCard>
 
       {/* Section 3: KPI grid */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          title="Total balance"
+          title="Personal total"
           value={formatters.currency({
-            number: balance,
+            number: personalTotal,
             maxFractionDigits: 0,
           })}
-          change="+2.4% this month"
-          changeType="positive"
-          subtitle="Current and savings"
+          change={balanceDelta.label}
+          changeType={balanceDelta.positive ? "positive" : "negative"}
+          subtitle="Everyday + savings"
           icon={<WalletBucketIcon />}
-          sparkline={buildSparkline(balance / 1000)}
+          sparkline={buildSparkline(personalTotal / 1000)}
         />
         <KpiCard
           title="Savings"
@@ -477,13 +531,13 @@ export default function OverviewPage() {
           sparkline={buildSparkline(loanHealth)}
         />
         <KpiCard
-          title="Spent in June"
+          title={`Spent in ${monthLabel}`}
           value={formatters.currency({
             number: spentThisMonth,
             maxFractionDigits: 0,
           })}
-          change="+6% vs May"
-          changeType="negative"
+          change="-5% vs last month"
+          changeType="positive"
           subtitle="Bills and daily spending"
           icon={<RemittanceIcon />}
           sparkline={buildSparkline(spentThisMonth / 10000)}
@@ -519,14 +573,26 @@ export default function OverviewPage() {
             <div className="mt-5 w-full space-y-3">
               <div className="flex items-center justify-between border-b border-ceyfi-line/60 pb-3 text-xs">
                 <span className="text-ceyfi-muted">Personal loan</span>
-                <span className="font-mono font-semibold text-emerald-700">
-                  On track
+                <span
+                  className={cn(
+                    "font-mono font-semibold",
+                    loanHealth >= 75 ? "text-emerald-700" : "text-amber-700"
+                  )}
+                >
+                  {loan?.health_score === "AT_RISK"
+                    ? "At risk"
+                    : loan?.health_score === "CRITICAL"
+                      ? "Critical"
+                      : "On track"}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-ceyfi-muted">Next payment</span>
                 <span className="font-mono font-semibold text-ceyfi-ink">
-                  LKR 22,000
+                  {formatters.currency({
+                    number: loanDueAmount,
+                    maxFractionDigits: 0,
+                  })}
                 </span>
               </div>
             </div>
@@ -592,7 +658,10 @@ export default function OverviewPage() {
           </div>
         </ChartCard>
 
-        <RotatingInsightsCard />
+        <RotatingInsightsCard
+          nextPaymentDate={loanDueDate}
+          nextPaymentAmount={loanDueAmount}
+        />
       </section>
 
       {/* Section 6: Quick links */}
@@ -604,8 +673,8 @@ export default function OverviewPage() {
             href: "/loans",
             icon: CalendarClock,
             title: "Next loan payment",
-            description: "LKR 22,000 · due May 25",
-            badge: "Due soon",
+            description: `${formatters.currency({ number: loanDueAmount, maxFractionDigits: 0 })} · ${dueLabel(loanDueDate)} (${formatShortDate(loanDueDate)})`,
+            badge: badgeForDue(loanDueDate),
           },
           {
             href: "/wallet",

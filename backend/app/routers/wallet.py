@@ -95,6 +95,8 @@ async def wallet_transfer(req: WalletTransferRequest, request: Request):
         log.warning("Failed to persist allocation rule: %s", exc)
 
     # Real bank transfer when enabled — uses configured sandbox test accounts
+    status = "COMPLETED"
+    note: str | None = None
     if settings.seylan_enable_transfers and settings.use_seylan_real:
         try:
             from app.seylan import transfers
@@ -107,8 +109,19 @@ async def wallet_transfer(req: WalletTransferRequest, request: Request):
                 dst_narration=f"Family wallet — {req.corridor}",
             )
             log.info("Seylan transfer succeeded: ref=%s", result.get("transaction_reference"))
+            note = "Seylan sandbox transfer completed"
         except Exception as exc:
-            log.error("Seylan transfer failed: %s — returning mock COMPLETED", exc)
+            log.error("Seylan transfer failed: %s — not claiming COMPLETED", exc)
+            return WalletTransferResponse(
+                transfer_id=transfer_id,
+                status="FAILED",
+                amount_lkr=req.amount_lkr,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+                buckets_credited=[],
+                note="Seylan transfer failed — funds were not moved",
+            )
+    else:
+        note = "Demo transfer (Seylan transfers not enabled)"
 
     # Record per-bucket credits so Supabase realtime and bucket balances stay consistent
     try:
@@ -127,13 +140,14 @@ async def wallet_transfer(req: WalletTransferRequest, request: Request):
     except Exception as exc:
         log.warning("Failed to record transfer transaction: %s", exc)
 
-    log.info("wallet_transfer sender=%s amount=%s", req.sender_account_id, req.amount_lkr)
+    log.info("wallet_transfer sender=%s amount=%s status=%s", req.sender_account_id, req.amount_lkr, status)
     return WalletTransferResponse(
         transfer_id=transfer_id,
-        status="COMPLETED",
+        status=status,
         amount_lkr=req.amount_lkr,
         timestamp=datetime.now(timezone.utc).isoformat(),
         buckets_credited=buckets_credited,
+        note=note,
     )
 
 

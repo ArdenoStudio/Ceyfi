@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getPaymentStatus } from "@/lib/api";
 import { Steps, type StepItem } from "@/components/daisyui-style";
+import { PaymentReceipt } from "@/components/payments/PaymentReceipt";
 import {
   parsePaymentReturnParams,
   paymentBackDestination,
@@ -89,8 +90,10 @@ function PaymentReturnPoller({
   const [state, setState] = useState<PollState>("polling");
   const [failReason, setFailReason] = useState("");
   const [purpose, setPurpose] = useState(initialPurpose ?? "");
+  const [amountLkr, setAmountLkr] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef(0);
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     async function poll() {
@@ -100,13 +103,14 @@ function PaymentReturnPoller({
         const status: string = data?.status ?? "UNKNOWN";
         const paidPurpose: string = data?.purpose ?? "";
         if (paidPurpose) setPurpose(paidPurpose);
+        if (typeof data?.amount_lkr === "number") setAmountLkr(data.amount_lkr);
 
         if (status === "CAPTURED") {
           clearInterval(intervalRef.current!);
           setState("success");
-          setTimeout(
+          redirectTimerRef.current = setTimeout(
             () => router.replace(paymentDestination(paidPurpose, data?.amount_lkr)),
-            2000
+            8000
           );
           return;
         }
@@ -133,7 +137,10 @@ function PaymentReturnPoller({
     intervalRef.current = setInterval(poll, 1500);
     poll();
 
-    return () => clearInterval(intervalRef.current!);
+    return () => {
+      clearInterval(intervalRef.current!);
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
+    };
   }, [orderId, router]);
 
   const steps = paymentSteps(state);
@@ -161,26 +168,17 @@ function PaymentReturnPoller({
       )}
 
       {state === "success" && (
-        <>
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-emerald-900/40">
-            <svg
-              className="h-7 w-7 text-green-600 dark:text-emerald-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              aria-hidden
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">
-            Payment successful
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {SUCCESS_COPY[purpose] ?? "Redirecting\u2026"}
-          </p>
-        </>
+        <PaymentReceipt
+          title="Payment successful"
+          amountLkr={amountLkr ?? 0}
+          reference={orderId}
+          detail={SUCCESS_COPY[purpose] ?? "Payment captured"}
+          onDone={() => {
+            if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
+            router.replace(paymentDestination(purpose, amountLkr ?? undefined));
+          }}
+          doneLabel="Done"
+        />
       )}
 
       {state === "failed" && (
@@ -235,7 +233,7 @@ function ImmediateReturn({
     if (outcome !== "success") return;
     const timer = window.setTimeout(() => {
       router.replace(paymentDestination(purpose));
-    }, 2000);
+    }, 8000);
     return () => window.clearTimeout(timer);
   }, [outcome, purpose, router]);
 
@@ -253,33 +251,21 @@ function ImmediateReturn({
   const backDest = paymentBackDestination(purpose);
 
   return (
-    <ReturnShell busy={outcome === "success"}>
+    <ReturnShell busy={false}>
       <Steps steps={steps} className="px-1" />
 
       {outcome === "success" && (
-        <>
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-emerald-900/40">
-            <svg
-              className="h-7 w-7 text-green-600 dark:text-emerald-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              aria-hidden
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h1 className="text-lg font-semibold text-ceyfi-ink dark:text-white">
-            Payment successful
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {gateway
-              ? `${gatewayLabel(gateway)} confirmed your payment. `
-              : ""}
-            {SUCCESS_COPY[purpose] ?? "Redirecting\u2026"}
-          </p>
-        </>
+        <PaymentReceipt
+          title="Payment successful"
+          amountLkr={0}
+          reference={gateway ? `${gatewayLabel(gateway)} confirmed` : "CEYFI payment"}
+          detail={
+            (gateway ? `${gatewayLabel(gateway)} confirmed. ` : "") +
+            (SUCCESS_COPY[purpose] ?? "Payment captured")
+          }
+          onDone={() => router.replace(paymentDestination(purpose))}
+          doneLabel="Done"
+        />
       )}
 
       {outcome === "cancelled" && (

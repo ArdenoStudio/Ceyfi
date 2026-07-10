@@ -1,51 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Bot } from "lucide-react";
 import { CeyfiMark } from "@/components/brand/CeyfiMark";
-import { cn } from "@/lib/utils";
+import { cn, formatLKR } from "@/lib/utils";
+import { dueLabel, formatShortDate } from "@/lib/dates";
 
-const INSIGHTS = [
-  {
-    pill: "Grocery spend up 12%",
-    title: "Household spending is trending higher this week.",
-    body: "Keells and delivery orders are up compared to your 4-week average. CEYFI can suggest a tighter grocery cap.",
-    cta: "Why is grocery spend up?",
-  },
-  {
-    pill: "Loan payment due in 4 days",
-    title: "Your next instalment is coming up soon.",
-    body: "LKR 22,000 is scheduled for May 25. Paying early keeps your loan health score in the green zone.",
-    cta: "Show my loan payment options",
-  },
-  {
-    pill: "On track to save LKR 8,400",
-    title: "You can move money to savings safely this week.",
-    body: "After bills and your loan instalment, CEYFI estimates LKR 8,400 is safe to tuck away.",
-    cta: "Explain why I can save LKR 8,400",
-  },
-];
+interface RotatingInsightsCardProps {
+  nextPaymentDate?: string;
+  nextPaymentAmount?: number;
+}
 
-export function RotatingInsightsCard() {
+export function RotatingInsightsCard({
+  nextPaymentDate = "2026-07-25",
+  nextPaymentAmount = 22000,
+}: RotatingInsightsCardProps) {
+  const insights = useMemo(
+    () => [
+      {
+        pill: "Grocery spend up 12%",
+        title: "Household spending is trending higher this week.",
+        body: "Keells and delivery orders are up compared to your 4-week average. CEYFI can suggest a tighter grocery cap.",
+        cta: "Why is grocery spend up?",
+      },
+      {
+        pill: dueLabel(nextPaymentDate),
+        title: "Your next instalment is coming up.",
+        body: `${formatLKR(nextPaymentAmount)} is scheduled for ${formatShortDate(nextPaymentDate)}. Paying early keeps your loan health score in the green zone.`,
+        cta: "Show my loan payment options",
+      },
+      {
+        pill: "On track to save LKR 8,400",
+        title: "You can move money to savings safely this week.",
+        body: "After bills and your loan instalment, CEYFI estimates LKR 8,400 is safe to tuck away.",
+        cta: "Explain why I can save LKR 8,400",
+      },
+    ],
+    [nextPaymentDate, nextPaymentAmount]
+  );
+
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
+    if (paused) return;
     const interval = setInterval(() => {
       setVisible(false);
       setTimeout(() => {
-        setIndex((i) => (i + 1) % INSIGHTS.length);
+        setIndex((i) => (i + 1) % insights.length);
         setVisible(true);
       }, 320);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [insights.length, paused]);
 
-  const insight = INSIGHTS[index];
+  const insight = insights[index];
 
   return (
-    <section className="insight-card-glow relative min-w-0 overflow-hidden rounded-[22px] p-[1px]">
+    <section
+      className="insight-card-glow relative min-w-0 overflow-hidden rounded-[22px] p-[1px]"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
       <div className="relative overflow-hidden rounded-[21px] bg-ceyfi-sprout p-5 dark:bg-ceyfi-deep/40 sm:p-6">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border border-ceyfi-green/10" />
         <div className="relative">
@@ -54,9 +74,14 @@ export function RotatingInsightsCard() {
               <CeyfiMark className="h-5 w-5" title="" aria-hidden />
             </div>
             <div className="flex flex-wrap justify-end gap-1.5">
-              {INSIGHTS.map((item, i) => (
-                <span
+              {insights.map((item, i) => (
+                <button
                   key={item.pill}
+                  type="button"
+                  onClick={() => {
+                    setIndex(i);
+                    setVisible(true);
+                  }}
                   className={cn(
                     "rounded-full px-2.5 py-1 text-[10px] font-semibold transition-opacity duration-300",
                     i === index
@@ -65,7 +90,7 @@ export function RotatingInsightsCard() {
                   )}
                 >
                   {item.pill}
-                </span>
+                </button>
               ))}
             </div>
           </div>

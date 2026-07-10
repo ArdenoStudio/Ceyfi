@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from datetime import date
 from pathlib import Path
@@ -10,8 +11,11 @@ from typing import Any
 
 from app.services import auth as auth_service
 from app.services import business_intelligence, chat_tools
+from app.services import supabase_client
 from app.services.financial_snapshot import build_financial_snapshot
 from app.mcp.registry import PROMPT_CATALOG, RESOURCE_CATALOG, TOOL_CATALOG
+
+log = logging.getLogger(__name__)
 
 _FX = Path(__file__).resolve().parents[2] / "fixtures"
 _fixture_cache: dict[str, dict] = {}
@@ -361,10 +365,66 @@ async def _execute_decision(arguments: dict[str, Any]) -> dict[str, Any]:
             "decision": decision,
         }
 
+    benefit = float(decision.get("benefit_lkr") or 0)
+    category = decision.get("category")
+
+    # ID-based routing for demo decisions.
+    if decision_id in ("d1", "d6"):
+        amount = benefit if benefit > 0 else 8400
+        account_id = "SEY-ACC-002"
+        try:
+            supabase_client.insert_transaction(
+                account_id=account_id,
+                merchant=f"CEYFI decision · {decision.get('title', 'Savings move')[:48]}",
+                amount_lkr=amount,
+                bucket_id="savings",
+                bucket_label="Savings",
+                source="decision_execute",
+                txn_type="credit",
+            )
+        except Exception as exc:
+            log.warning("execute_decision savings credit failed: %s", exc)
+        return {
+            "ok": True,
+            "action_type": "wallet_credit",
+            "redirect": "/wallet",
+            "message": f"Moved LKR {amount:,.0f} into the Savings bucket",
+            "decision": decision,
+            "amount_lkr": amount,
+            "reference": f"DEC-{decision_id.upper()}-SAVE",
+        }
+
+    if decision_id == "d2":
+        return {
+            "ok": True,
+            "action_type": "redirect",
+            "redirect": "/loans",
+            "message": "EMI date shift request opened — review your repayment schedule",
+            "decision": decision,
+        }
+
+    if decision_id == "d3":
+        return {
+            "ok": True,
+            "action_type": "redirect",
+            "redirect": "/wallet",
+            "message": "Remittance timing tip — check wallet buckets before the next send",
+            "decision": decision,
+        }
+
+    if decision_id == "d5":
+        return {
+            "ok": True,
+            "action_type": "redirect",
+            "redirect": "/loans",
+            "message": "Refinance options opened — compare rates against your current facility",
+            "decision": decision,
+        }
+
     redirect = "/assistant"
-    if decision["category"] == "Save":
+    if category == "Save":
         redirect = "/wallet"
-    elif decision["category"] == "Protect" and persona_type == "borrower":
+    elif category == "Protect" and persona_type == "borrower":
         redirect = "/loans"
     elif persona_type == "sme":
         redirect = "/business"

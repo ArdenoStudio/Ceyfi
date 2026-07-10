@@ -17,7 +17,7 @@ Presenter cheat sheet for the Cursor Buildathon Colombo 2026 judges walkthrough.
 | Household bucket (before spend) | LKR 71,500 | `family_wallet.json` |
 | Demo spend trigger | LKR 12,400 @ Softlogic Glomark | `/mock/trigger-spend` |
 | Household after spend | LKR 59,100 | 71,500 − 12,400 |
-| Personal loan next due | **2026-06-25** · LKR 22,000 | `SEY-USR-001` |
+| Personal loan next due | **2026-07-25** · LKR 22,000 | `SEY-USR-001` |
 | Business loan (Sunil) | **2026-06-08** · LKR 18,500 · AT RISK | `SEY-USR-003` |
 | Tax jar balance | LKR 15,070 | `SEY-BIZ-001` |
 | Tax jar demo trigger | LKR 8,200 in → LKR 820 saved (10%) | `/mock/tax-jar/trigger` |
@@ -36,11 +36,12 @@ Press **`S`** on `/demo` to auto-run, or follow manually:
 
 | Step | ~Time | Route / action | Say this |
 |------|-------|----------------|----------|
-| 1 | 18s | `/` Overview | "CEYFI shows your financial future — TimeRiver, not just today's balance." |
-| 2 | 22s | `/wallet` then **Trigger spend** (key `1`) | "Nimal sends GBP home; Kumari spends from Household — watch the bucket drop LKR 12,400." |
-| 3 | 20s | `/assistant` | "Ask in Sinhala or English — the assistant knows live balances and loan context." |
-| 4 | 18s | `/decisions` | "One ranked recommendation with evidence — not a wall of charts." |
-| 5 | 12s | **Reset demo** (key `3`) | "Clean slate for the next judge." |
+| 1 | 16s | `/` Overview · pick a **Time River** plan | "CEYFI shows your financial future — select a plan on Time River." |
+| 2 | 18s | `/wallet` then **Simulate family spend** (or key `1`) | "Nimal sends GBP home; Kumari spends from Household — watch LKR 12,400 drop." |
+| 3 | 14s | `/scenarios` (brief) | "What-if scenarios — stress the plan before you commit." |
+| 4 | 14s | `/assistant` | "Ask in Sinhala or English — live balances and loan context." |
+| 5 | 16s | `/decisions` (auto-expands from `?plan=`) | "One ranked recommendation with evidence — execute in one tap." |
+| 6 | 12s | **Reset demo** (key `3`) | "Clean slate for the next judge." |
 
 **Total: ~90 seconds**
 
@@ -73,4 +74,4 @@ Press **`S`** on `/demo` to auto-run, or follow manually:
 
 - **Spend doesn't update wallet:** Check backend URL (`NEXT_PUBLIC_API_BASE`). Press `4` to prewarm.
 - **Login fails:** Start backend on port 8000; frontend falls back to embedded personas.
-- **Wrong loan date on screen:** Fixture next due for Nimal is **2026-06-25**, not June 1.
+- **Wrong loan date on screen:** Fixture next due for Nimal is **2026-07-25**, not June 1.
