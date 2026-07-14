@@ -43,6 +43,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { getFinancialSnapshot, type FinancialSnapshot } from "@/lib/api";
 import { CHART_COLORS } from "@/lib/chartUtils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 import { formatters } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +64,7 @@ const ICON_MAP = {
 };
 
 export default function IntelligencePage() {
+  const { colors } = useChartTheme();
   const { user } = useAuth();
   const [snapshot, setSnapshot] = useState<FinancialSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -268,9 +270,9 @@ export default function IntelligencePage() {
       <ChartCard title="Score components" subtitle="Weighted breakdown with improve actions">
           <ChartContainer height={240}>
             <BarChart layout="vertical" data={components} margin={{ top: 4, right: 80, left: 4, bottom: 0 }}>
-              <CartesianGrid horizontal={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: "#617267" }} width={110} axisLine={false} tickLine={false} />
+              <CartesianGrid horizontal={false} stroke={colors.grid} strokeDasharray="3 3" />
+              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: colors.label }} width={110} axisLine={false} tickLine={false} />
               <Tooltip content={(p) => <CeyfiTooltip {...p} valueFormatter={(v) => `${v}/100`} />} />
               <Bar dataKey="score" fill={CHART_COLORS.green} radius={[0, 4, 4, 0]} name="Score" />
             </BarChart>
@@ -323,9 +325,9 @@ export default function IntelligencePage() {
       >
         <ChartContainer height={240}>
           <ComposedChart data={forecast} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-            <XAxis dataKey="day" tick={{ fontSize: 8, fill: "#8C9A91" }} axisLine={false} tickLine={false} interval={4} />
-            <YAxis tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+            <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="day" tick={{ fontSize: 8, fill: colors.axis }} axisLine={false} tickLine={false} interval={4} />
+            <YAxis tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
             <Bar dataKey="actual" fill={CHART_COLORS.green} name="Actual" radius={[2, 2, 0, 0]} />
             <Line type="monotone" dataKey="predicted" stroke={CHART_COLORS.violet} strokeWidth={2} dot={false} name="Predicted" />

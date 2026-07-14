@@ -34,6 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAccountContext } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { lkrAxisTick } from "@/lib/chartUtils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 import {
   CATEGORY_COLORS,
   CATEGORIES,
@@ -109,6 +110,7 @@ function enrichBasic(
 }
 
 export default function TransactionsPage() {
+  const { colors } = useChartTheme();
   const { userId } = useCurrentUser();
   const [transactions, setTransactions] = useState(FALLBACK_TRANSACTIONS);
   const [query, setQuery] = useState("");
@@ -330,9 +332,9 @@ export default function TransactionsPage() {
             <ChartCard title="Transaction amount over time" subtitle="Weekly debit totals">
               <ChartContainer height={220}>
                 <BarChart data={weeklyAmount} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
-                  <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-                  <XAxis dataKey="week" tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-                  <YAxis tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={40} />
+                  <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+                  <XAxis dataKey="week" tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} />
+                  <YAxis tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={40} />
                   <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
                   <Bar dataKey="amount" fill="#059669" radius={[3, 3, 0, 0]} name="Amount" />
                 </BarChart>
@@ -342,9 +344,9 @@ export default function TransactionsPage() {
             <ChartCard title="Transaction count over time" subtitle="Weekly volume">
               <ChartContainer height={220}>
                 <BarChart data={weeklyCount} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
-                  <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-                  <XAxis dataKey="week" tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={30} />
+                  <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+                  <XAxis dataKey="week" tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={30} />
                   <Tooltip content={(p) => <CeyfiTooltip {...p} valueFormatter={(v) => `${v}`} />} />
                   <Bar dataKey="count" fill="#2563EB" radius={[3, 3, 0, 0]} name="Count" />
                 </BarChart>
@@ -354,9 +356,9 @@ export default function TransactionsPage() {
             <ChartCard title="Top 5 categories" subtitle="By spend">
               <ChartContainer height={220}>
                 <BarChart layout="vertical" data={topCategories} margin={{ top: 4, right: 16, left: 4, bottom: 0 }}>
-                  <CartesianGrid horizontal={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-                  <XAxis type="number" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="category" tick={{ fontSize: 9, fill: "#617267" }} width={100} axisLine={false} tickLine={false} />
+                  <CartesianGrid horizontal={false} stroke={colors.grid} strokeDasharray="3 3" />
+                  <XAxis type="number" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="category" tick={{ fontSize: 9, fill: colors.label }} width={100} axisLine={false} tickLine={false} />
                   <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
                   <Bar dataKey="amount" fill="#D97706" radius={[0, 3, 3, 0]} name="Amount" />
                 </BarChart>
@@ -366,9 +368,9 @@ export default function TransactionsPage() {
             <ChartCard title="Top 5 merchants" subtitle="By spend">
               <ChartContainer height={220}>
                 <BarChart layout="vertical" data={topMerchants} margin={{ top: 4, right: 16, left: 4, bottom: 0 }}>
-                  <CartesianGrid horizontal={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-                  <XAxis type="number" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="merchant" tick={{ fontSize: 9, fill: "#617267" }} width={90} axisLine={false} tickLine={false} />
+                  <CartesianGrid horizontal={false} stroke={colors.grid} strokeDasharray="3 3" />
+                  <XAxis type="number" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="merchant" tick={{ fontSize: 9, fill: colors.label }} width={90} axisLine={false} tickLine={false} />
                   <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
                   <Bar dataKey="amount" fill="#7C3AED" radius={[0, 3, 3, 0]} name="Amount" />
                 </BarChart>
@@ -437,9 +439,9 @@ export default function TransactionsPage() {
             ) : null}
             <ChartContainer height={240}>
               <ScatterChart margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
-                <CartesianGrid stroke="#D8E8DC" strokeDasharray="3 3" />
-                <XAxis type="number" dataKey="day" name="Day" tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-                <YAxis type="number" dataKey="amount" name="Amount" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={44} />
+                <CartesianGrid stroke={colors.grid} strokeDasharray="3 3" />
+                <XAxis type="number" dataKey="day" name="Day" tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} />
+                <YAxis type="number" dataKey="amount" name="Amount" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={44} />
                 <ZAxis range={[64, 256]} />
                 <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
                 <Scatter

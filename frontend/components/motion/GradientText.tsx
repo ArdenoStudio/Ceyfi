@@ -13,6 +13,7 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react";
+import { useChartTheme } from "@/hooks/useChartTheme";
 
 export interface GradientTextProps {
   children: ReactNode;
@@ -25,19 +26,26 @@ export interface GradientTextProps {
   yoyo?: boolean;
 }
 
-const CEYFI_GRADIENT = ["#059669", "#34D399", "#052E16"];
+// Light mode reads best sweeping through the near-black brand stop; on dark
+// backgrounds that same stop makes the text nearly disappear mid-cycle, so
+// dark mode uses only light-legible green/mint tones instead.
+const CEYFI_GRADIENT_LIGHT = ["#059669", "#34D399", "#052E16"];
+const CEYFI_GRADIENT_DARK = ["#34D399", "#6EE7B7", "#059669"];
 
 /** React Bits GradientText — animated gradient sweep (adapted for CEYFI). */
 export function GradientText({
   children,
   className = "",
-  colors = CEYFI_GRADIENT,
+  colors,
   animationSpeed = 8,
   showBorder = false,
   direction = "horizontal",
   pauseOnHover = false,
   yoyo = true,
 }: GradientTextProps) {
+  const { isDark } = useChartTheme();
+  const resolvedColors =
+    colors ?? (isDark ? CEYFI_GRADIENT_DARK : CEYFI_GRADIENT_LIGHT);
   const [isPaused, setIsPaused] = useState(false);
   const progress = useMotionValue(0);
   const elapsedRef = useRef(0);
@@ -101,7 +109,7 @@ export function GradientText({
       : direction === "vertical"
         ? "to bottom"
         : "to bottom right";
-  const gradientColors = [...colors, colors[0]].join(", ");
+  const gradientColors = [...resolvedColors, resolvedColors[0]].join(", ");
 
   const gradientStyle = {
     backgroundImage: `linear-gradient(${gradientAngle}, ${gradientColors})`,

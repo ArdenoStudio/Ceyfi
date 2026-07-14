@@ -25,6 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CHART_COLORS, seriesColor } from "@/lib/chartUtils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 import { formatters } from "@/lib/utils";
 import { getReceivables, postRecoveryMessage, type ReceivableRow } from "@/lib/api";
 import { shareText } from "@/lib/share";
@@ -41,7 +42,7 @@ const WATERFALL_STEPS = [
   { name: "Net Profit", value: 144000, total: true },
 ];
 
-function buildWaterfall() {
+function buildWaterfall(isDark: boolean) {
   let running = 0;
   return WATERFALL_STEPS.map((step) => {
     const start = step.subtotal || step.total ? 0 : running;
@@ -53,7 +54,11 @@ function buildWaterfall() {
       ...step,
       base: step.value < 0 && !step.subtotal && !step.total ? running : start,
       height: display,
-      fill: step.total ? "#052E16" : step.value >= 0 ? CHART_COLORS.green : CHART_COLORS.rose,
+      fill: step.total
+        ? (isDark ? CHART_COLORS.mint : "#052E16")
+        : step.value >= 0
+          ? CHART_COLORS.green
+          : CHART_COLORS.rose,
     };
   });
 }
@@ -77,10 +82,10 @@ const TREND_DATA = [
 ];
 
 const STATUS_COLORS = {
-  green: "bg-emerald-50 text-emerald-700",
-  amber: "bg-amber-50 text-amber-700",
-  orange: "bg-orange-50 text-orange-700",
-  red: "bg-rose-50 text-rose-700",
+  green: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400",
+  amber: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400",
+  orange: "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400",
+  red: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400",
 };
 
 function TreemapContent(props: {
@@ -143,14 +148,14 @@ function RecoveryDialog({ row }: { row: ReceivableRow }) {
       ) : (
         <div className="space-y-3 text-sm">
           {(["en", "si", "ta"] as const).map((lang) => (
-            <div key={lang} className="rounded-lg bg-ceyfi-canvas p-3">
+            <div key={lang} className="rounded-lg bg-ceyfi-canvas p-3 dark:bg-white/5">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase text-ceyfi-muted">{lang}</span>
+                <span className="text-[10px] font-semibold uppercase text-ceyfi-muted dark:text-white/50">{lang}</span>
                 <button type="button" onClick={() => copy(messages[lang])} className="text-ceyfi-green">
                   <Copy className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <p className={lang === "si" ? "sinhala text-ceyfi-ink" : "text-ceyfi-ink"}>{messages[lang]}</p>
+              <p className={lang === "si" ? "sinhala text-ceyfi-ink dark:text-white" : "text-ceyfi-ink dark:text-white"}>{messages[lang]}</p>
             </div>
           ))}
           <Button
@@ -174,7 +179,8 @@ function RecoveryDialog({ row }: { row: ReceivableRow }) {
 }
 
 export function BusinessAnalyticsSections() {
-  const waterfall = useMemo(() => buildWaterfall(), []);
+  const { colors, isDark } = useChartTheme();
+  const waterfall = useMemo(() => buildWaterfall(isDark), [isDark]);
   const [receivables, setReceivables] = useState<ReceivableRow[]>([]);
   const [predictions, setPredictions] = useState<{ client: string; expected_payment_date: string; confidence: number }[]>([]);
 
@@ -192,9 +198,9 @@ export function BusinessAnalyticsSections() {
       <ChartCard title="Where did revenue go?" subtitle="Cash-flow waterfall">
         <ChartContainer height={280}>
           <BarChart data={waterfall} margin={{ top: 20, right: 8, left: -8, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-            <XAxis dataKey="name" tick={{ fontSize: 8, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+            <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 8, fill: colors.axis }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
             <Bar dataKey="height" stackId="a" radius={[3, 3, 0, 0]}>
               {waterfall.map((entry, i) => (
@@ -211,7 +217,7 @@ export function BusinessAnalyticsSections() {
             data={TREEMAP_DATA}
             dataKey="size"
             aspectRatio={4 / 3}
-            stroke="#fff"
+            stroke={colors.maskFill}
             content={<TreemapContent />}
           />
         </ChartContainer>
@@ -220,10 +226,10 @@ export function BusinessAnalyticsSections() {
       <ChartCard title="Revenue vs expenses · 6 months" subtitle="Net profit margin overlay">
         <ChartContainer height={260}>
           <ComposedChart data={TREND_DATA} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-            <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-            <YAxis yAxisId="left" tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={36} unit="%" />
+            <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="month" tick={{ fontSize: 10, fill: colors.axis }} axisLine={false} tickLine={false} />
+            <YAxis yAxisId="left" tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={36} unit="%" />
             <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
             <Bar yAxisId="left" dataKey="revenue" fill={CHART_COLORS.green} name="Revenue" radius={[3, 3, 0, 0]} />
             <Bar yAxisId="left" dataKey="expenses" fill={CHART_COLORS.amber} name="Expenses" radius={[3, 3, 0, 0]} />
@@ -236,9 +242,9 @@ export function BusinessAnalyticsSections() {
         <ChartCard title="Payment prediction" subtitle="Expected incoming payments">
           <div className="grid gap-2 sm:grid-cols-2">
             {predictions.slice(0, 4).map((p) => (
-              <div key={p.client} className="rounded-lg border border-ceyfi-line/60 bg-ceyfi-canvas px-3 py-2 text-xs">
-                <div className="font-medium text-ceyfi-ink">{p.client}</div>
-                <div className="mt-1 text-ceyfi-muted">
+              <div key={p.client} className="rounded-lg border border-ceyfi-line/60 bg-ceyfi-canvas px-3 py-2 text-xs dark:border-white/10 dark:bg-white/5">
+                <div className="font-medium text-ceyfi-ink dark:text-white">{p.client}</div>
+                <div className="mt-1 text-ceyfi-muted dark:text-white/50">
                   Expected {p.expected_payment_date} · {p.confidence}% confidence
                 </div>
               </div>
@@ -251,7 +257,7 @@ export function BusinessAnalyticsSections() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-ceyfi-line/60 text-[10px] font-semibold uppercase text-ceyfi-muted">
+              <tr className="border-b border-ceyfi-line/60 text-[10px] font-semibold uppercase text-ceyfi-muted dark:border-white/10 dark:text-white/50">
                 <th className="py-2 pr-3">Client</th>
                 <th className="py-2 pr-3">Invoice</th>
                 <th className="py-2 pr-3">Amount</th>
@@ -262,12 +268,12 @@ export function BusinessAnalyticsSections() {
             </thead>
             <tbody>
               {receivables.map((row) => (
-                <tr key={row.invoice} className="border-b border-ceyfi-line/40">
-                  <td className="py-3 pr-3 font-medium text-ceyfi-ink">{row.client}</td>
-                  <td className="py-3 pr-3 font-mono text-ceyfi-muted">{row.invoice}</td>
-                  <td className="py-3 pr-3 font-mono font-semibold">{formatters.currency({ number: row.amount, maxFractionDigits: 0 })}</td>
+                <tr key={row.invoice} className="border-b border-ceyfi-line/40 dark:border-white/10">
+                  <td className="py-3 pr-3 font-medium text-ceyfi-ink dark:text-white">{row.client}</td>
+                  <td className="py-3 pr-3 font-mono text-ceyfi-muted dark:text-white/50">{row.invoice}</td>
+                  <td className="py-3 pr-3 font-mono font-semibold text-ceyfi-ink dark:text-white">{formatters.currency({ number: row.amount, maxFractionDigits: 0 })}</td>
                   <td className="py-3 pr-3">
-                    <span className="rounded-full bg-ceyfi-canvas px-2 py-0.5 font-mono text-[10px] font-semibold text-ceyfi-ink">
+                    <span className="rounded-full bg-ceyfi-canvas px-2 py-0.5 font-mono text-[10px] font-semibold text-ceyfi-ink dark:bg-white/10 dark:text-white">
                       {row.trust_score}
                     </span>
                   </td>

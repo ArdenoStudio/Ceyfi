@@ -2,6 +2,7 @@
 
 import { CHART_COLORS } from "@/lib/chartUtils";
 import { formatters } from "@/lib/utils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 
 interface Flow {
   from: string;
@@ -31,6 +32,11 @@ function curvePath(x1: number, y1: number, x2: number, y2: number) {
 }
 
 export function MoneyFlowDiagram() {
+  const { isDark } = useChartTheme();
+  const nodeFillSource = isDark ? "rgba(52,211,153,0.14)" : "#E8F7EE";
+  const nodeFillAccount = isDark ? "rgba(52,211,153,0.10)" : "#F0FDF4";
+  const nodeFillDestination = isDark ? "rgba(255,255,255,0.05)" : "#FBFDF9";
+  const nodeStroke = isDark ? "rgba(255,255,255,0.12)" : "#D8E8DC";
   const colX = [60, 200, 340];
   const sourceY = [40, 100, 160];
   const accountY = [70, 130];
@@ -56,7 +62,7 @@ export function MoneyFlowDiagram() {
             x={x}
             y={12}
             textAnchor="middle"
-            className="fill-ceyfi-muted text-[9px] font-semibold"
+            className="fill-ceyfi-muted text-[9px] font-semibold dark:fill-white/50"
           >
             {i === 0 ? "Sources" : i === 1 ? "Accounts" : "Destinations"}
           </text>
@@ -78,24 +84,24 @@ export function MoneyFlowDiagram() {
         })}
         {SOURCES.map((name, i) => (
           <g key={name}>
-            <rect x={colX[0] - 50} y={sourceY[i] - 14} width={100} height={28} rx={8} fill="#E8F7EE" />
-            <text x={colX[0]} y={sourceY[i] + 4} textAnchor="middle" className="fill-ceyfi-ink text-[9px] font-medium">
+            <rect x={colX[0] - 50} y={sourceY[i] - 14} width={100} height={28} rx={8} fill={nodeFillSource} />
+            <text x={colX[0]} y={sourceY[i] + 4} textAnchor="middle" className="fill-ceyfi-ink text-[9px] font-medium dark:fill-white">
               {name}
             </text>
           </g>
         ))}
         {ACCOUNTS.map((name, i) => (
           <g key={name}>
-            <rect x={colX[1] - 55} y={accountY[i] - 14} width={110} height={28} rx={8} fill="#F0FDF4" stroke="#D8E8DC" />
-            <text x={colX[1]} y={accountY[i] + 4} textAnchor="middle" className="fill-ceyfi-ink text-[9px] font-medium">
+            <rect x={colX[1] - 55} y={accountY[i] - 14} width={110} height={28} rx={8} fill={nodeFillAccount} stroke={nodeStroke} />
+            <text x={colX[1]} y={accountY[i] + 4} textAnchor="middle" className="fill-ceyfi-ink text-[9px] font-medium dark:fill-white">
               {name}
             </text>
           </g>
         ))}
         {DESTINATIONS.map((name, i) => (
           <g key={name}>
-            <rect x={colX[2] - 50} y={destY[i] - 12} width={100} height={24} rx={6} fill="#FBFDF9" stroke="#D8E8DC" />
-            <text x={colX[2]} y={destY[i] + 4} textAnchor="middle" className="fill-ceyfi-ink text-[8px] font-medium">
+            <rect x={colX[2] - 50} y={destY[i] - 12} width={100} height={24} rx={6} fill={nodeFillDestination} stroke={nodeStroke} />
+            <text x={colX[2]} y={destY[i] + 4} textAnchor="middle" className="fill-ceyfi-ink text-[8px] font-medium dark:fill-white">
               {name}
             </text>
           </g>

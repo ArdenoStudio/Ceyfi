@@ -41,13 +41,13 @@ export function KpiCard({
   return (
     <article
       className={cn(
-        "group relative overflow-hidden rounded-[20px] border border-ceyfi-line/75 bg-ceyfi-paper p-5 transition-all duration-200 hover:-translate-y-1 hover:border-ceyfi-green/25 hover:shadow-[0_8px_32px_rgba(5,150,105,0.10)]",
+        "group relative overflow-hidden rounded-[20px] border border-border bg-card p-5 transition-all duration-200 hover:-translate-y-1 hover:border-ceyfi-green/25 hover:shadow-[0_8px_32px_rgba(5,150,105,0.10)]",
         className
       )}
     >
       <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-ceyfi-mint/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start justify-between gap-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ceyfi-muted">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {title}
         </div>
         {icon ? (
@@ -56,19 +56,19 @@ export function KpiCard({
           </IconWell>
         ) : null}
       </div>
-      <div className="mt-4 font-heading text-[1.65rem] font-semibold leading-none tracking-[-0.04em] text-ceyfi-ink tabular-nums">
+      <div className="mt-4 font-heading text-[1.65rem] font-semibold leading-none tracking-[-0.04em] text-card-foreground tabular-nums">
         {value}
       </div>
       {subtitle ? (
-        <div className="mt-2 text-xs text-ceyfi-faint">{subtitle}</div>
+        <div className="mt-2 text-xs text-muted-foreground">{subtitle}</div>
       ) : null}
       <div className="mt-4 flex items-end justify-between gap-3">
         <div
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-            changeType === "positive" && "bg-emerald-50 text-emerald-700",
-            changeType === "negative" && "bg-rose-50 text-rose-700",
-            changeType === "neutral" && "bg-stone-100 text-stone-600"
+            changeType === "positive" && "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400",
+            changeType === "negative" && "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400",
+            changeType === "neutral" && "bg-stone-100 text-stone-600 dark:bg-white/10 dark:text-white/60"
           )}
         >
           <ChangeIcon className="h-3 w-3" />

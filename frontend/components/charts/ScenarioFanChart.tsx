@@ -12,6 +12,7 @@ import {
 import { ChartContainer } from "@/components/charts/ChartContainer";
 import { CeyfiTooltip } from "@/components/charts/CeyfiTooltip";
 import { lkrAxisTick } from "@/lib/chartUtils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 
 export interface ScenarioPath {
   id: string;
@@ -32,6 +33,7 @@ const OPACITY: Record<string, number> = {
 };
 
 export function ScenarioFanChart({ paths, height = 280 }: ScenarioFanChartProps) {
+  const { colors } = useChartTheme();
   const merged = paths[0]?.data.map((point, i) => {
     const row: Record<string, string | number> = { date: point.date };
     paths.forEach((path) => {
@@ -43,18 +45,18 @@ export function ScenarioFanChart({ paths, height = 280 }: ScenarioFanChartProps)
   return (
     <ChartContainer height={height}>
       <ComposedChart data={merged} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-        <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
+        <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
         <XAxis
           dataKey="date"
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#8C9A91", fontSize: 10 }}
+          tick={{ fill: colors.axis, fontSize: 10 }}
           minTickGap={40}
         />
         <YAxis
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#8C9A91", fontSize: 10 }}
+          tick={{ fill: colors.axis, fontSize: 10 }}
           tickFormatter={lkrAxisTick}
           width={44}
         />

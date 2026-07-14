@@ -60,10 +60,10 @@ export function TransactionDetailSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="rounded-t-[22px] border-ceyfi-line bg-ceyfi-paper sm:mx-auto sm:max-w-lg"
+        className="rounded-t-[22px] border-border sm:mx-auto sm:max-w-lg"
       >
         <SheetHeader>
-          <SheetTitle className="font-heading text-ceyfi-ink">{title}</SheetTitle>
+          <SheetTitle className="font-heading">{title}</SheetTitle>
           <SheetDescription>
             {new Date(tx.timestamp).toLocaleString("en-LK", {
               dateStyle: "medium",
@@ -111,18 +111,18 @@ export function TransactionDetailSheet({
             </div>
           </div>
 
-          <dl className="space-y-2 rounded-xl border border-ceyfi-line/70 bg-ceyfi-canvas p-4 text-sm">
+          <dl className="space-y-2 rounded-xl border border-ceyfi-line/70 bg-ceyfi-canvas p-4 text-sm dark:border-white/10 dark:bg-white/5">
             <div className="flex justify-between gap-3">
-              <dt className="text-ceyfi-muted">Reference</dt>
+              <dt className="text-muted-foreground">Reference</dt>
               <dd className="font-mono text-xs font-semibold">{reference}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-ceyfi-muted">Paid via</dt>
+              <dt className="text-muted-foreground">Paid via</dt>
               <dd>CEYFI wallet / bank transfer</dd>
             </div>
             {tx.description && tx.description !== title ? (
               <div className="flex justify-between gap-3">
-                <dt className="text-ceyfi-muted">Note</dt>
+                <dt className="text-muted-foreground">Note</dt>
                 <dd className="text-right">{tx.description}</dd>
               </div>
             ) : null}

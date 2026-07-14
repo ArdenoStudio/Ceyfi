@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConnectionDiagramSkeleton } from "@/components/lazy/LazySkeletons";
 import { FaqSection } from "@/components/blocks/FaqSection";
 import { getFamilyWallet } from "@/lib/api";
+import { useChartTheme } from "@/hooks/useChartTheme";
 import { WalletState } from "@/types";
 
 const FinanceConnectionDiagram = dynamic(
@@ -39,6 +40,7 @@ const TYPEWRITER_PROMPTS = [
 ];
 
 function AssistantPageContent() {
+  const { isDark } = useChartTheme();
   const { userId, walletAccountId } = useCurrentUser();
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt");
@@ -135,7 +137,6 @@ function AssistantPageContent() {
             <h1 className="font-heading text-4xl font-semibold sm:text-5xl">
               <GradientText
                 className="font-heading text-4xl font-semibold sm:text-5xl"
-                colors={["#059669", "#34D399", "#052E16"]}
                 animationSpeed={7}
               >
                 CEYFI Assistant
@@ -144,10 +145,10 @@ function AssistantPageContent() {
             <p className="mt-3 text-sm text-ceyfi-muted dark:text-white/55">
               <ShinyText
                 text="Account-aware guidance in English or Sinhala"
-                color="#617267"
-                shineColor="#059669"
+                color={isDark ? "rgba(255,255,255,0.55)" : "#617267"}
+                shineColor={isDark ? "#34D399" : "#059669"}
                 speed={3}
-                className="text-sm font-medium dark:text-white/55"
+                className="text-sm font-medium"
               />
             </p>
             <TypewriterSubtitle prompts={TYPEWRITER_PROMPTS} />

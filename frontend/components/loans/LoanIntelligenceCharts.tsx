@@ -17,6 +17,7 @@ import { ChartContainer } from "@/components/charts/ChartContainer";
 import { Slider } from "@/components/ui/slider";
 import { formatters } from "@/lib/utils";
 import { lkrAxisTick } from "@/lib/chartUtils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
 const EMI = 22000;
@@ -80,6 +81,7 @@ const STATUS_STYLES = {
 };
 
 export function LoanIntelligenceCharts() {
+  const { colors } = useChartTheme();
   const [lumpSum, setLumpSum] = useState(50000);
   const comboData = useMemo(() => buildComboData(), []);
   const waterfallData = useMemo(() => buildWaterfallData(), []);
@@ -94,10 +96,10 @@ export function LoanIntelligenceCharts() {
       <ChartCard title="EMI payments vs outstanding balance" subtitle="36-month personal loan · LKR 600,000">
         <ChartContainer height={260}>
           <ComposedChart data={comboData} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-            <XAxis dataKey="month" tick={{ fontSize: 8, fill: "#8C9A91" }} axisLine={false} tickLine={false} interval={5} />
-            <YAxis yAxisId="left" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={44} />
-            <YAxis yAxisId="right" orientation="right" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={44} />
+            <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="month" tick={{ fontSize: 8, fill: colors.axis }} axisLine={false} tickLine={false} interval={5} />
+            <YAxis yAxisId="left" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={44} />
+            <YAxis yAxisId="right" orientation="right" tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={44} />
             <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
             <Bar yAxisId="left" dataKey="emiPaid" fill="#059669" radius={[3, 3, 0, 0]} name="EMI paid" />
             <Line yAxisId="right" type="monotone" dataKey="outstanding" stroke="#E11D48" strokeWidth={2} dot={false} name="Outstanding" />
@@ -108,9 +110,9 @@ export function LoanIntelligenceCharts() {
       <ChartCard title="Principal vs interest breakdown" subtitle="How repayment composition shifts over time">
         <ChartContainer height={220}>
           <BarChart data={waterfallData} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-            <XAxis dataKey="year" tick={{ fontSize: 10, fill: "#8C9A91" }} axisLine={false} tickLine={false} />
-            <YAxis tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={44} />
+            <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="year" tick={{ fontSize: 10, fill: colors.axis }} axisLine={false} tickLine={false} />
+            <YAxis tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={44} />
             <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
             <Bar dataKey="principal" stackId="a" fill="#059669" name="Principal" radius={[0, 0, 0, 0]} />
             <Bar dataKey="interest" stackId="a" fill="#D97706" name="Interest" radius={[3, 3, 0, 0]} />

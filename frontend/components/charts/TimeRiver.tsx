@@ -19,6 +19,7 @@ import {
   type ActionPlan,
 } from "@/components/charts/CausalityPanel";
 import { CHART_COLORS, lkrAxisTick } from "@/lib/chartUtils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 import { cn } from "@/lib/utils";
 
 export interface TimeRiverPoint {
@@ -148,6 +149,7 @@ export function TimeRiver({
   }, [baseData, balanceBoost, dangerThreshold]);
   const todayLabel = data.find((p) => p.isToday)?.date ?? "Today";
 
+  const { colors } = useChartTheme();
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<TimeRiverPoint | null>(
     null
@@ -214,36 +216,36 @@ export function TimeRiver({
           >
             <CartesianGrid
               vertical={false}
-              stroke="#D8E8DC"
+              stroke={colors.grid}
               strokeDasharray="3 3"
             />
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#8C9A91", fontSize: 10 }}
+              tick={{ fill: colors.axis, fontSize: 10 }}
               interval="preserveStartEnd"
               minTickGap={48}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#8C9A91", fontSize: 10 }}
+              tick={{ fill: colors.axis, fontSize: 10 }}
               tickFormatter={lkrAxisTick}
               width={44}
             />
             <Tooltip
               content={(props) => <CeyfiTooltip {...props} />}
-              cursor={{ stroke: "#D8E8DC", strokeDasharray: "3 3" }}
+              cursor={{ stroke: colors.grid, strokeDasharray: "3 3" }}
             />
 
-            {/* Confidence band — lower white cutout */}
+            {/* Confidence band — lower cutout, matches surrounding card */}
             <Area
               type="monotone"
               dataKey="lower"
               stackId="band"
               stroke="none"
-              fill="white"
+              fill={colors.maskFill}
               connectNulls={false}
               isAnimationActive={false}
             />
@@ -252,7 +254,7 @@ export function TimeRiver({
               dataKey="bandRange"
               stackId="band"
               stroke="none"
-              fill="rgba(52,211,153,0.12)"
+              fill={colors.areaFillSecondary}
               connectNulls={false}
               isAnimationActive={false}
             />
@@ -263,10 +265,10 @@ export function TimeRiver({
               dataKey="balanceDisplay"
               stroke={CHART_COLORS.green}
               strokeWidth={2}
-              fill="#E8F7EE"
+              fill={colors.areaFill}
               connectNulls={false}
               name="Balance"
-              activeDot={{ r: 5, strokeWidth: 2, stroke: "#E8F7EE" }}
+              activeDot={{ r: 5, strokeWidth: 2, stroke: colors.areaFill }}
             />
 
             {/* Forecast */}
@@ -276,10 +278,10 @@ export function TimeRiver({
               stroke={CHART_COLORS.green}
               strokeWidth={1.5}
               strokeDasharray="4 3"
-              fill="rgba(5,150,105,0.08)"
+              fill={colors.forecastFill}
               connectNulls={false}
               name="Forecast"
-              activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+              activeDot={{ r: 5, strokeWidth: 2, stroke: colors.maskFill }}
             />
 
             <ReferenceLine
@@ -311,12 +313,12 @@ export function TimeRiver({
               <ReferenceLine
                 key={`${point.date}-${point.event}`}
                 x={point.date}
-                stroke="#8C9A91"
+                stroke={colors.axis}
                 strokeDasharray="2 4"
                 strokeOpacity={0.5}
                 label={{
                   value: point.event ?? "",
-                  fill: "#617267",
+                  fill: colors.label,
                   fontSize: 8,
                   position: "top",
                 }}

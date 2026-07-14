@@ -30,6 +30,12 @@ export const CHART_VARIANTS = {
     label: "#617267",
     cursor: "#a7d8b8",
     legend: "#617267",
+    // Area fills — solid card-colored mask for stacked cutout tricks, soft
+    // brand-green washes for data areas.
+    maskFill: "#FBFDF9",
+    areaFill: "#E8F7EE",
+    areaFillSecondary: "rgba(52,211,153,0.12)",
+    forecastFill: "rgba(5,150,105,0.08)",
     tooltipClass:
       "rounded-xl border border-ceyfi-line bg-white/97 px-3.5 py-3 text-xs text-ceyfi-ink shadow-lg",
   },
@@ -39,6 +45,10 @@ export const CHART_VARIANTS = {
     label: "rgba(255,255,255,0.5)",
     cursor: "rgba(255,255,255,0.04)",
     legend: "rgba(255,255,255,0.5)",
+    maskFill: "#0a1f16",
+    areaFill: "rgba(52,211,153,0.16)",
+    areaFillSecondary: "rgba(52,211,153,0.10)",
+    forecastFill: "rgba(52,211,153,0.08)",
     tooltipClass: CHART_BRAND.tooltipClass,
   },
 } as const;

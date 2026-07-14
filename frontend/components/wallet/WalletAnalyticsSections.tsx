@@ -17,6 +17,7 @@ import { ChartContainer } from "@/components/charts/ChartContainer";
 import { MoneyFlowDiagram } from "@/components/wallet/MoneyFlowDiagram";
 import { CHART_COLORS } from "@/lib/chartUtils";
 import { lkrAxisTick } from "@/lib/chartUtils";
+import { useChartTheme } from "@/hooks/useChartTheme";
 
 function buildBalanceHistory() {
   const start = new Date();
@@ -52,6 +53,7 @@ function buildFxHistory() {
 }
 
 export function WalletAnalyticsSections() {
+  const { colors } = useChartTheme();
   const balanceData = useMemo(() => buildBalanceHistory(), []);
   const fxData = useMemo(() => buildFxHistory(), []);
 
@@ -74,9 +76,9 @@ export function WalletAnalyticsSections() {
                 <stop offset="100%" stopColor={CHART_COLORS.mint} stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{ fontSize: 8, fill: "#8C9A91" }} axisLine={false} tickLine={false} minTickGap={40} />
-            <YAxis tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={44} />
+            <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="date" tick={{ fontSize: 8, fill: colors.axis }} axisLine={false} tickLine={false} minTickGap={40} />
+            <YAxis tickFormatter={lkrAxisTick} tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={44} />
             <Tooltip content={(p) => <CeyfiTooltip {...p} />} />
             <Area type="monotone" dataKey="total" stroke={CHART_COLORS.green} fill="url(#totalGrad)" name="Total balance" />
             <Area type="monotone" dataKey="savings" stroke={CHART_COLORS.mint} fill="url(#savingsGrad)" name="Savings" />
@@ -87,9 +89,9 @@ export function WalletAnalyticsSections() {
       <ChartCard title="Exchange rate history" subtitle="Click best day to remit · last 30 days">
         <ChartContainer height={240}>
           <LineChart data={fxData} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#D8E8DC" strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{ fontSize: 8, fill: "#8C9A91" }} axisLine={false} tickLine={false} minTickGap={40} />
-            <YAxis tick={{ fontSize: 9, fill: "#8C9A91" }} axisLine={false} tickLine={false} width={44} domain={["auto", "auto"]} />
+            <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
+            <XAxis dataKey="date" tick={{ fontSize: 8, fill: colors.axis }} axisLine={false} tickLine={false} minTickGap={40} />
+            <YAxis tick={{ fontSize: 9, fill: colors.axis }} axisLine={false} tickLine={false} width={44} domain={["auto", "auto"]} />
             <Tooltip content={(p) => <CeyfiTooltip {...p} valueFormatter={(v) => v.toFixed(2)} />} />
             <Line type="monotone" dataKey="aed" stroke={CHART_COLORS.green} strokeWidth={2} dot={false} name="LKR/AED" />
             <Line type="monotone" dataKey="aud" stroke={CHART_COLORS.blue} strokeWidth={2} dot={false} name="LKR/AUD" />

@@ -41,9 +41,9 @@ interface CausalityPanelProps {
 }
 
 const riskStyles = {
-  Low: "bg-emerald-50 text-emerald-700",
-  Medium: "bg-amber-50 text-amber-700",
-  High: "bg-rose-50 text-rose-700",
+  Low: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400",
+  Medium: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400",
+  High: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400",
 } as const;
 
 export function CausalityPanel({
@@ -59,17 +59,17 @@ export function CausalityPanel({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full overflow-y-auto border-ceyfi-line bg-ceyfi-paper sm:max-w-md"
+        className="w-full overflow-y-auto border-border sm:max-w-md"
       >
-        <SheetHeader className="border-b border-ceyfi-line/60 pb-4">
-          <SheetTitle className="font-heading text-lg font-semibold tracking-[-0.03em] text-ceyfi-ink">
+        <SheetHeader className="border-b border-ceyfi-line/60 pb-4 dark:border-white/10">
+          <SheetTitle className="font-heading text-lg font-semibold tracking-[-0.03em]">
             Why does the balance dip here?
           </SheetTitle>
-          <SheetDescription className="text-sm text-ceyfi-muted">
-            <span className="font-medium text-ceyfi-ink">{date}</span>
+          <SheetDescription className="text-sm text-ceyfi-muted dark:text-white/50">
+            <span className="font-medium text-ceyfi-ink dark:text-white">{date}</span>
             {" · "}
             Projected{" "}
-            <span className="font-mono font-semibold text-ceyfi-ink">
+            <span className="font-mono font-semibold text-ceyfi-ink dark:text-white">
               {formatters.currency({
                 number: projectedBalance,
                 maxFractionDigits: 0,
@@ -80,20 +80,20 @@ export function CausalityPanel({
 
         <div className="space-y-6 px-4 py-5">
           <section>
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ceyfi-muted">
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ceyfi-muted dark:text-white/50">
               Cause chain
             </h3>
             <div className="mt-3 space-y-3">
               {events.map((event) => (
                 <div
                   key={event.cause}
-                  className="rounded-xl border border-ceyfi-line/70 bg-ceyfi-canvas p-3"
+                  className="rounded-xl border border-ceyfi-line/70 bg-ceyfi-canvas p-3 dark:border-white/10 dark:bg-white/5"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-medium text-ceyfi-ink">
+                    <p className="text-sm font-medium text-ceyfi-ink dark:text-white">
                       {event.cause}
                     </p>
-                    <span className="shrink-0 font-mono text-xs font-semibold text-rose-700">
+                    <span className="shrink-0 font-mono text-xs font-semibold text-rose-700 dark:text-rose-400">
                       −
                       {formatters.currency({
                         number: event.impact,
@@ -102,7 +102,7 @@ export function CausalityPanel({
                     </span>
                   </div>
                   <div className="mt-2.5 flex items-center gap-2">
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ceyfi-line/60">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ceyfi-line/60 dark:bg-white/10">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
@@ -111,7 +111,7 @@ export function CausalityPanel({
                         }}
                       />
                     </div>
-                    <span className="text-[10px] font-semibold text-ceyfi-muted">
+                    <span className="text-[10px] font-semibold text-ceyfi-muted dark:text-white/50">
                       {event.probability}%
                     </span>
                   </div>
@@ -121,19 +121,19 @@ export function CausalityPanel({
           </section>
 
           <section>
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ceyfi-muted">
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ceyfi-muted dark:text-white/50">
               Action plans
             </h3>
             <div className="mt-3 space-y-3">
               {actionPlans.map((plan) => (
                 <article
                   key={plan.id}
-                  className="rounded-xl border border-ceyfi-line/70 bg-white p-4"
+                  className="rounded-xl border border-ceyfi-line/70 bg-white p-4 dark:border-white/10 dark:bg-white/5"
                 >
-                  <p className="font-heading text-sm font-semibold text-ceyfi-ink">
+                  <p className="font-heading text-sm font-semibold text-ceyfi-ink dark:text-white">
                     {plan.title}
                   </p>
-                  <p className="mt-2 font-mono text-sm font-bold text-emerald-700">
+                  <p className="mt-2 font-mono text-sm font-bold text-emerald-700 dark:text-emerald-400">
                     +
                     {formatters.currency({
                       number: plan.benefit,
@@ -151,12 +151,12 @@ export function CausalityPanel({
                     {plan.reversible ? (
                       <Badge
                         variant="outline"
-                        className="border-ceyfi-line text-[10px] text-ceyfi-muted"
+                        className="border-ceyfi-line text-[10px] text-ceyfi-muted dark:border-white/10 dark:text-white/50"
                       >
                         Reversible
                       </Badge>
                     ) : null}
-                    <span className="text-[10px] text-ceyfi-faint">
+                    <span className="text-[10px] text-ceyfi-faint dark:text-white/40">
                       {plan.effort}
                     </span>
                   </div>
@@ -173,10 +173,10 @@ export function CausalityPanel({
           </section>
         </div>
 
-        <SheetFooter className="border-t border-ceyfi-line/60">
+        <SheetFooter className="border-t border-ceyfi-line/60 dark:border-white/10">
           <Link
             href="/scenarios"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ceyfi-green hover:text-ceyfi-deep"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-ceyfi-green hover:text-ceyfi-deep dark:hover:text-ceyfi-mint"
           >
             Simulate this scenario
             <ArrowRight className="h-3.5 w-3.5" />
