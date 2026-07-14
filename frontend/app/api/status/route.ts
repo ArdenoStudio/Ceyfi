@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { absoluteBackendUrl } from "@/lib/urls";
 
-const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8000";
+const BACKEND = absoluteBackendUrl();
 const TIMEOUT = 5000;
 /** Demo user IDs that exist in backend fixtures and Supabase seeds */
 const DEMO_SENDER_ID = "SEY-USR-001";

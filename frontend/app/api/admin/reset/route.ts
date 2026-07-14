@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { absoluteBackendUrl } from "@/lib/urls";
 
-const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8000";
+const BACKEND = absoluteBackendUrl();
 const DEMO_RESET_ENABLED = process.env.DEMO_RESET_ENABLED === "true";
 const ADMIN_KEY = process.env.DEMO_ADMIN_KEY;
 

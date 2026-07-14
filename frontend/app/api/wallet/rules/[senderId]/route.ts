@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { absoluteBackendUrl } from "@/lib/urls";
 
-const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8000";
+const BACKEND = absoluteBackendUrl();
 
 export async function POST(
   req: Request,

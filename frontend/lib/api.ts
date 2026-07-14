@@ -1,8 +1,10 @@
 /**
  * Backend URL resolution (first match wins):
- *   NEXT_PUBLIC_API_URL  — ECS / custom production backend (see frontend/.env.production.example)
+ *   NEXT_PUBLIC_API_URL  — custom production backend override
  *   NEXT_PUBLIC_API_BASE — legacy alias, local dev default in .env.example
- *   fallback             — Ceyfi Cloud Run backend in production, localhost:8000 in dev
+ *   fallback             — `/_/backend` on Vercel production, localhost:8000 in dev
+ *
+ * Retired Cloud Run URLs in NEXT_PUBLIC_* are ignored (see urls.ts).
  */
 import { authHeaders } from "@/lib/auth";
 import { PRODUCTION_BACKEND_URL } from "@/lib/urls";
@@ -15,12 +17,7 @@ function jsonHeaders(extra?: Record<string, string>): Record<string, string> {
   };
 }
 
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ??
-  process.env.NEXT_PUBLIC_API_BASE ??
-  (process.env.NODE_ENV === "production"
-    ? PRODUCTION_BACKEND_URL
-    : "http://localhost:8000");
+export const API_BASE = PRODUCTION_BACKEND_URL;
 
 export class ApiError extends Error {
   status: number;
