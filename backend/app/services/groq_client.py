@@ -21,8 +21,16 @@ def _get_client() -> AsyncGroq:
 
 
 async def _try_models_stream(msgs: list[dict], max_tokens: int, temperature: float) -> AsyncIterator[str]:
-    """Try primary model then fallbacks for streaming, yielding tokens."""
+    """Try primary model then fallbacks for streaming, yielding tokens.
+
+    Any failure (not just rate limits — a single model outage, a deprecated
+    model, a transient network error) falls through to the next model in the
+    chain instead of failing the whole request, since a partial stream can't
+    be "retried" from where it stopped.
+    """
+    last_exc: Exception | None = None
     for model in [_PRIMARY_MODEL] + _FALLBACK_MODELS:
+        started = False
         try:
             stream = await _get_client().chat.completions.create(
                 model=model,
@@ -34,19 +42,27 @@ async def _try_models_stream(msgs: list[dict], max_tokens: int, temperature: flo
             if model != _PRIMARY_MODEL:
                 log.info("groq: using fallback model %s", model)
             async for chunk in stream:
+                started = True
                 if not chunk.choices:
                     continue
                 delta = chunk.choices[0].delta.content
                 if delta:
                     yield delta
             return  # success — stop trying
-        except RateLimitError:
+        except RateLimitError as exc:
+            last_exc = exc
             log.warning("groq: rate limit on %s, trying next model", model)
             continue
         except Exception as exc:
-            log.error("groq: error on %s: %s", model, exc)
-            raise
-    raise RuntimeError("All Groq models are rate-limited. Please try again shortly.")
+            last_exc = exc
+            if started:
+                # Already streamed partial content to the client — surfacing
+                # a second, different model's output now would be incoherent.
+                log.error("groq: error on %s after partial stream: %s", model, exc)
+                raise
+            log.error("groq: error on %s, trying next model: %s", model, exc)
+            continue
+    raise RuntimeError(f"All Groq models failed: {last_exc}")
 
 
 async def stream_chat(system_prompt: str, messages: list[dict],
