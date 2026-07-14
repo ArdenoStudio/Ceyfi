@@ -4,6 +4,10 @@
 
 Built for **Cursor Buildathon Colombo 2026** by Ardeno Studio.
 
+## Live Demo
+
+🌐 [ceyfi-app.vercel.app](https://ceyfi-app.vercel.app)
+
 ## Architecture
 
 | Layer | Tech | Notes |
