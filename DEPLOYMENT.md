@@ -7,10 +7,10 @@ Single source of truth for live URLs and environment setup.
 | Surface | URL | Git repo branch |
 |---------|-----|-----------------|
 | **Frontend** | https://frontend-taupe-three-96.vercel.app | `ArdenoStudio/Ceyfi` `main` |
-| **Backend API** | https://ceyfi-backend-98470559362.asia-southeast1.run.app | Cloud Run service `ceyfi-backend` |
+| **Backend API** | https://frontend-taupe-three-96.vercel.app/_/backend | Vercel experimental service (`backend/`) |
 | **Status** | https://frontend-taupe-three-96.vercel.app/status | frontend status route |
 
-> **Vercel:** Project `frontend` serves the Next.js app. The FastAPI backend is deployed separately to Google Cloud Run in `asia-southeast1`.
+> **Vercel:** Project serves the Next.js app at `/` and the FastAPI backend at `/_/backend`. The old Cloud Run URL (`ceyfi-backend-…run.app`) is retired — leave `NEXT_PUBLIC_API_*` unset so the app uses `/_/backend`.
 
 ## Vercel (monorepo)
 
@@ -19,12 +19,13 @@ Root `vercel.json` uses experimental services for monorepo builds:
 - `frontend/` → `/`
 - `backend/` → `/_/backend`
 
-Production frontend traffic calls the canonical Cloud Run backend above.
+Production frontend traffic calls same-origin `/_/backend` by default.
 
 ### Frontend env
 
 ```env
-NEXT_PUBLIC_API_BASE=https://ceyfi-backend-98470559362.asia-southeast1.run.app
+# Prefer unset — app defaults to same-origin /_/backend
+# NEXT_PUBLIC_API_BASE=
 NEXT_PUBLIC_SITE_URL=https://frontend-taupe-three-96.vercel.app
 NEXT_PUBLIC_APP_URL=https://frontend-taupe-three-96.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=...
@@ -32,10 +33,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 # Server-only (Vercel → Settings → Environment Variables, NOT exposed to browser):
 DEMO_ADMIN_KEY=...
 DEMO_RESET_ENABLED=false
-BACKEND_URL=https://ceyfi-backend-98470559362.asia-southeast1.run.app
+# Server proxies; defaults to https://$VERCEL_URL/_/backend when unset
+# BACKEND_URL=
 ```
 
-Shared URL constants for code fallbacks live in `frontend/lib/urls.ts` (`PRODUCTION_FRONTEND_URL`, `PRODUCTION_BACKEND_URL`). Set the env vars above in Vercel so builds do not rely on hardcoded defaults.
+Shared URL constants for code fallbacks live in `frontend/lib/urls.ts` (`PRODUCTION_FRONTEND_URL`, `PRODUCTION_BACKEND_URL`, `absoluteBackendUrl()`).
 
 ### Backend env
 
@@ -44,7 +46,7 @@ DATABASE_URL=postgresql://...  # Neon
 GROQ_API_KEY=...
 OPENAI_API_KEY=...
 ELEVENLABS_API_KEY=...
-DEMO_SESSION_SECRET=...
+DEMO_SESSION_SECRET=...   # optional; code has a demo default — override in real deploys
 DEMO_ADMIN_KEY=...
 DEMO_AUTH_REQUIRED=true
 CORS_ORIGINS=https://frontend-taupe-three-96.vercel.app,https://ceyfi.app
@@ -53,7 +55,7 @@ SEYLAN_API_KEY=...
 MPGS_ENABLE=false
 ```
 
-`CORS_ORIGINS` must include every frontend origin that calls the API. The Cloud Run value should contain only production aliases. Code defaults also cover local dev ports `3000`/`3003`/`3005`; add a specific preview origin temporarily only when browser testing that preview against the production API.
+`CORS_ORIGINS` must include every frontend origin that calls the API when the backend is on a different host. Same-origin `/_/backend` does not need CORS. Code defaults also cover local dev ports `3000`/`3003`/`3005`.
 
 ## Google Cloud Build (backend)
 

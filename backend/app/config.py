@@ -75,8 +75,10 @@ class Settings(BaseSettings):
     frontend_base_url: str = "https://frontend-taupe-three-96.vercel.app"
     backend_base_url: str = "http://localhost:8000"
 
-    # Demo auth & admin (set via env — no insecure defaults)
-    demo_session_secret: str = ""
+    # Demo auth & admin — override DEMO_SESSION_SECRET / DEMO_ADMIN_KEY in real deploys.
+    # Empty secret previously 503'd login on Vercel `/_/backend`; keep a demo default so
+    # persona sign-in works out of the box (tokens are demo-only, not end-user auth).
+    demo_session_secret: str = "ceyfi-insecure-demo-session-secret"
     demo_session_ttl_seconds: int = 86400 * 7
     demo_admin_key: str = ""
     demo_auth_required: bool = True
