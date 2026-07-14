@@ -59,6 +59,8 @@ const requiredSnippets = [
   ["app/manifest.ts", "/favicon.ico"],
   ["components/payments/PayHereButton.tsx", "Pay with PayHere"],
   ["components/layout/SiteFooter.tsx", "CEYFI"],
+  ["app/api/wallet/transfer/route.ts", "req.headers.get(\"authorization\")"],
+  ["app/api/wallet/transfer/route.ts", "headers.Authorization = auth"],
 ];
 
 const missing = requiredFiles.filter((file) => !existsSync(join(root, file)));
