@@ -1,18 +1,21 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
 import { PlSummaryCard } from "@/components/business/PlSummaryCard";
 import { ExpenseBreakdown } from "@/components/business/ExpenseBreakdown";
 import { TaxJarPanel } from "@/components/business/TaxJarPanel";
 import { CategorisedTransactionFeed } from "@/components/business/CategorisedTransactionFeed";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { ErrorState } from "@/components/ErrorState";
+import { EmptyState } from "@/components/EmptyState";
 import { BusinessHeroStats } from "@/components/blocks/BusinessHeroStats";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getPlSummary, getBusinessAccount, getFinancialSnapshot } from "@/lib/api";
 import { PlSummary, Transaction } from "@/types";
-import { Bot, PiggyBank, ReceiptText, TrendingUp, Wallet } from "lucide-react";
+import { BriefcaseBusiness, Bot, PiggyBank, ReceiptText, TrendingUp, Wallet } from "lucide-react";
 import { formatters } from "@/lib/utils";
 import { CfoBriefPanel } from "@/components/business/CfoBriefPanel";
 import { BusinessAnalyticsSections } from "@/components/business/BusinessAnalyticsSections";
@@ -22,7 +25,7 @@ const ASSISTANT_PROMPT =
   "Act as my SME bookkeeper. Review this week's revenue, expenses, tax jar readiness, and transactions that need category review.";
 
 export default function BusinessPage() {
-  const { businessUserId, user } = useCurrentUser();
+  const { businessUserId, user, defaultRoute } = useCurrentUser();
   const BUSINESS_USER_ID = businessUserId;
   const [extraTransactions, setExtraTransactions] = useState<Transaction[]>([]);
   const [pl, setPl] = useState<PlSummary | null>(null);
@@ -61,12 +64,15 @@ export default function BusinessPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.allSettled([
-      getPlSummary(BUSINESS_USER_ID),
-      getBusinessAccount(BUSINESS_USER_ID),
-      getFinancialSnapshot(BUSINESS_USER_ID),
-    ]).then((results) => {
-      if (cancelled) return;
+    const requests = BUSINESS_USER_ID
+      ? [
+          getPlSummary(BUSINESS_USER_ID),
+          getBusinessAccount(BUSINESS_USER_ID),
+          getFinancialSnapshot(BUSINESS_USER_ID),
+        ]
+      : [];
+    Promise.allSettled(requests).then((results) => {
+      if (cancelled || !BUSINESS_USER_ID) return;
       const [plRes, bizRes, snapRes] = results;
       if (plRes.status === "fulfilled") {
         setPl(plRes.value as PlSummary);
@@ -97,6 +103,23 @@ export default function BusinessPage() {
   const handleNewTransaction = useCallback((tx: Transaction) => {
     setExtraTransactions((prev) => [tx, ...prev]);
   }, []);
+
+  if (!BUSINESS_USER_ID) {
+    return (
+      <div data-module="business" className="mx-auto w-full max-w-[1400px] p-4 sm:p-6 lg:p-8">
+        <EmptyState
+          icon={BriefcaseBusiness}
+          title="Business Bookkeeper is for the SME persona"
+          description="Suresh Silva's Silva Hardware & Electricals shop books live here. Switch to that persona to see it."
+          action={
+            <Link href={defaultRoute}>
+              <Button variant="outline">Go to your dashboard</Button>
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   if (plLoading) {
     return (

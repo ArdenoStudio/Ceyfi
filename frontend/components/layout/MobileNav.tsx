@@ -26,6 +26,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const MOBILE_PRIMARY = [
   { href: "/wallet", label: "Wallet", icon: Wallet },
@@ -47,11 +48,15 @@ const MOBILE_MORE = [
 export function MobileNav() {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
+  const { user } = useAuth();
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
 
-  const moreActive = MOBILE_MORE.some((item) => isActive(item.href));
+  const mobileMore = MOBILE_MORE.filter(
+    (item) => item.href !== "/business" || user?.persona === "sme"
+  );
+  const moreActive = mobileMore.some((item) => isActive(item.href));
 
   return (
     <nav
@@ -119,7 +124,7 @@ export function MobileNav() {
             <SheetTitle>More pages</SheetTitle>
           </SheetHeader>
           <div className="grid grid-cols-3 gap-3 px-4 pb-6">
-            {MOBILE_MORE.map((item) => (
+            {mobileMore.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

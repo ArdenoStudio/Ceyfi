@@ -73,10 +73,10 @@ const PAYMENT_CALENDAR = [
 ];
 
 const STATUS_STYLES = {
-  paid: { bg: "bg-emerald-50 border-emerald-200", icon: CheckCircle2, color: "text-emerald-700" },
-  late: { bg: "bg-amber-50 border-amber-200", icon: Clock, color: "text-amber-700" },
-  missed: { bg: "bg-rose-50 border-rose-200", icon: XCircle, color: "text-rose-700" },
-  future: { bg: "bg-stone-50 border-stone-200", icon: Clock, color: "text-stone-400" },
+  paid: { bg: "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800/50", icon: CheckCircle2, color: "text-emerald-700 dark:text-emerald-400" },
+  late: { bg: "bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800/50", icon: Clock, color: "text-amber-700 dark:text-amber-400" },
+  missed: { bg: "bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:border-rose-800/50", icon: XCircle, color: "text-rose-700 dark:text-rose-400" },
+  future: { bg: "bg-stone-50 border-stone-200 dark:bg-white/5 dark:border-white/10", icon: Clock, color: "text-stone-400 dark:text-white/40" },
 };
 
 export function LoanIntelligenceCharts() {
@@ -122,8 +122,8 @@ export function LoanIntelligenceCharts() {
         <div className="space-y-6">
           <div>
             <div className="mb-2 flex justify-between text-xs">
-              <span className="text-ceyfi-muted">Lump-sum payment</span>
-              <span className="font-mono font-semibold text-ceyfi-ink">
+              <span className="text-ceyfi-muted dark:text-white/50">Lump-sum payment</span>
+              <span className="font-mono font-semibold text-ceyfi-ink dark:text-white">
                 {formatters.currency({ number: lumpSum, maxFractionDigits: 0 })}
               </span>
             </div>
@@ -135,9 +135,9 @@ export function LoanIntelligenceCharts() {
               { label: "Interest saved", value: formatters.currency({ number: saved, maxFractionDigits: 0 }) },
               { label: "New end date", value: endDate.toLocaleDateString("en", { month: "short", year: "numeric" }) },
             ].map((kpi) => (
-              <div key={kpi.label} className="rounded-xl border border-ceyfi-line/70 bg-ceyfi-canvas p-4">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-ceyfi-muted">{kpi.label}</div>
-                <div className="mt-2 font-heading text-xl font-semibold text-ceyfi-ink">{kpi.value}</div>
+              <div key={kpi.label} className="rounded-xl border border-ceyfi-line/70 bg-ceyfi-canvas p-4 dark:border-white/10 dark:bg-white/5">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-ceyfi-muted dark:text-white/50">{kpi.label}</div>
+                <div className="mt-2 font-heading text-xl font-semibold text-ceyfi-ink dark:text-white">{kpi.value}</div>
               </div>
             ))}
           </div>
@@ -152,10 +152,10 @@ export function LoanIntelligenceCharts() {
             return (
               <div key={item.month} className={`rounded-xl border p-3 ${style.bg}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold text-ceyfi-ink">{item.month}</span>
+                  <span className="text-[10px] font-semibold text-ceyfi-ink dark:text-white">{item.month}</span>
                   <Icon className={`h-3.5 w-3.5 ${style.color}`} />
                 </div>
-                <div className="mt-2 font-mono text-xs font-semibold text-ceyfi-muted">
+                <div className="mt-2 font-mono text-xs font-semibold text-ceyfi-muted dark:text-white/50">
                   {formatters.currency({ number: item.amount, maxFractionDigits: 0 })}
                 </div>
               </div>

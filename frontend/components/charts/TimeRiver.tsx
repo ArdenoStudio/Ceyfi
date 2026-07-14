@@ -327,13 +327,13 @@ export function TimeRiver({
       </div>
 
       <div className="mt-2 flex flex-col items-center gap-2">
-        <p className="text-center text-[10px] text-ceyfi-faint">
+        <p className="text-center text-[10px] text-ceyfi-faint dark:text-white/40">
           Tap a future point to see what caused the projected dip
         </p>
         <button
           type="button"
           onClick={handleInspectNextRisk}
-          className="rounded-lg border border-ceyfi-line/80 bg-ceyfi-paper px-3 py-1.5 text-[11px] font-semibold text-ceyfi-green transition hover:border-ceyfi-green/40 hover:bg-ceyfi-sprout/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30"
+          className="rounded-lg border border-ceyfi-line/80 bg-ceyfi-paper px-3 py-1.5 text-[11px] font-semibold text-ceyfi-green transition hover:border-ceyfi-green/40 hover:bg-ceyfi-sprout/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30 dark:border-white/10 dark:bg-white/5 dark:text-ceyfi-mint dark:hover:bg-white/10"
         >
           Inspect next risk
         </button>

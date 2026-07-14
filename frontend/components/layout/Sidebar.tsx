@@ -195,16 +195,18 @@ export function Sidebar() {
                 {group.label}
               </div>
               <div className="space-y-1">
-                {group.items.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    href={item.href}
-                    label={item.label}
-                    icon={item.icon}
-                    active={isActive(item.href)}
-                    animate={animate}
-                  />
-                ))}
+                {group.items
+                  .filter((item) => item.href !== "/business" || user?.persona === "sme")
+                  .map((item) => (
+                    <NavLink
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      icon={item.icon}
+                      active={isActive(item.href)}
+                      animate={animate}
+                    />
+                  ))}
               </div>
             </div>
           ))}
