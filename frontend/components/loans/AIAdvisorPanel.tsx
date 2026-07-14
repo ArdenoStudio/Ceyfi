@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { API_BASE } from "@/lib/api";
+import { authHeaders } from "@/lib/auth";
 import { Bot } from "lucide-react";
 
 interface AIAdvisorPanelProps {
@@ -18,7 +19,10 @@ export function AIAdvisorPanel({ userId }: AIAdvisorPanelProps) {
     let cancelled = false;
     fetch(`${API_BASE}/api/loans/advisor`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(),
+      },
       body: JSON.stringify({ user_id: userId }),
       signal: AbortSignal.timeout(20000),
     })
