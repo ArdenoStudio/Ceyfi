@@ -316,7 +316,12 @@ function DecisionsPageInner() {
                     <Link href="/scenarios" className="rounded-lg border border-border px-3 py-2 text-[11px] font-semibold text-primary hover:bg-muted">
                       Simulate →
                     </Link>
-                    <Button size="sm" className="bg-primary text-white" onClick={() => setExecuteTarget(d)}>
+                    <Button
+                      size="sm"
+                      data-demo-target="decision-execute"
+                      className="bg-primary text-white"
+                      onClick={() => setExecuteTarget(d)}
+                    >
                       Execute
                     </Button>
                   </div>

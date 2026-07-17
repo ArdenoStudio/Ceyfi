@@ -422,13 +422,12 @@ export async function getProfileData(userId: string) {
 }
 
 export async function prewarmDemoData() {
-  await Promise.all([
+  // Only warm resources the current session can read — cross-persona mock
+  // fetches 403 under DEMO_AUTH_REQUIRED and just spam the console.
+  await Promise.allSettled([
     getFamilyWallet("SEY-ACC-002"),
     getLoans("SEY-USR-001"),
-    getLoans("SEY-USR-003"),
-    getBusinessAccount("SEY-BIZ-001"),
-    getPlSummary("SEY-BIZ-001"),
-    postCategorize({ transaction_ids: [] }).catch(() => null),
+    postCategorize({ transaction_ids: [] }),
   ]);
 }
 

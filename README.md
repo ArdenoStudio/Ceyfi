@@ -62,7 +62,7 @@ Key demo settings:
 ## Demo Notes
 
 - **Persona login** at `/login` — three Sri Lankan banking journeys
-- **Presenter controls** at `/demo` — scripted 90-second walkthrough (press `S`)
+- **Presenter controls** at `/demo` — full product tour autopilot (press `S` or **Play auto demo**); covers wallet, scenarios, market, intelligence, loans, tax jar, assistant, decisions
 - Keyboard shortcuts on demo page: `1` spend · `2` tax · `3` reset · `4` prewarm
 - **Financial snapshot API** (`GET /api/financial-snapshot/{user_id}`) powers intelligence, decisions, and scenarios
 

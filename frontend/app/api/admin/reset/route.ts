@@ -39,9 +39,15 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Backend middleware still requires a demo session for /mock/reset-demo
+    // (admin paths only cover /health/deep and /api/metrics), so forward Bearer
+    // alongside the server-side admin key.
     const res = await fetch(`${BACKEND}/mock/reset-demo`, {
       method: "POST",
-      headers: { "X-Demo-Admin-Key": ADMIN_KEY },
+      headers: {
+        Authorization: auth,
+        "X-Demo-Admin-Key": ADMIN_KEY,
+      },
       signal: AbortSignal.timeout(10000),
     });
     const text = await res.text();

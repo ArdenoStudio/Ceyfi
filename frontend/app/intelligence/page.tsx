@@ -178,7 +178,10 @@ export default function IntelligencePage() {
         }
         mainFeature={
           <GradientBorder animationMode="auto-rotate" animationSpeed={8} className="h-full">
-            <div className="flex h-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-ceyfi-deep to-[#0a4424] p-8 text-white">
+            <div
+              data-demo-target="health-score"
+              className="flex h-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-ceyfi-deep to-[#0a4424] p-8 text-white"
+            >
               <ProgressCircle value={totalScore} size={160} strokeWidth={12}>
                 <div className="text-center">
                   <div

@@ -36,7 +36,7 @@ type DemoStep = {
   step: number;
   label: string;
   path?: string;
-  action?: "spend" | "reset";
+  action?: "spend" | "tax" | "reset" | "persona";
   hint: string;
   seconds: number;
   persona?: string;
@@ -47,45 +47,85 @@ const DEMO_SCRIPT: DemoStep[] = [
     step: 1,
     label: "Time River",
     path: "/",
-    hint: "Pick a plan on Time River — forecast updates",
-    seconds: 16,
+    hint: "Inspect next risk → select a plan",
+    seconds: 9,
   },
   {
     step: 2,
     label: "Wallet spend",
     path: "/wallet",
     action: "spend",
-    hint: "Simulate family spend — Household −LKR 12,400",
-    seconds: 18,
-    persona: "Login as Nimal Fernando (diaspora)",
+    hint: "Household −LKR 12,400",
+    seconds: 7,
+    persona: "Nimal Fernando",
   },
   {
     step: 3,
     label: "Scenarios",
     path: "/scenarios",
-    hint: "Stress-test salary delay + FX before you commit",
-    seconds: 14,
+    hint: "Toggle salary-delay shock",
+    seconds: 6,
   },
   {
     step: 4,
-    label: "Assistant",
-    path: "/assistant?lang=si&prompt=" + encodeURIComponent("මගේ ණය ගෙවීම කවදාද?"),
-    hint: "Ask in Sinhala — live balances and loan context",
-    seconds: 14,
+    label: "Market",
+    path: "/market → /market/alerts/f-1",
+    hint: "Chime fires + cash context + broker CTA",
+    seconds: 10,
   },
   {
     step: 5,
-    label: "Decisions",
-    path: "/decisions?plan=d1",
-    hint: "Execute a ranked action — real demo side-effect",
-    seconds: 16,
+    label: "Intelligence",
+    path: "/intelligence",
+    hint: "Explainable health score",
+    seconds: 5,
   },
   {
     step: 6,
+    label: "Loans · Nimal",
+    path: "/loans",
+    hint: "Personal loan next due",
+    seconds: 5,
+  },
+  {
+    step: 7,
+    label: "Loans · Sunil",
+    path: "/loans",
+    action: "persona",
+    hint: "AT RISK borrower lens",
+    seconds: 8,
+    persona: "Sunil Bandara",
+  },
+  {
+    step: 8,
+    label: "Tax jar",
+    path: "/business",
+    action: "tax",
+    hint: "LKR 8,200 in → LKR 820 saved",
+    seconds: 9,
+    persona: "Suresh Silva",
+  },
+  {
+    step: 9,
+    label: "Assistant",
+    path: "/assistant",
+    hint: "Sinhala prompt with live context",
+    seconds: 9,
+    persona: "Nimal Fernando",
+  },
+  {
+    step: 10,
+    label: "Decisions",
+    path: "/decisions?plan=d1",
+    hint: "Execute ranked recommendation",
+    seconds: 6,
+  },
+  {
+    step: 11,
     label: "Reset",
     action: "reset",
-    hint: "Clean slate for the next audience",
-    seconds: 12,
+    hint: "Clean slate + restore Nimal",
+    seconds: 4,
   },
 ];
 
@@ -99,23 +139,13 @@ function DemoStepIndicator({
   completedThrough: number;
 }) {
   return (
-    <ol className="grid gap-3 sm:grid-cols-6">
-      {steps.map((item, index) => {
+    <ol className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      {steps.map((item) => {
         const done = item.step <= completedThrough;
         const active = activeStep === item.step;
-        const isLast = index === steps.length - 1;
 
         return (
           <li key={item.step} className="relative flex flex-col">
-            {!isLast ? (
-              <span
-                aria-hidden
-                className={cn(
-                  "absolute left-[calc(50%+1.25rem)] top-5 hidden h-0.5 w-[calc(100%-2.5rem)] sm:block",
-                  done ? "bg-ceyfi-green" : "bg-border"
-                )}
-              />
-            ) : null}
             <div
               className={cn(
                 "flex flex-col items-center rounded-xl border px-3 py-4 text-center transition-colors",
@@ -166,9 +196,23 @@ export default function DemoControlPage() {
   // Delegate the full walkthrough to the layout-level autopilot so it survives
   // navigation and shows the animated cursor + caption chrome. This page's
   // "Start" button and `S` shortcut both drive that single engine.
-  const { start: runScript, isRunning: scriptRunning, stepIndex } = useDemoAutopilot();
-  const activeStep = scriptRunning ? stepIndex + 1 : null;
-  const completedThrough = scriptRunning ? stepIndex : 0;
+  const {
+    start: runScript,
+    isRunning: scriptRunning,
+    stepIndex,
+    totalSteps,
+  } = useDemoAutopilot();
+  // Autopilot has finer-grained steps than the presenter summary cards;
+  // map progress onto the summary list by proportion.
+  const activeStep = scriptRunning
+    ? Math.min(
+        DEMO_SCRIPT.length,
+        Math.max(1, Math.round(((stepIndex + 1) / totalSteps) * DEMO_SCRIPT.length)),
+      )
+    : null;
+  const completedThrough = scriptRunning
+    ? Math.max(0, (activeStep ?? 1) - 1)
+    : 0;
 
   async function runAction(action: Action, task: () => Promise<unknown>) {
     setRunning(action);
@@ -225,7 +269,7 @@ export default function DemoControlPage() {
       <div>
         <h1 className="text-xl font-bold text-seylan-charcoal dark:text-white">Demo Controls</h1>
         <p className="text-sm text-muted-foreground">
-          Presenter panel for the 90-second CEYFI walkthrough. Shortcuts: 1 spend · 2 tax · 3 reset · 4 prewarm · S script
+          Presenter panel for the full CEYFI product tour. Shortcuts: 1 spend · 2 tax · 3 reset · 4 prewarm · S script
         </p>
       </div>
 
@@ -233,10 +277,10 @@ export default function DemoControlPage() {
         columns={4}
         items={[
           {
-            label: "Demo script",
-            metric: "90s",
-            subLabel: "6-step narrative",
-            description: "Overview → wallet spend → scenarios → assistant → decisions → reset",
+            label: "Full product tour",
+            metric: "~2 min",
+            subLabel: `${totalSteps}-step autopilot`,
+            description: "Overview → wallet → scenarios → market → intelligence → loans ×2 → tax jar → assistant → decisions → reset",
             icon: Timer,
             accent: "ceyfi",
           },
@@ -272,20 +316,21 @@ export default function DemoControlPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ceyfi-green">
-                90-second script
+                Full product tour
               </p>
               <h2 className="font-heading text-lg font-semibold text-ceyfi-ink">
                 Step-by-step click path
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Login as <strong>Nimal Fernando</strong> before running. Step 2 opens{" "}
-                <code className="rounded bg-muted px-1">/wallet</code> and fires the spend trigger.
+                Autopilot starts as <strong>Nimal Fernando</strong>, switches to{" "}
+                <strong>Sunil</strong> and <strong>Suresh</strong> mid-run, then restores Nimal.
+                The floating <strong>Play auto demo</strong> button runs the same script.
               </p>
             </div>
             {scriptRunning ? (
               <span className="inline-flex items-center gap-2 rounded-full bg-ceyfi-sprout px-3 py-1 text-xs font-semibold text-ceyfi-green">
                 <span className="size-2 animate-pulse rounded-full bg-ceyfi-green" />
-                Step {activeStep} running
+                Autopilot step {stepIndex + 1}/{totalSteps}
               </span>
             ) : null}
           </div>
@@ -319,9 +364,9 @@ export default function DemoControlPage() {
           <div className="flex items-center gap-3">
             <Play className="h-5 w-5 text-ceyfi-green" />
             <div>
-              <h2 className="font-semibold text-ceyfi-ink">Run demo script</h2>
+              <h2 className="font-semibold text-ceyfi-ink">Run full product tour</h2>
               <p className="text-sm text-ceyfi-muted">
-                Automated 6-step narrative with route changes and live wallet spend
+                Automated {totalSteps}-step narrative across all three personas with live mock side-effects
               </p>
             </div>
           </div>
@@ -330,9 +375,13 @@ export default function DemoControlPage() {
             disabled={scriptRunning || running !== null}
             className="w-full bg-ceyfi-green text-white"
           >
-            {scriptRunning ? "Running script…" : "Start 90-second script (S)"}
+            {scriptRunning ? "Running script…" : "Start full product tour (S)"}
             {!scriptRunning ? <ArrowRight className="ml-2 size-4" /> : null}
           </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            Also available as the floating &ldquo;Play auto demo&rdquo; control on every page.
+            Legacy shortcut label: 90-second script.
+          </p>
         </CardContent>
       </Card>
 
@@ -435,7 +484,7 @@ export default function DemoControlPage() {
       <FaqSection
         eyebrow="Presenter help"
         heading="Demo FAQ"
-        description="Talking points for the 90-second CEYFI walkthrough."
+        description="Talking points for the CEYFI full product tour (and the classic 90-second script path)."
       />
     </div>
   );

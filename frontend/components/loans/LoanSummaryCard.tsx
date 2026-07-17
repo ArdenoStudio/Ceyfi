@@ -25,7 +25,10 @@ export function LoanSummaryCard({ loan, onPaymentSuccess }: LoanSummaryCardProps
 
   return (
     <>
-      <Card className="card-glass shadow-brand-lg border-0">
+      <Card
+        data-demo-target="loan-summary"
+        className="card-glass shadow-brand-lg border-0"
+      >
         <CardContent className="p-5">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div className="flex gap-3">

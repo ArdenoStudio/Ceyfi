@@ -222,6 +222,7 @@ export function TaxJarPanel({
         )}
 
         <Button
+          data-demo-target="tax-jar-trigger"
           className="w-full rounded-full bg-ceyfi-green hover:bg-ceyfi-green/90 text-white font-semibold"
           onClick={() => { setPaymentMode("demo"); setCardModalOpen(true); }}
         >
