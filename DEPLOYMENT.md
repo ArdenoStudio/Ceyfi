@@ -7,7 +7,7 @@ Single source of truth for live URLs and environment setup.
 | Surface | URL | Git repo branch |
 |---------|-----|-----------------|
 | **Frontend** | https://ceyfi-app.vercel.app | `ArdenoStudio/Ceyfi` `main` |
-| **Backend API** | https://ceyfi-app.vercel.app/_/backend | Vercel experimental service (`backend/`) |
+| **Backend API** | https://ceyfi-app.vercel.app/_/backend | Vercel `services` backend (`backend/`) |
 | **Status** | https://ceyfi-app.vercel.app/status | frontend status route |
 
 > **Vercel:** Project serves the Next.js app at `/` and the FastAPI backend at `/_/backend`. The old Cloud Run URL (`ceyfi-backend-…run.app`) is retired — leave `NEXT_PUBLIC_API_*` unset so the app uses `/_/backend`.
