@@ -57,6 +57,13 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = "EXAVITQu4vr4xnSDxMaL"
 
+    # Gemini voice (TTS + STT). When gemini_api_key is set, the /api/tts and
+    # /api/stt routers prefer Gemini and fall back to ElevenLabs / OpenAI.
+    gemini_api_key: str = ""
+    gemini_tts_model: str = "gemini-2.5-flash-preview-tts"
+    gemini_tts_voice: str = "Kore"  # prebuilt voice; e.g. Kore, Aoede, Puck, Charon
+    gemini_stt_model: str = "gemini-2.5-flash"
+
     # Database (Neon PostgreSQL)
     database_url: str = ""
 
@@ -69,14 +76,14 @@ class Settings(BaseSettings):
         "http://localhost:3000,"
         "http://localhost:3003,"
         "http://localhost:3005,"
-        "https://frontend-taupe-three-96.vercel.app,"
+        "https://ceyfi-app.vercel.app,"
         "https://ceyfi.app"
     )
-    frontend_base_url: str = "https://frontend-taupe-three-96.vercel.app"
+    frontend_base_url: str = "https://ceyfi-app.vercel.app"
     # Public backend origin used to build externally-reachable webhook/notify URLs
     # (e.g. PayHere notify_url). On Vercel the FastAPI app is mounted at /_/backend.
     # Override with BACKEND_BASE_URL for other hosts.
-    backend_base_url: str = "https://frontend-taupe-three-96.vercel.app/_/backend"
+    backend_base_url: str = "https://ceyfi-app.vercel.app/_/backend"
 
     # Demo auth & admin — override DEMO_SESSION_SECRET / DEMO_ADMIN_KEY in real deploys.
     # Empty secret previously 503'd login on Vercel `/_/backend`; keep a demo default so
