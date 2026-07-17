@@ -117,7 +117,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
               className={cn(
                 "h-11 w-11 rounded-xl transition-all duration-150 focus-visible:ring-2 focus-visible:ring-ring/30",
                 canSend
-                  ? "bg-seylan-red text-white shadow-md shadow-seylan-red/30 hover:bg-seylan-red/90 hover:shadow-seylan-red/40"
+                  ? "bg-primary text-white shadow-md shadow-primary/30 hover:bg-primary/90 hover:shadow-primary/40"
                   : "bg-muted text-muted-foreground cursor-not-allowed dark:bg-white/[0.08] dark:text-white/20"
               )}
             >

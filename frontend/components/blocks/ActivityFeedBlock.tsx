@@ -126,7 +126,7 @@ export function ActivityFeedBlock({
                   <button
                     type="button"
                     onClick={onFooterClick}
-                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold text-seylan-red transition hover:bg-seylan-red/5 dark:hover:bg-seylan-red/10"
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold text-primary transition hover:bg-primary/5 dark:hover:bg-primary/10"
                   >
                     {footerLabel}
                     <ArrowRight className="size-3.5" aria-hidden />
@@ -164,7 +164,7 @@ function FeedHeader({
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
           {eyebrow}
         </p>
         <h3 className="mt-1 font-heading text-lg font-semibold text-foreground dark:text-white">

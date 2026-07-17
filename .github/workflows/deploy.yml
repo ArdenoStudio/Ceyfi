@@ -11,10 +11,6 @@ on:
 env:
   AWS_REGION: ap-southeast-1
   ECR_REPOSITORY: ceyfi-backend
-  ECS_CLUSTER: ceyfi-cluster
-  ECS_SERVICE: ceyfi-backend-service
-  ECS_TASK_DEFINITION: infrastructure/ecs/task-definition.json
-  CONTAINER_NAME: ceyfi-backend
 
 jobs:
   test:
@@ -35,7 +31,7 @@ jobs:
       - run: python -m pytest tests/ -v
 
   build-and-deploy:
-    name: Build and Deploy to ECS
+    name: Build and Push to ECR
     needs: test
     # Set repository variable AWS_DEPLOY_ENABLED=true after bootstrap (see infrastructure/MANUAL_STEPS.md)
     if: vars.AWS_DEPLOY_ENABLED == 'true'
@@ -55,7 +51,6 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push image to Amazon ECR
-        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
@@ -65,20 +60,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Render Amazon ECS task definition
-        id: render-task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      # The EC2 host polls ECR for a new ":latest" digest every 2 minutes
+      # (systemd timer ceyfi-redeploy.timer, see infrastructure/ec2/user-data.sh)
+      # and redeploys itself — no explicit deploy step needed here.

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { DM_Sans, Geist_Mono, Noto_Sans_Sinhala, Sora } from "next/font/google";
+import { Geist_Mono, Inter, Noto_Sans_Sinhala } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -17,16 +18,18 @@ import {
 } from "@/lib/seo";
 import "./globals.css";
 
-const headingFont = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// Cal Sans — display / heading face, self-hosted. It is a single-weight display
+// font; declaring the 400–700 range maps every heading weight to the one file
+// so the browser never synthesizes faux-bold.
+const headingFont = localFont({
+  src: "./fonts/CalSans.woff2",
+  variable: "--font-cal-sans",
+  weight: "400 700",
   display: "swap",
-  preload: true,
 });
 
-const bodyFont = DM_Sans({
-  variable: "--font-dm-sans",
+const bodyFont = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   display: "swap",

@@ -1,6 +1,6 @@
 /**
  * Backend URL resolution (first match wins):
- *   NEXT_PUBLIC_API_URL  — custom production backend override
+ *   NEXT_PUBLIC_API_URL  — AWS App Runner / custom production backend override
  *   NEXT_PUBLIC_API_BASE — legacy alias, local dev default in .env.example
  *   fallback             — `/_/backend` on Vercel production, localhost:8000 in dev
  *
