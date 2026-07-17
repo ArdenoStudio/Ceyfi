@@ -169,7 +169,7 @@ def test_notify_hash_formula():
 
 
 def test_default_cors_origins_only_include_live_frontends():
-    assert "https://frontend-taupe-three-96.vercel.app" in settings.cors_list
+    assert "https://ceyfi-app.vercel.app" in settings.cors_list
     assert "https://ceyfi.app" in settings.cors_list
     assert all("cookie-cat21s" not in origin for origin in settings.cors_list)
     assert all("seylan-hub" not in origin for origin in settings.cors_list)
@@ -179,7 +179,7 @@ def test_default_cors_origins_only_include_live_frontends():
 async def test_cors_headers_on_auth_failure(client, monkeypatch):
     """Browsers mask 401s as CORS failures when error responses omit ACAO."""
     monkeypatch.setattr(settings, "demo_auth_required", True)
-    origin = "https://frontend-taupe-three-96.vercel.app"
+    origin = "https://ceyfi-app.vercel.app"
     resp = await client.get(
         "/mock/pl-summary/SEY-BIZ-001",
         headers={"Origin": origin},

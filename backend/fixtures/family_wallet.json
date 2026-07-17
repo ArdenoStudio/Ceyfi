@@ -23,5 +23,55 @@
       { "id": "txn_k002", "date": "2026-06-12T09:15:00Z", "merchant": "Lanka Hospitals Pharmacy",         "amount_lkr": 4200, "type": "debit", "bucket_id": "household", "bucket_label": "Household" },
       { "id": "txn_k003", "date": "2026-06-01T18:45:00Z", "merchant": "Dialog - Monthly Bill",            "amount_lkr": 3800, "type": "debit", "bucket_id": "household", "bucket_label": "Household" }
     ]
+  },
+  "SEY-ACC-003": {
+    "account_id": "SEY-ACC-003",
+    "account_holder": "Bandara Family",
+    "linked_sender": "Sunil Bandara",
+    "total_balance_lkr": 122000,
+    "last_remittance": {
+      "id": "REM-2026-00518",
+      "date": "2026-06-05",
+      "amount_lkr": 122490,
+      "corridor": "GBPLKR",
+      "exchange_rate": 408.30,
+      "sender_amount_gbp": 300,
+      "provider": "Tempo"
+    },
+    "buckets": [
+      { "id": "school",    "label": "School Fees", "allocated_pct": 34, "allocated_lkr": 41000, "balance_lkr": 40000, "spent_lkr": 0 },
+      { "id": "household", "label": "Household",   "allocated_pct": 40, "allocated_lkr": 49000, "balance_lkr": 48000, "spent_lkr": 16000 },
+      { "id": "savings",   "label": "Savings",     "allocated_pct": 26, "allocated_lkr": 32000, "balance_lkr": 34000, "spent_lkr": 0 }
+    ],
+    "recent_transactions": [
+      { "id": "txn_b001", "date": "2026-06-16T11:05:00Z", "merchant": "Cargills Food City - Kandy",   "amount_lkr": 7200, "type": "debit", "bucket_id": "household", "bucket_label": "Household" },
+      { "id": "txn_b002", "date": "2026-06-10T16:40:00Z", "merchant": "Sarasavi Bookshop",            "amount_lkr": 5400, "type": "debit", "bucket_id": "household", "bucket_label": "Household" },
+      { "id": "txn_b003", "date": "2026-06-05T09:30:00Z", "merchant": "CEB - Electricity Bill",       "amount_lkr": 3400, "type": "debit", "bucket_id": "household", "bucket_label": "Household" }
+    ]
+  },
+  "SEY-ACC-004": {
+    "account_id": "SEY-ACC-004",
+    "account_holder": "Silva Family",
+    "linked_sender": "Suresh Silva",
+    "total_balance_lkr": 164000,
+    "last_remittance": {
+      "id": "REM-2026-00604",
+      "date": "2026-06-08",
+      "amount_lkr": 163320,
+      "corridor": "GBPLKR",
+      "exchange_rate": 408.30,
+      "sender_amount_gbp": 400,
+      "provider": "Tempo"
+    },
+    "buckets": [
+      { "id": "school",    "label": "School Fees", "allocated_pct": 30, "allocated_lkr": 49000, "balance_lkr": 52000, "spent_lkr": 0 },
+      { "id": "household", "label": "Household",   "allocated_pct": 45, "allocated_lkr": 74000, "balance_lkr": 64000, "spent_lkr": 22000 },
+      { "id": "savings",   "label": "Savings",     "allocated_pct": 25, "allocated_lkr": 41000, "balance_lkr": 48000, "spent_lkr": 0 }
+    ],
+    "recent_transactions": [
+      { "id": "txn_s001", "date": "2026-06-18T13:15:00Z", "merchant": "Softlogic Glomark - Nugegoda", "amount_lkr": 9600, "type": "debit", "bucket_id": "household", "bucket_label": "Household" },
+      { "id": "txn_s002", "date": "2026-06-13T10:50:00Z", "merchant": "Asiri Medical - Pharmacy",     "amount_lkr": 6100, "type": "debit", "bucket_id": "household", "bucket_label": "Household" },
+      { "id": "txn_s003", "date": "2026-06-08T19:20:00Z", "merchant": "SLT Fibre - Monthly Bill",     "amount_lkr": 4300, "type": "debit", "bucket_id": "household", "bucket_label": "Household" }
+    ]
   }
 }

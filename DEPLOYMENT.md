@@ -6,9 +6,9 @@ Single source of truth for live URLs and environment setup.
 
 | Surface | URL | Git repo branch |
 |---------|-----|-----------------|
-| **Frontend** | https://frontend-taupe-three-96.vercel.app | `ArdenoStudio/Ceyfi` `main` |
-| **Backend API** | https://frontend-taupe-three-96.vercel.app/_/backend | Vercel experimental service (`backend/`) |
-| **Status** | https://frontend-taupe-three-96.vercel.app/status | frontend status route |
+| **Frontend** | https://ceyfi-app.vercel.app | `ArdenoStudio/Ceyfi` `main` |
+| **Backend API** | https://ceyfi-app.vercel.app/_/backend | Vercel experimental service (`backend/`) |
+| **Status** | https://ceyfi-app.vercel.app/status | frontend status route |
 
 > **Vercel:** Project serves the Next.js app at `/` and the FastAPI backend at `/_/backend`. The old Cloud Run URL (`ceyfi-backend-…run.app`) is retired — leave `NEXT_PUBLIC_API_*` unset so the app uses `/_/backend`.
 
@@ -26,8 +26,8 @@ Production frontend traffic calls same-origin `/_/backend` by default.
 ```env
 # Prefer unset — app defaults to same-origin /_/backend
 # NEXT_PUBLIC_API_BASE=
-NEXT_PUBLIC_SITE_URL=https://frontend-taupe-three-96.vercel.app
-NEXT_PUBLIC_APP_URL=https://frontend-taupe-three-96.vercel.app
+NEXT_PUBLIC_SITE_URL=https://ceyfi-app.vercel.app
+NEXT_PUBLIC_APP_URL=https://ceyfi-app.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 # Server-only (Vercel → Settings → Environment Variables, NOT exposed to browser):
@@ -49,7 +49,7 @@ ELEVENLABS_API_KEY=...
 DEMO_SESSION_SECRET=...   # optional; code has a demo default — override in real deploys
 DEMO_ADMIN_KEY=...
 DEMO_AUTH_REQUIRED=true
-CORS_ORIGINS=https://frontend-taupe-three-96.vercel.app,https://ceyfi.app
+CORS_ORIGINS=https://ceyfi-app.vercel.app,https://ceyfi.app
 USE_SEYLAN_REAL=false
 SEYLAN_API_KEY=...
 MPGS_ENABLE=false

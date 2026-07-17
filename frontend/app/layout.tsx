@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthGuard } from "@/components/layout/AuthGuard";
+import { DemoAutopilotProvider } from "@/components/demo/DemoAutopilot";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -132,9 +133,11 @@ export default function RootLayout({
         <ErrorBoundary>
           <ThemeProvider>
             <AuthProvider>
-              <AuthGuard>
-                <AppShell>{children}</AppShell>
-              </AuthGuard>
+              <DemoAutopilotProvider>
+                <AuthGuard>
+                  <AppShell>{children}</AppShell>
+                </AuthGuard>
+              </DemoAutopilotProvider>
             </AuthProvider>
           </ThemeProvider>
         </ErrorBoundary>

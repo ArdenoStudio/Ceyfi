@@ -32,7 +32,7 @@ const ASSISTANT_PROMPT =
   "Explain the latest family wallet activity and tell me whether any bucket needs attention before the next transfer.";
 
 export default function WalletPage() {
-  const { walletAccountId, userId, defaultRoute, loading: authLoading } = useCurrentUser();
+  const { walletAccountId, userId, defaultRoute, persona, loading: authLoading } = useCurrentUser();
   const router = useRouter();
   const { offline } = useNetworkStatus();
   const [modalOpen, setModalOpen] = useState(false);
@@ -165,17 +165,33 @@ export default function WalletPage() {
   const showSpendAlert = bucketUtilPct >= 60 && mostUsedBucket != null;
   const showRemittanceAlert = remittanceOverride != null;
 
+  const walletCopy =
+    persona === "diaspora"
+      ? {
+          eyebrow: "Diaspora family wallet",
+          title: "Track money sent home with confidence",
+          description:
+            "See the latest remittance, how the family is using each bucket, and adjust the next split before sending again.",
+        }
+      : {
+          eyebrow: "Family wallet",
+          title: "Keep the family's money organised and clear",
+          description:
+            "See the latest top-up, how each bucket is being used, and adjust the split before the next transfer.",
+        };
+
   return (
     <div data-module="wallet" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <NetworkErrorBanner offline={offline} message={error} onRetry={() => void refetch()} />
       <PageHeader
-        eyebrow="Diaspora family wallet"
-        title="Track money sent home with confidence"
-        description="See the latest remittance, how the family is using each bucket, and adjust the next split before sending again."
-        
+        eyebrow={walletCopy.eyebrow}
+        title={walletCopy.title}
+        description={walletCopy.description}
+
         action={
           <div className="flex flex-wrap gap-2">
             <Button
+              data-demo-target="wallet-spend"
               variant="outline"
               disabled={spendSimulating}
               onClick={async () => {
