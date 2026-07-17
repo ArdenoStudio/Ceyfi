@@ -255,7 +255,7 @@ export function buildCausalityForPoint(
       effort: "2 minutes",
     },
     {
-      id: "d1",
+      id: "d1b",
       title: "Pause Netflix and defer non-essential subscriptions",
       benefit: 1750,
       risk: "Low",

@@ -48,12 +48,16 @@ type DemoStep = {
   target?: string;
   /** When true, programmatically click the matched target after the cursor arrives. */
   click?: boolean;
-  /** Real (mock) side-effect fired mid-step. */
+  /** Runs before navigation — use for persona switches so the next page loads as the right user. */
+  prepare?: () => Promise<unknown>;
+  /** Real (mock) side-effect fired mid-step (after cursor / click). */
   action?: () => Promise<unknown>;
   /** Extra settle time after navigation before seeking the target. */
   settleMs?: number;
   /** How long to linger on this step so the audience can read it. */
   dwellMs: number;
+  /** Toast only for real demo side-effects (default: toast when action is present). */
+  toastOnAction?: boolean;
 };
 
 const PERSONA = {
@@ -139,53 +143,39 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
       dwellMs: 4500,
     },
     {
-      caption: "Switch persona — Sunil's business loan is AT RISK",
-      say: "Same product, borrower lens: overdue instalment and recovery cues.",
-      action: () => switchPersona(PERSONA.sunil),
-      dwellMs: 2500,
-    },
-    {
-      route: "/loans",
-      caption: "Borrower view — overdue instalment, clear next action",
-      say: "Sunil sees urgency without leaving the Ceyfi shell.",
+      // Query forces a remount when we were already on /loans as Nimal.
+      route: "/loans?persona=sunil",
+      caption: "Switch to Sunil — business loan AT RISK, overdue instalment",
+      say: "Same product, borrower lens: urgency without leaving the Ceyfi shell.",
       target: '[data-demo-target="loan-summary"]',
-      settleMs: 1100,
-      dwellMs: 5500,
+      prepare: () => switchPersona(PERSONA.sunil),
+      settleMs: 1600,
+      dwellMs: 6000,
     },
     {
-      caption: "Switch persona — Suresh's SME bookkeeper",
-      say: "Tax jar, P&L and card-accept demo for Silva Hardware.",
-      action: () => switchPersona(PERSONA.suresh),
-      dwellMs: 2500,
-    },
-    {
-      route: "/business",
-      caption: "Inbound sale — tax jar auto-saves 10% (LKR 820)",
+      route: "/business?persona=suresh",
+      caption: "Suresh's tax jar — inbound sale auto-saves 10% (LKR 820)",
       say: "Every customer payment seeds VAT readiness without spreadsheet work.",
       target: '[data-demo-target="tax-jar-trigger"]',
+      prepare: () => switchPersona(PERSONA.suresh),
       action: () =>
         postTaxJarTrigger({
           user_id: PERSONA.suresh,
           incoming_amount_lkr: 8200,
           description: "Cash Sale - Electrical Fittings",
         }),
-      settleMs: 1100,
+      settleMs: 1600,
       dwellMs: 6500,
-    },
-    {
-      caption: "Back to Nimal — bilingual assistant with live context",
-      say: "Ask in Sinhala or English; answers ground in balances and loans.",
-      action: () => switchPersona(PERSONA.nimal),
-      dwellMs: 2000,
     },
     {
       route:
         "/assistant?lang=si&prompt=" +
         encodeURIComponent("මගේ ණය ගෙවීම කවදාද?"),
       caption: "Ask in Sinhala — live balances and loan context",
-      say: "The assistant answers grounded in your real fixture data.",
-      settleMs: 1200,
-      dwellMs: 7000,
+      say: "Back to Nimal. The assistant answers grounded in fixture data.",
+      prepare: () => switchPersona(PERSONA.nimal),
+      settleMs: 2000,
+      dwellMs: 8000,
     },
     {
       route: "/decisions?plan=d1",
@@ -329,6 +319,17 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
       setStepIndex(i);
       setCaption({ caption: step.caption, say: step.say });
 
+      // Persona switches run immediately before navigation so we never dwell on
+      // the wrong persona's empty-state page (e.g. Nimal on /business).
+      if (step.prepare) {
+        try {
+          await step.prepare();
+        } catch {
+          toast.error("Demo action skipped");
+        }
+        if (abortRef.current) break;
+      }
+
       if (step.route) {
         router.push(step.route);
         await sleep(step.settleMs ?? 900);
@@ -357,7 +358,9 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
       if (step.action) {
         try {
           await step.action();
-          toast.success(step.caption);
+          if (step.toastOnAction !== false) {
+            toast.success(step.caption);
+          }
         } catch {
           toast.error("Demo action skipped");
         }

@@ -43,9 +43,9 @@ Press **`S`** on `/demo`, or the floating **Play auto demo** button, to auto-run
 | Market | `/market` → `/market/alerts/f-1` | "CSE alerts via Chime next to cash. Broker CTA stays disabled — NFA." |
 | Intelligence | `/intelligence` | "Explainable health score, anomalies and forecast." |
 | Loans · Nimal | `/loans` | "Personal loan next due and repayment progress." |
-| Loans · Sunil | switch persona → `/loans` | "Borrower lens — AT RISK overdue instalment." |
+| Loans · Sunil | switch persona → `/loans?persona=sunil` | "Borrower lens — AT RISK overdue instalment." |
 | Business | switch to Suresh → `/business` · tax jar | "Inbound sale auto-saves 10% to the tax jar." |
-| Assistant | back to Nimal → Sinhala prompt | "Ask in Sinhala or English — live balances and loan context." |
+| Assistant | back to Nimal → Sinhala prompt | "Ask in Sinhala — live balances and loan context (works without Groq via fixture fallback)." |
 | Decisions | `/decisions?plan=d1` · execute | "One ranked recommendation with evidence — execute in one tap." |
 | Reset | admin reset + restore Nimal | "Clean slate for the next judge." |
 
