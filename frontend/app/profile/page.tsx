@@ -96,7 +96,7 @@ export default function ProfilePage() {
     );
   }
 
-  const totalBalance = profile.balance_lkr;
+  const totalBalance = profile.savings_balance + profile.current_balance;
   const loan = profile.loans?.[0];
   const fd = profile.fixed_deposits?.[0];
 

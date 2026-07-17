@@ -277,7 +277,7 @@ export default function LoansPage() {
       </section>
 
       <section id="loan-intelligence" className="scroll-mt-6">
-        <LoanIntelligenceCharts />
+        <LoanIntelligenceCharts loan={loan} />
       </section>
     </div>
   );

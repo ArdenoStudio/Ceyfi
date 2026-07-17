@@ -48,12 +48,19 @@ def _get_supplemental_context(user_id: str) -> tuple[dict | None, dict | None]:
     wallet = None
     try:
         loans_data = _load_fixture("loans.json")
-        loans_detail = loans_data.get(user_id) or loans_data.get("SEY-USR-001")
+        loans_detail = loans_data.get(user_id)
     except Exception:
         pass
     try:
-        wallet_data = _load_fixture("family_wallet.json")
-        wallet = wallet_data.get("SEY-ACC-002")
+        # Only inject the family wallet for the persona that actually owns one
+        # (Nimal). Sunil/Suresh have wallet_account_id=None → no wallet section,
+        # so we never leak Nimal's wallet into another customer's context.
+        from app.services.auth import get_persona
+        persona = get_persona(user_id)
+        wallet_id = persona.get("wallet_account_id") if persona else None
+        if wallet_id:
+            wallet_data = _load_fixture("family_wallet.json")
+            wallet = wallet_data.get(wallet_id)
     except Exception:
         pass
     return loans_detail, wallet
@@ -100,7 +107,7 @@ async def chat(req: ChatRequest, request: Request):
                 if probe.tool_calls:
                     tc = probe.tool_calls[0]
                     fn_args = json.loads(tc.function.arguments)
-                    result_str = await execute_tool_async(tc.function.name, fn_args)
+                    result_str = await execute_tool_async(tc.function.name, {**fn_args, "user_id": req.user_id})
                     result = json.loads(result_str)
                     if "checkout_url" in result:
                         payment_action = result

@@ -83,6 +83,10 @@ async def create_checkout_session(
                     "amount": _format_amount(amount_lkr),
                     "currency": "LKR",
                 },
+                "interaction": {
+                    "operation": "PURCHASE",
+                    "returnUrl": return_url,
+                },
             },
             auth=_auth(),
         )

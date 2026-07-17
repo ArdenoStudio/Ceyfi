@@ -62,5 +62,32 @@
       }
     ],
     "fixed_deposits": []
+  },
+  "SEY-BIZ-001": {
+    "user_id": "SEY-BIZ-001",
+    "name": "Suresh Silva",
+    "account_holder": "Suresh Silva",
+    "accounts": ["SEY-BIZ-001", "SEY-SAV-001"],
+    "balance_lkr": 199270,
+    "language_preference": "en",
+    "savings_balance": 15070,
+    "current_balance": 184200,
+    "recent_transactions": [
+      { "id": "biz_r01", "date": "2026-06-16", "description": "LankaPay QR - Customer Payment",       "amount_lkr":  7200,  "type": "credit", "bucket_id": null },
+      { "id": "biz_r02", "date": "2026-06-14", "description": "Cash Sale - Hardware Assorted",         "amount_lkr":  9100,  "type": "credit", "bucket_id": null },
+      { "id": "biz_r03", "date": "2026-06-12", "description": "Nippon Paint Lanka - Supplier Invoice", "amount_lkr": -22500, "type": "debit",  "bucket_id": null },
+      { "id": "biz_r04", "date": "2026-06-05", "description": "Staff Wages - Pradeep",                 "amount_lkr": -28000, "type": "debit",  "bucket_id": null },
+      { "id": "biz_r05", "date": "2026-06-01", "description": "Shop Rent - Gampaha Premises",          "amount_lkr": -35000, "type": "debit",  "bucket_id": null }
+    ],
+    "loans": [],
+    "fixed_deposits": [
+      {
+        "id": "FD-2025-01120",
+        "amount_lkr": 300000,
+        "maturity_date": "2026-12-15",
+        "interest_rate_pct": 9.5,
+        "term_months": 6
+      }
+    ]
   }
 }

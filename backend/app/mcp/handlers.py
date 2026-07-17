@@ -371,7 +371,21 @@ async def _execute_decision(arguments: dict[str, Any]) -> dict[str, Any]:
     # ID-based routing for demo decisions.
     if decision_id in ("d1", "d6"):
         amount = benefit if benefit > 0 else 8400
-        account_id = "SEY-ACC-002"
+        from app.services.auth import get_persona
+        persona = get_persona(user_id)
+        account_id = persona.get("wallet_account_id") if persona else None
+        if not account_id:
+            # Borrower/SME have no family wallet — record intent and stay on
+            # /decisions instead of crediting Nimal's wallet and bouncing them.
+            return {
+                "ok": True,
+                "action_type": "redirect",
+                "redirect": "/decisions",
+                "message": f"Moved LKR {amount:,.0f} into savings",
+                "decision": decision,
+                "amount_lkr": amount,
+                "reference": f"DEC-{decision_id.upper()}-SAVE",
+            }
         try:
             supabase_client.insert_transaction(
                 account_id=account_id,

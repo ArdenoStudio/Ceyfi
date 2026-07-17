@@ -45,11 +45,11 @@ def build_assistant_system_prompt(
         for f in fds
     ) or "  None"
 
-    lang_instruction = (
-        "Always respond in English. Be clear and concise."
-        if language == "en"
-        else "Always respond in Sinhala (Sinhala script). If the user writes in English, still respond in Sinhala."
-    )
+    lang_instruction = {
+        "en": "Always respond in English. Be clear and concise.",
+        "si": "Always respond in Sinhala (Sinhala script). If the user writes in English, still respond in Sinhala.",
+        "ta": "Always respond in Tamil (Tamil script). If the user writes in English, still respond in Tamil.",
+    }.get(language, "Always respond in English. Be clear and concise.")
 
     wallet_section = ""
     if wallet:

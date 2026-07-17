@@ -83,11 +83,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(5000),
     })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data) => setUser(data.user as DemoPersona))
+      .then(async (r) => {
+        if (r.ok) {
+          const data = await r.json();
+          setUser(data.user as DemoPersona);
+          return;
+        }
+        // Only a genuine auth rejection should end the session.
+        if (r.status === 401 || r.status === 403) {
+          clearSession();
+          setUser(null);
+        }
+      })
       .catch(() => {
-        clearSession();
-        setUser(null);
+        /* transient (timeout / network / 5xx): keep the cached session */
       })
       .finally(() => setLoading(false));
   }, []);

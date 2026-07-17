@@ -30,10 +30,12 @@ export default function BusinessPage() {
   const [extraTransactions, setExtraTransactions] = useState<Transaction[]>([]);
   const [pl, setPl] = useState<PlSummary | null>(null);
   const [taxJarBalance, setTaxJarBalance] = useState(15070);
+  const [bizBalance, setBizBalance] = useState(184200);
   const [plLoading, setPlLoading] = useState(true);
   const [plError, setPlError] = useState<string | null>(null);
   const [anomalyCount, setAnomalyCount] = useState(0);
   const paidToastFired = useRef(false);
+  const paidBumpRef = useRef(0);
 
   // Handle redirect back from MPGS payment
   useEffect(() => {
@@ -42,23 +44,18 @@ export default function BusinessPage() {
     if (params.get("paid") === "1") {
       paidToastFired.current = true;
       const amount = parseFloat(params.get("amount") ?? "0");
-      const taxSaved = amount > 0 ? Math.round(amount * 0.1) : 0;
+      const pct = parseFloat(params.get("pct") ?? "10");
+      const taxSaved = amount > 0 ? Math.round((amount * pct) / 100) : 0;
+      // Store the bump in a ref; Effect B applies it as base + bump so the
+      // async fixture reload can't clobber it (no setTimeout race).
+      if (taxSaved > 0) paidBumpRef.current = taxSaved;
       toast.success("Payment received", {
         description:
           taxSaved > 0
             ? `LKR ${amount.toLocaleString()} received — LKR ${taxSaved.toLocaleString()} auto-saved to Tax Jar.`
             : "Customer card payment confirmed.",
       });
-      let bumpTimer: ReturnType<typeof setTimeout> | undefined;
-      if (taxSaved > 0) {
-        bumpTimer = setTimeout(() => {
-          setTaxJarBalance((prev) => prev + taxSaved);
-        }, 0);
-      }
       window.history.replaceState({}, "", window.location.pathname);
-      return () => {
-        if (bumpTimer) clearTimeout(bumpTimer);
-      };
     }
   }, []);
 
@@ -82,12 +79,12 @@ export default function BusinessPage() {
         setPlError("Could not load profit & loss summary.");
       }
       if (bizRes.status === "fulfilled") {
-        const raw = bizRes.value as { tax_jar_balance?: number };
-        setTaxJarBalance(
-          typeof raw.tax_jar_balance === "number" ? raw.tax_jar_balance : 15070
-        );
+        const raw = bizRes.value as { tax_jar_balance?: number; current_balance?: number };
+        const base = typeof raw.tax_jar_balance === "number" ? raw.tax_jar_balance : 15070;
+        setTaxJarBalance(base + paidBumpRef.current);
+        setBizBalance(typeof raw.current_balance === "number" ? raw.current_balance : 184200);
       } else {
-        setTaxJarBalance(15070);
+        setTaxJarBalance(15070 + paidBumpRef.current);
       }
       if (snapRes.status === "fulfilled") {
         setAnomalyCount((snapRes.value as { anomalies?: unknown[] }).anomalies?.length ?? 0);
@@ -148,10 +145,9 @@ export default function BusinessPage() {
   const misc = pl?.expense_breakdown?.MISC ?? 0;
 
   const dailyExpenseRate = expenses > 0 ? expenses / 7 : 0;
-  const cashRunwayDays = Math.max(
-    1,
-    dailyExpenseRate > 0 ? Math.round(net / dailyExpenseRate) : 1
-  );
+  // Runway = cash on hand / daily burn (not cash / net profit).
+  const cashRunwayDays =
+    dailyExpenseRate > 0 ? Math.max(1, Math.round(bizBalance / dailyExpenseRate)) : 30;
   const projectedTaxNeed = revenue > 0 ? Math.round(revenue * 0.45) : 0;
   const taxCoveragePct =
     projectedTaxNeed > 0

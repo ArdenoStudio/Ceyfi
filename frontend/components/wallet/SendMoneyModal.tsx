@@ -75,7 +75,7 @@ export function SendMoneyModal({
   open,
   onOpenChange,
 }: SendMoneyModalProps) {
-  const [paymentMode, setPaymentMode] = useState<"card" | "demo">("card");
+  const [paymentMode, setPaymentMode] = useState<"card" | "demo">("demo");
   const [amount, setAmount] = useState(600);
   const [currency, setCurrency] = useState<RemittanceCurrency>(DEFAULT_CURRENCY);
   const [showFxCalc, setShowFxCalc] = useState(false);
@@ -203,7 +203,7 @@ export function SendMoneyModal({
           </div>
         </div>
       ), { duration: 4000 });
-      onSuccess(amountLkr, amountGbpEquiv, currency);
+      onSuccess(amountLkr, amount, currency);
     } catch (err) {
       setPinOpen(false);
       const msg = err instanceof Error ? err.message : "";

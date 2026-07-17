@@ -75,7 +75,7 @@ function CardGatewayTabs({
 }
 
 export function LoanPaymentModal({ loan, isOpen, onClose, onSuccess }: LoanPaymentModalProps) {
-  const [paymentMode, setPaymentMode] = useState<"card" | "demo">("card");
+  const [paymentMode, setPaymentMode] = useState<"card" | "demo">("demo");
   const [cardGateway, setCardGateway] = useState<CardGateway>("mpgs");
   const [amount, setAmount] = useState(loan.monthly_payment_lkr);
   const [submitting, setSubmitting] = useState(false);
