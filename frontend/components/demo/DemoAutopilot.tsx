@@ -5,17 +5,16 @@
  *
  * WHY this lives in a layout-level provider (not the /demo page):
  * Next's App Router unmounts a page component the moment you navigate away.
- * An autopilot that hops /  ->  /wallet  ->  /scenarios must therefore live
- * ABOVE the router outlet so its loop, cursor, and captions survive every
- * route change. Mounted once in app/layout.tsx, it persists for the session.
+ * An autopilot that hops across modules must therefore live ABOVE the router
+ * outlet so its loop, cursor, and captions survive every route change.
+ * Mounted once in app/layout.tsx, it persists for the session.
  *
- * The runner drives real navigation and fires the real (mock) backend
- * side-effects the manual demo uses — so it is a genuine end-to-end run, not a
- * video. The animated cursor + caption bar are theatrical chrome that make it
- * read as "the app is clicking itself" to an audience.
+ * The runner drives real navigation, real (mock) backend side-effects, and —
+ * where useful — real DOM clicks, so it is a genuine end-to-end product tour,
+ * not a video. The animated cursor + caption bar are theatrical chrome.
  *
- * SAFETY: it never triggers a real payment/transfer. Money-moving steps are
- * intentionally omitted; only mock demo endpoints (spend/tax/reset) are called.
+ * SAFETY: it never triggers a real payment/transfer. Money-moving steps call
+ * mock demo endpoints only (spend / tax-jar / decision execute / reset).
  */
 
 import {
@@ -29,8 +28,11 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import {
+  executeDecision,
   postDemoReset,
+  postTaxJarTrigger,
   postTriggerSpend,
   prewarmDemoData,
 } from "@/lib/api";
@@ -42,64 +44,169 @@ type DemoStep = {
   caption: string;
   /** Presenter subtitle ("say this"). */
   say?: string;
-  /** CSS selector the fake cursor animates to and "clicks". */
+  /** CSS selector the fake cursor animates to (and optionally clicks). */
   target?: string;
+  /** When true, programmatically click the matched target after the cursor arrives. */
+  click?: boolean;
   /** Real (mock) side-effect fired mid-step. */
   action?: () => Promise<unknown>;
+  /** Extra settle time after navigation before seeking the target. */
+  settleMs?: number;
   /** How long to linger on this step so the audience can read it. */
   dwellMs: number;
 };
 
+const PERSONA = {
+  nimal: "SEY-USR-001",
+  sunil: "SEY-USR-003",
+  suresh: "SEY-BIZ-001",
+} as const;
+
 // ── The script. Data-driven: add/reorder steps freely. ────────────────────────
-// Mirrors DEMO_SCRIPT.md's proven Nimal narrative, minus manual clicking.
-const STEPS: DemoStep[] = [
-  {
-    route: "/",
-    caption: "Ceyfi shows your financial future",
-    say: "One calm view of money, loans, remittances and business cash flow.",
-    dwellMs: 6000,
-  },
-  {
-    route: "/wallet",
-    caption: "Nimal sends money home — watch Household drop LKR 12,400",
-    say: "Diaspora remittance lands, family spends, buckets update live.",
-    target: '[data-demo-target="wallet-spend"]',
-    action: () =>
-      postTriggerSpend({
-        account_id: "SEY-ACC-002",
-        amount_lkr: 12400,
-        merchant: "Softlogic Glomark",
-        bucket_id: "household",
-      }),
-    dwellMs: 7500,
-  },
-  {
-    route: "/scenarios",
-    caption: "Stress-test salary delays and FX before you commit",
-    say: "What-if scenarios pressure the plan while it is still safe to.",
-    dwellMs: 6000,
-  },
-  {
-    route:
-      "/assistant?lang=si&prompt=" +
-      encodeURIComponent("මගේ ණය ගෙවීම කවදාද?"),
-    caption: "Ask in Sinhala or English — with live balances and loan context",
-    say: "The assistant answers grounded in your real fixture data.",
-    dwellMs: 7000,
-  },
-  {
-    route: "/decisions?plan=d1",
-    caption: "One ranked recommendation, with evidence — execute in one tap",
-    say: "Ceyfi turns the whole picture into a single next best action.",
-    dwellMs: 6500,
-  },
-  {
-    caption: "Clean slate for the next judge",
-    say: "Demo state resets so every run starts identical.",
-    action: () => postDemoReset(),
-    dwellMs: 3500,
-  },
-];
+// Full product tour across diaspora → borrower → SME → back to Nimal.
+function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[] {
+  return [
+    {
+      route: "/",
+      caption: "Ceyfi shows your financial future",
+      say: "Time River projects cash, loans and remittances — inspect the next risk.",
+      target: '[data-demo-target="inspect-next-risk"]',
+      click: true,
+      settleMs: 1100,
+      dwellMs: 4500,
+    },
+    {
+      caption: "Pick a plan — the forecast updates live",
+      say: "One tap selects a ranked action and links it into Decisions.",
+      target: '[data-demo-target="select-plan"]',
+      click: true,
+      dwellMs: 4000,
+    },
+    {
+      route: "/wallet",
+      caption: "Nimal sends money home — Household drops LKR 12,400",
+      say: "Diaspora remittance lands, family spends, buckets update live.",
+      target: '[data-demo-target="wallet-spend"]',
+      action: () =>
+        postTriggerSpend({
+          account_id: "SEY-ACC-002",
+          amount_lkr: 12400,
+          merchant: "Softlogic Glomark",
+          bucket_id: "household",
+        }),
+      settleMs: 900,
+      dwellMs: 6500,
+    },
+    {
+      route: "/scenarios",
+      caption: "Stress-test a salary delay before you commit",
+      say: "What-if shocks pressure the 90-day fan while it is still safe to.",
+      target: '[data-demo-target="shock-salary-delay"]',
+      click: true,
+      settleMs: 900,
+      dwellMs: 5500,
+    },
+    {
+      route: "/market",
+      caption: "CSE watchlist next to your cash — powered by Chime",
+      say: "Alerts and fires sit beside liquid balance. Ceyfi never scrapes cse.lk.",
+      target: '[data-demo-target="market-fire"]',
+      settleMs: 1100,
+      dwellMs: 4500,
+    },
+    {
+      route: "/market/alerts/f-1",
+      caption: "Alert detail: cash context + disabled broker handoff",
+      say: "NFA on every surface. Order entry stays with a licensed broker.",
+      target: '[data-demo-target="broker-cta"]',
+      settleMs: 1000,
+      dwellMs: 5000,
+    },
+    {
+      route: "/intelligence",
+      caption: "Explainable financial health — score, anomalies, forecast",
+      say: "One snapshot ranks what matters and why the score moved.",
+      target: '[data-demo-target="health-score"]',
+      settleMs: 1100,
+      dwellMs: 5000,
+    },
+    {
+      route: "/loans",
+      caption: "Nimal's personal loan — next due and repayment progress",
+      say: "Loan health, countdown and AI advisor share the same fixture truth.",
+      target: '[data-demo-target="loan-summary"]',
+      settleMs: 1000,
+      dwellMs: 4500,
+    },
+    {
+      caption: "Switch persona — Sunil's business loan is AT RISK",
+      say: "Same product, borrower lens: overdue instalment and recovery cues.",
+      action: () => switchPersona(PERSONA.sunil),
+      dwellMs: 2500,
+    },
+    {
+      route: "/loans",
+      caption: "Borrower view — overdue instalment, clear next action",
+      say: "Sunil sees urgency without leaving the Ceyfi shell.",
+      target: '[data-demo-target="loan-summary"]',
+      settleMs: 1100,
+      dwellMs: 5500,
+    },
+    {
+      caption: "Switch persona — Suresh's SME bookkeeper",
+      say: "Tax jar, P&L and card-accept demo for Silva Hardware.",
+      action: () => switchPersona(PERSONA.suresh),
+      dwellMs: 2500,
+    },
+    {
+      route: "/business",
+      caption: "Inbound sale — tax jar auto-saves 10% (LKR 820)",
+      say: "Every customer payment seeds VAT readiness without spreadsheet work.",
+      target: '[data-demo-target="tax-jar-trigger"]',
+      action: () =>
+        postTaxJarTrigger({
+          user_id: PERSONA.suresh,
+          incoming_amount_lkr: 8200,
+          description: "Cash Sale - Electrical Fittings",
+        }),
+      settleMs: 1100,
+      dwellMs: 6500,
+    },
+    {
+      caption: "Back to Nimal — bilingual assistant with live context",
+      say: "Ask in Sinhala or English; answers ground in balances and loans.",
+      action: () => switchPersona(PERSONA.nimal),
+      dwellMs: 2000,
+    },
+    {
+      route:
+        "/assistant?lang=si&prompt=" +
+        encodeURIComponent("මගේ ණය ගෙවීම කවදාද?"),
+      caption: "Ask in Sinhala — live balances and loan context",
+      say: "The assistant answers grounded in your real fixture data.",
+      settleMs: 1200,
+      dwellMs: 7000,
+    },
+    {
+      route: "/decisions?plan=d1",
+      caption: "One ranked recommendation — execute with evidence",
+      say: "Ceyfi turns the whole picture into a single next best action.",
+      target: '[data-demo-target="decision-execute"]',
+      action: () => executeDecision(PERSONA.nimal, "d1"),
+      settleMs: 1200,
+      dwellMs: 6000,
+    },
+    {
+      caption: "Clean slate for the next audience",
+      say: "Demo state resets so every run starts identical.",
+      action: async () => {
+        await postDemoReset();
+        await switchPersona(PERSONA.nimal);
+      },
+      dwellMs: 3500,
+    },
+  ];
+}
 
 // ── Context ───────────────────────────────────────────────────────────────────
 type Ctx = {
@@ -124,6 +231,9 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function DemoAutopilotProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { switchPersona } = useAuth();
+  const steps = useMemo(() => buildSteps(switchPersona), [switchPersona]);
+
   const [isRunning, setIsRunning] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [caption, setCaption] = useState<{ caption: string; say?: string } | null>(
@@ -135,6 +245,10 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
   // Ref-based abort so the async loop can bail between awaits without stale state.
   const abortRef = useRef(false);
   const runningRef = useRef(false);
+  const stepsRef = useRef(steps);
+  useEffect(() => {
+    stepsRef.current = steps;
+  }, [steps]);
 
   const centerCursor = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -151,22 +265,23 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
     async (selector?: string) => {
       if (!selector) {
         centerCursor();
-        return;
+        return null;
       }
       let el: Element | null = null;
-      for (let i = 0; i < 12 && !abortRef.current; i++) {
+      for (let i = 0; i < 16 && !abortRef.current; i++) {
         el = document.querySelector(selector);
         if (el) break;
-        await sleep(150);
+        await sleep(175);
       }
       if (!el) {
         centerCursor();
-        return;
+        return null;
       }
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       await sleep(450);
       const r = el.getBoundingClientRect();
       setCursor({ x: r.left + r.width / 2, y: r.top + r.height / 2, visible: true });
+      return el;
     },
     [centerCursor],
   );
@@ -200,24 +315,46 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
       /* non-fatal — prewarm is best-effort */
     }
 
-    for (let i = 0; i < STEPS.length; i++) {
+    // Always begin as Nimal so the diaspora chapters match captions.
+    try {
+      await switchPersona(PERSONA.nimal);
+    } catch {
+      /* non-fatal if already Nimal / offline */
+    }
+
+    const script = stepsRef.current;
+    for (let i = 0; i < script.length; i++) {
       if (abortRef.current) break;
-      const step = STEPS[i];
+      const step = script[i];
       setStepIndex(i);
       setCaption({ caption: step.caption, say: step.say });
 
       if (step.route) {
         router.push(step.route);
-        await sleep(900); // let the new page mount
+        await sleep(step.settleMs ?? 900);
+      } else if (step.settleMs) {
+        await sleep(step.settleMs);
       }
       if (abortRef.current) break;
 
-      await moveCursorTo(step.target);
+      const el = await moveCursorTo(step.target);
       await sleep(700); // let the cursor glide (CSS transition)
       if (abortRef.current) break;
 
-      if (step.action) {
+      if (step.click || step.action) {
         await pulseClick();
+      }
+
+      if (step.click && el instanceof HTMLElement) {
+        try {
+          el.click();
+        } catch {
+          /* ignore — target may have unmounted */
+        }
+        await sleep(400);
+      }
+
+      if (step.action) {
         try {
           await step.action();
           toast.success(step.caption);
@@ -231,10 +368,10 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
     }
 
     if (!abortRef.current) {
-      toast.success("Autopilot demo complete ✨");
+      toast.success("Full product tour complete");
     }
     stop();
-  }, [moveCursorTo, pulseClick, router, stop]);
+  }, [moveCursorTo, pulseClick, router, stop, switchPersona]);
 
   // Esc aborts at any time.
   useEffect(() => {
@@ -249,8 +386,14 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
   }, [stop]);
 
   const value = useMemo<Ctx>(
-    () => ({ isRunning, stepIndex, totalSteps: STEPS.length, start, stop }),
-    [isRunning, stepIndex, start, stop],
+    () => ({
+      isRunning,
+      stepIndex,
+      totalSteps: steps.length,
+      start,
+      stop,
+    }),
+    [isRunning, stepIndex, steps.length, start, stop],
   );
 
   return (
@@ -260,7 +403,7 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
       <DemoOverlay
         active={isRunning}
         stepIndex={stepIndex}
-        total={STEPS.length}
+        total={steps.length}
         caption={caption}
         cursor={cursor}
         clicking={clicking}
@@ -278,7 +421,7 @@ function DemoLauncher() {
     <button
       type="button"
       onClick={start}
-      aria-label="Start Ceyfi autopilot demo"
+      aria-label="Start Ceyfi full product auto demo"
       className="fixed bottom-5 right-5 z-[9998] inline-flex items-center gap-2 rounded-full bg-ceyfi-green px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-ceyfi-green/30 transition-transform hover:scale-105 active:scale-95"
     >
       <span className="relative flex size-2.5">
@@ -311,30 +454,34 @@ function DemoOverlay({
   if (!active) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[9999]">
-      {/* Transparent click-shield so stray clicks don't derail the run. */}
-      <div className="pointer-events-auto absolute inset-0" />
+    <>
+      {/*
+        Shield + vignette sit BELOW Radix sheets/dialogs (z-50) so Time River,
+        Execute confirm, etc. remain visible during the tour. Cursor/caption stay
+        above everything so the audience always sees the autopilot chrome.
+      */}
+      <div className="pointer-events-auto fixed inset-0 z-40" aria-hidden />
+      <div
+        className="pointer-events-none fixed inset-0 z-40 shadow-[inset_0_0_180px_60px_rgba(0,0,0,0.28)]"
+        aria-hidden
+      />
 
-      {/* Subtle vignette to focus the eye, without hiding the app. */}
-      <div className="absolute inset-0 shadow-[inset_0_0_180px_60px_rgba(0,0,0,0.28)]" />
-
-      {/* Top bar: AUTO DEMO badge + progress dots + exit */}
-      <div className="absolute inset-x-0 top-0 flex items-center justify-between px-5 py-4">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[9999] flex items-center justify-between px-5 py-4">
         <span className="inline-flex items-center gap-2 rounded-full bg-ceyfi-green px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white shadow">
           <span className="size-2 animate-pulse rounded-full bg-white" />
           Auto Demo
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex max-w-[45vw] flex-wrap items-center justify-center gap-1">
           {Array.from({ length: total }).map((_, i) => (
             <span
               key={i}
               className={
                 "h-1.5 rounded-full transition-all " +
                 (i === stepIndex
-                  ? "w-7 bg-ceyfi-green"
+                  ? "w-5 bg-ceyfi-green sm:w-6"
                   : i < stepIndex
-                    ? "w-4 bg-ceyfi-green/50"
-                    : "w-4 bg-white/40")
+                    ? "w-2.5 bg-ceyfi-green/50 sm:w-3"
+                    : "w-2.5 bg-white/40 sm:w-3")
               }
             />
           ))}
@@ -348,10 +495,9 @@ function DemoOverlay({
         </button>
       </div>
 
-      {/* Fake cursor */}
       {cursor.visible ? (
         <div
-          className="absolute left-0 top-0 transition-transform duration-700 ease-out"
+          className="pointer-events-none fixed left-0 top-0 z-[9999] transition-transform duration-700 ease-out"
           style={{ transform: `translate(${cursor.x}px, ${cursor.y}px)` }}
         >
           {clicking ? (
@@ -374,9 +520,8 @@ function DemoOverlay({
         </div>
       ) : null}
 
-      {/* Caption bar */}
       {caption ? (
-        <div className="absolute inset-x-0 bottom-0 flex justify-center px-4 pb-8">
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9999] flex justify-center px-4 pb-8">
           <div className="max-w-2xl rounded-2xl bg-black/80 px-6 py-4 text-center text-white shadow-2xl backdrop-blur">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green">
               Step {stepIndex + 1} of {total}
@@ -390,6 +535,6 @@ function DemoOverlay({
           </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

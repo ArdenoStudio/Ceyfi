@@ -334,6 +334,7 @@ export function TimeRiver({
         </p>
         <button
           type="button"
+          data-demo-target="inspect-next-risk"
           onClick={handleInspectNextRisk}
           className="rounded-lg border border-ceyfi-line/80 bg-ceyfi-paper px-3 py-1.5 text-[11px] font-semibold text-ceyfi-green transition hover:border-ceyfi-green/40 hover:bg-ceyfi-sprout/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ceyfi-green/30 dark:border-white/10 dark:bg-white/5 dark:text-ceyfi-mint dark:hover:bg-white/10"
         >

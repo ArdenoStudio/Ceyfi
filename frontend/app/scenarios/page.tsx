@@ -205,6 +205,9 @@ export default function ScenariosPage() {
                 <span className="text-sm font-medium text-ceyfi-ink">{row.label}</span>
                 <button
                   type="button"
+                  data-demo-target={
+                    row.key === "salaryDelay" ? "shock-salary-delay" : undefined
+                  }
                   onClick={() => row.onToggle(!row.enabled)}
                   className={cn(
                     "rounded-full px-2 py-0.5 text-[10px] font-semibold",

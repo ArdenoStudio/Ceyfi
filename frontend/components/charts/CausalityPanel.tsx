@@ -162,6 +162,7 @@ export function CausalityPanel({
                   </div>
                   <Button
                     size="sm"
+                    data-demo-target="select-plan"
                     className="mt-4 w-full bg-ceyfi-green text-white hover:bg-ceyfi-deep"
                     onClick={() => onPlanSelect?.(plan)}
                   >

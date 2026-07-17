@@ -136,6 +136,7 @@ export default function MarketAlertDetailPage() {
                 Review wallet
               </Link>
               <span
+                data-demo-target="broker-cta"
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
                   "pointer-events-none inline-flex items-center gap-1.5 opacity-70",

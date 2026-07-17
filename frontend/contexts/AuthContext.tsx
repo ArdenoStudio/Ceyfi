@@ -22,6 +22,8 @@ interface AuthContextValue {
   user: DemoPersona | null;
   loading: boolean;
   login: (userId: string) => Promise<void>;
+  /** Swap demo persona without navigating — used by the autopilot tour. */
+  switchPersona: (userId: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -101,13 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (userId: string) => {
+  const authenticate = useCallback(async (userId: string): Promise<DemoPersona> => {
     if (SKIP_AUTH) {
       const persona = SKIP_AUTH_PERSONAS[userId] ?? E2E_USER;
       storeSession(persona, "skip-auth");
       setUser(persona);
-      router.push(personaDestination(persona));
-      return;
+      return persona;
     }
 
     const res = await fetch(`${API_BASE}/api/auth/login`, {
@@ -120,8 +121,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await res.json();
     storeSession(data.user, data.token);
     setUser(data.user);
-    router.push(personaDestination(data.user as DemoPersona));
-  }, [router]);
+    return data.user as DemoPersona;
+  }, []);
+
+  const login = useCallback(async (userId: string) => {
+    const persona = await authenticate(userId);
+    router.push(personaDestination(persona));
+  }, [authenticate, router]);
+
+  const switchPersona = useCallback(async (userId: string) => {
+    await authenticate(userId);
+  }, [authenticate]);
 
   const logout = useCallback(() => {
     clearSession();
@@ -130,8 +140,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const value = useMemo(
-    () => ({ user, loading, login, logout }),
-    [user, loading, login, logout]
+    () => ({ user, loading, login, switchPersona, logout }),
+    [user, loading, login, switchPersona, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

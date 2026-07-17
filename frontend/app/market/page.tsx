@@ -172,10 +172,11 @@ export default function MarketPage() {
               </p>
             ) : (
               <ul className="space-y-2">
-                {fires.map((f) => (
+                {fires.map((f, idx) => (
                   <li key={f.id}>
                     <Link
                       href={`/market/alerts/${encodeURIComponent(f.id)}`}
+                      data-demo-target={idx === 0 ? "market-fire" : undefined}
                       className="block rounded-xl border border-ceyfi-line/70 px-3 py-2.5 transition-colors hover:bg-ceyfi-sprout/40 dark:border-white/10 dark:hover:bg-white/[0.04]"
                     >
                       <div className="flex items-baseline justify-between gap-2">
