@@ -43,7 +43,7 @@ export function TaxJarPanel({
   const [cardModalOpen, setCardModalOpen] = useState(false);
   const [cardAmount, setCardAmount] = useState(8200);
   const [submitting, setSubmitting] = useState(false);
-  const [paymentMode, setPaymentMode] = useState<"card" | "demo">("card");
+  const [paymentMode, setPaymentMode] = useState<"card" | "demo">("demo");
   const [taxPct, setTaxPct] = useState(10);
   const [savedPct, setSavedPct] = useState(10);
   const [savingRule, setSavingRule] = useState(false);
@@ -88,21 +88,17 @@ export function TaxJarPanel({
         return;
       }
 
-      // Demo mode — hit mock endpoint to simulate inbound payment
-      const result = await postTaxJarTrigger({
+      // Demo mode — record the inbound payment, then compute the saved amount
+      // from the configured auto-save % and accumulate locally. The stateless
+      // mock recomputes from a constant base, so we grow the jar client-side
+      // (15,070 → 15,890 → …) and honour the chosen percentage.
+      await postTaxJarTrigger({
         user_id: userId,
         incoming_amount_lkr: cardAmount,
         description: "Customer payment — Silva Hardware (demo)",
       });
-      const taxSaved =
-        result.tax_saved > 0
-          ? result.tax_saved
-          : Math.round(cardAmount * rate);
-      if (result.new_balance > 0) {
-        setDisplayBalance(result.new_balance);
-      } else {
-        setDisplayBalance((prev) => prev + taxSaved);
-      }
+      const taxSaved = Math.round(cardAmount * rate);
+      setDisplayBalance((prev) => prev + taxSaved);
       onNewTransaction?.({
         transaction_id: `biz_demo_tax_${Date.now()}`,
         type: "credit",
@@ -227,7 +223,7 @@ export function TaxJarPanel({
 
         <Button
           className="w-full rounded-full bg-ceyfi-green hover:bg-ceyfi-green/90 text-white font-semibold"
-          onClick={() => { setPaymentMode("card"); setCardModalOpen(true); }}
+          onClick={() => { setPaymentMode("demo"); setCardModalOpen(true); }}
         >
           <CreditCard className="h-4 w-4 mr-2" />
           Accept Card Payment

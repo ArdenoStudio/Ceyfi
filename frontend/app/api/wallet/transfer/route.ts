@@ -6,9 +6,12 @@ const BACKEND = absoluteBackendUrl();
 export async function POST(req: Request) {
   try {
     const body = await req.text();
+    const auth = req.headers.get("authorization");
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (auth) headers.Authorization = auth;
     const res = await fetch(`${BACKEND}/api/wallet/transfer`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body,
       signal: AbortSignal.timeout(30000),
     });

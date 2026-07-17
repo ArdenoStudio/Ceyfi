@@ -314,6 +314,16 @@ async def get_payment(request: Request, order_id: str = Path(..., min_length=8, 
                 gateway_response=gateway,
             )
             row["status"] = gateway["status"]
+            # Fulfill on the PENDING->CAPTURED transition so the business action
+            # runs even if the server-to-server webhook never arrives. This block
+            # only runs while the stored status was PENDING, so it fires at most once.
+            if gateway["status"] == "CAPTURED":
+                await _fulfill(
+                    order_id,
+                    purpose=row.get("purpose", ""),
+                    amount_lkr=float(row.get("amount_lkr") or gateway.get("amount") or 0),
+                    metadata=row.get("metadata") or {},
+                )
         except Exception as exc:
             log.warning("MPGS status refresh failed for %s: %s", order_id, exc)
 

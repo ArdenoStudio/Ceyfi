@@ -73,7 +73,10 @@ class Settings(BaseSettings):
         "https://ceyfi.app"
     )
     frontend_base_url: str = "https://frontend-taupe-three-96.vercel.app"
-    backend_base_url: str = "http://localhost:8000"
+    # Public backend origin used to build externally-reachable webhook/notify URLs
+    # (e.g. PayHere notify_url). On Vercel the FastAPI app is mounted at /_/backend.
+    # Override with BACKEND_BASE_URL for other hosts.
+    backend_base_url: str = "https://frontend-taupe-three-96.vercel.app/_/backend"
 
     # Demo auth & admin — override DEMO_SESSION_SECRET / DEMO_ADMIN_KEY in real deploys.
     # Empty secret previously 503'd login on Vercel `/_/backend`; keep a demo default so

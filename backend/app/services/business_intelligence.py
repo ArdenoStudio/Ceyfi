@@ -95,11 +95,14 @@ def compute_cash_runway_days(user_id: str) -> int:
     pl = _load_pl(user_id)
     current = pl.get("current_week", pl)
     expenses = float(current.get("expenses_lkr", 0))
-    net = float(current.get("net_lkr", 0))
+    # Runway = how long the cash on hand lasts at the current burn rate,
+    # not cash / net profit (which is meaningless for a profitable shop).
+    biz = _load_biz(user_id)
+    balance = float(biz.get("current_balance", 0))
     daily = expenses / 7 if expenses > 0 else 0
     if daily <= 0:
         return 30
-    return max(1, int(round(net / daily)))
+    return max(1, int(round(balance / daily)))
 
 
 async def build_cfo_brief(user_id: str) -> dict[str, Any]:

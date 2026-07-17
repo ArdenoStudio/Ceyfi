@@ -19,37 +19,35 @@ import { formatters } from "@/lib/utils";
 import { lkrAxisTick } from "@/lib/chartUtils";
 import { useChartTheme } from "@/hooks/useChartTheme";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Loan } from "@/types";
 
-const EMI = 22000;
-const PRINCIPAL = 600000;
-const RATE = 0.14 / 12;
-
-function buildComboData() {
-  let outstanding = PRINCIPAL;
-  return Array.from({ length: 36 }, (_, i) => {
-    const interest = outstanding * RATE;
-    const principal = EMI - interest;
-    outstanding = Math.max(0, outstanding - principal);
+function buildComboData(emi: number, principal: number, rate: number, months: number) {
+  let outstanding = principal;
+  return Array.from({ length: months }, (_, i) => {
+    const interest = outstanding * rate;
+    const principalPaid = emi - interest;
+    outstanding = Math.max(0, outstanding - principalPaid);
     return {
       month: `M${i + 1}`,
-      emiPaid: EMI,
+      emiPaid: emi,
       outstanding: Math.round(outstanding),
     };
   });
 }
 
-function buildWaterfallData() {
+function buildWaterfallData(emi: number, principal: number, rate: number) {
   const years = [1, 2, 3];
+  let outstanding = principal;
   return years.map((year) => {
-    let outstanding = PRINCIPAL;
     let totalPrincipal = 0;
     let totalInterest = 0;
     for (let m = 0; m < 12; m++) {
-      const interest = outstanding * RATE;
-      const principal = EMI - interest;
-      totalPrincipal += principal;
+      if (outstanding <= 0) break;
+      const interest = outstanding * rate;
+      const principalPaid = Math.min(emi - interest, outstanding);
+      totalPrincipal += principalPaid;
       totalInterest += interest;
-      outstanding -= principal;
+      outstanding -= principalPaid;
     }
     return {
       year: `Year ${year}`,
@@ -59,19 +57,10 @@ function buildWaterfallData() {
   });
 }
 
-function interestSaved(lumpSum: number) {
-  const monthsSaved = Math.floor(lumpSum / EMI);
-  return Math.round(monthsSaved * EMI * RATE * 6);
+function interestSaved(lumpSum: number, emi: number, rate: number) {
+  const monthsSaved = Math.floor(lumpSum / emi);
+  return Math.round(monthsSaved * emi * rate * 6);
 }
-
-const PAYMENT_CALENDAR = [
-  { month: "Jan 2026", status: "paid" as const, amount: EMI },
-  { month: "Feb 2026", status: "paid" as const, amount: EMI },
-  { month: "Mar 2026", status: "late" as const, amount: EMI },
-  { month: "Apr 2026", status: "paid" as const, amount: EMI },
-  { month: "May 2026", status: "late" as const, amount: EMI },
-  { month: "Jun 2026", status: "future" as const, amount: EMI },
-];
 
 const STATUS_STYLES = {
   paid: { bg: "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800/50", icon: CheckCircle2, color: "text-emerald-700 dark:text-emerald-400" },
@@ -80,20 +69,42 @@ const STATUS_STYLES = {
   future: { bg: "bg-stone-50 border-stone-200 dark:bg-white/5 dark:border-white/10", icon: Clock, color: "text-stone-400 dark:text-white/40" },
 };
 
-export function LoanIntelligenceCharts() {
+type CalStatus = keyof typeof STATUS_STYLES;
+
+export function LoanIntelligenceCharts({ loan }: { loan: Loan }) {
   const { colors } = useChartTheme();
   const [lumpSum, setLumpSum] = useState(50000);
-  const comboData = useMemo(() => buildComboData(), []);
-  const waterfallData = useMemo(() => buildWaterfallData(), []);
+
+  // Derive everything from the loan actually on screen so the charts match the header.
+  const EMI = loan.monthly_payment_lkr;
+  const PRINCIPAL = loan.outstanding_lkr;
+  const RATE = (loan.interest_rate_pct || 14) / 100 / 12;
+  const MONTHS = Math.max(6, Math.min(loan.total_payments || 36, Math.ceil(PRINCIPAL / EMI) + 2));
+
+  const comboData = useMemo(() => buildComboData(EMI, PRINCIPAL, RATE, MONTHS), [EMI, PRINCIPAL, RATE, MONTHS]);
+  const waterfallData = useMemo(() => buildWaterfallData(EMI, PRINCIPAL, RATE), [EMI, PRINCIPAL, RATE]);
 
   const monthsSaved = Math.floor(lumpSum / EMI);
-  const saved = interestSaved(lumpSum);
+  const saved = interestSaved(lumpSum, EMI, RATE);
   const endDate = new Date(2028, 5, 25);
   endDate.setMonth(endDate.getMonth() - monthsSaved);
 
+  // Illustrative recent calendar; amounts tie to this loan's EMI and the
+  // paid/late pattern reflects the health signal.
+  const atRisk = loan.health_score !== "ON_TRACK";
+  const paymentCalendar: { month: string; status: CalStatus; amount: number }[] = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  ].map((m, i) => ({
+    month: `${m} 2026`,
+    status: i === 5 ? "future" : atRisk && (i === 2 || i === 4) ? "late" : "paid",
+    amount: EMI,
+  }));
+
+  const outstandingLabel = `LKR ${PRINCIPAL.toLocaleString()}`;
+
   return (
     <div className="space-y-6">
-      <ChartCard title="EMI payments vs outstanding balance" subtitle="36-month personal loan · LKR 600,000">
+      <ChartCard title="EMI payments vs outstanding balance" subtitle={`${loan.total_payments}-month loan · ${outstandingLabel} outstanding`}>
         <ChartContainer height={260}>
           <ComposedChart data={comboData} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke={colors.grid} strokeDasharray="3 3" />
@@ -146,9 +157,9 @@ export function LoanIntelligenceCharts() {
         </div>
       </ChartCard>
 
-      <ChartCard title="Payment calendar" subtitle="Last 12 months">
+      <ChartCard title="Payment calendar" subtitle="Last 6 months">
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {PAYMENT_CALENDAR.map((item) => {
+          {paymentCalendar.map((item) => {
             const style = STATUS_STYLES[item.status];
             const Icon = style.icon;
             return (

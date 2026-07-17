@@ -170,7 +170,7 @@ async def _pay_loan_instalment(arguments: dict) -> str:
     from app.config import settings
     from app.services import supabase_client, loan_state
 
-    user_id = "SEY-USR-001"
+    user_id = arguments.get("user_id", "SEY-USR-001")
     amount_lkr = float(arguments.get("amount_lkr", 22000))
 
     # Resolve loan_id from in-memory state or fixture

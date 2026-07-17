@@ -68,9 +68,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
           tone={isUser ? "primary" : "neutral"}
           footer={
             !isUser && !isStreaming && message.content
-              ? message.language === "en"
-                ? "CEYFI assistant"
-                : undefined
+              ? "CEYFI assistant"
               : undefined
           }
         >
@@ -98,7 +96,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
               <span>Pay {formatLKR(pa.amount_lkr)} →</span>
             </a>
           )}
-          {!isUser && !isStreaming && message.content && message.language === "en" && (
+          {!isUser && !isStreaming && message.content && (
             <AudioPlayer text={message.content} language={message.language} />
           )}
         </ChatBubble>

@@ -72,12 +72,13 @@ export async function getFamilyWallet(accountId: string) {
       ...b,
       bucket_id: (b as Record<string, unknown>).bucket_id ?? (b as Record<string, unknown>).id,
       allocation_pct: (b as Record<string, unknown>).allocation_pct ?? (b as Record<string, unknown>).allocated_pct,
+      icon: (b as Record<string, unknown>).icon ?? (b as Record<string, unknown>).id,
     })),
     recent_transactions: (raw.recent_transactions ?? []).map((t) => ({
       ...t,
       transaction_id: (t as Record<string, unknown>).transaction_id ?? (t as Record<string, unknown>).id,
       timestamp: (t as Record<string, unknown>).timestamp ?? (t as Record<string, unknown>).date,
-      type: (t as Record<string, unknown>).type ?? ((t as Record<string, unknown>).amount_lkr as number) < 0 ? "debit" : "credit",
+      type: (t as Record<string, unknown>).type ?? (((t as Record<string, unknown>).amount_lkr as number) < 0 ? "debit" : "credit"),
     })),
   };
 }

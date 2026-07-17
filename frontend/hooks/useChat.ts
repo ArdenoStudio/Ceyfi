@@ -17,12 +17,17 @@ export function useChat(userId: string) {
 
   const send = useCallback(
     async (content: string) => {
+      // Detect Sinhala script in the outgoing message so the "Speak in Sinhala"
+      // chip (and any typed Sinhala) flips the UI and forces a Sinhala reply,
+      // without waiting on the async setLanguage state update.
+      const reqLang: Language = /[඀-෿]/.test(content) ? "si" : language;
+      if (reqLang !== language) setLanguage(reqLang);
       const userMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "user",
         content,
         timestamp: new Date().toISOString(),
-        language,
+        language: reqLang,
       };
 
       setMessages((prev) => [...prev, userMsg]);
@@ -34,7 +39,7 @@ export function useChat(userId: string) {
         role: "assistant",
         content: "",
         timestamp: new Date().toISOString(),
-        language,
+        language: reqLang,
       };
       setMessages((prev) => [...prev, aiMsg]);
 
@@ -49,7 +54,7 @@ export function useChat(userId: string) {
             user_id: userId,
             session_id: sessionIdRef.current,
             message: content,
-            language,
+            language: reqLang,
             history,
           },
           (token) => {

@@ -58,10 +58,14 @@ function MiniTooltip({
 export function RepaymentTimeline({ schedule }: RepaymentTimelineProps) {
   const [tab, setTab] = useState("all");
 
+  // Fixture schedules can arrive out of order — sort by month so the timeline
+  // and mini-chart read chronologically.
+  const ordered = [...schedule].sort((a, b) => a.month - b.month);
+
   const filtered =
     tab === "all"
-      ? schedule
-      : schedule.filter((e) => {
+      ? ordered
+      : ordered.filter((e) => {
           const key = canonicalScheduleStatus(e.status);
           if (tab === "upcoming") return key === "UPCOMING";
           if (tab === "paid") return key === "PAID";
@@ -69,7 +73,7 @@ export function RepaymentTimeline({ schedule }: RepaymentTimelineProps) {
           return false;
         });
 
-  const chartData = schedule.slice(0, 12).map((e) => ({
+  const chartData = ordered.slice(0, 12).map((e) => ({
     month: `M${e.month}`,
     amount: e.amount_lkr,
     paid: canonicalScheduleStatus(e.status) === "PAID" ? e.amount_lkr : 0,

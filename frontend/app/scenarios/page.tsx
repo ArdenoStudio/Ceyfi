@@ -223,7 +223,16 @@ export default function ScenariosPage() {
                 onValueChange={(v) => row.onChange(Array.isArray(v) ? (v[0] ?? 0) : v)}
               />
               <div className="mt-1 text-[10px] text-ceyfi-faint">
-                {row.value} {row.unit} · ({formatters.currency({ number: impact, maxFractionDigits: 0 })} projected impact)
+                {row.value} {row.unit} · ({formatters.currency({
+                  number: row.enabled
+                    ? row.key === "salaryDelay"
+                      ? -row.value * 6200
+                      : row.key === "fxDepreciation"
+                        ? -row.value * 800
+                        : -row.value * 420
+                    : 0,
+                  maxFractionDigits: 0,
+                })} projected impact)
               </div>
             </div>
           ))}
@@ -370,7 +379,23 @@ export default function ScenariosPage() {
               </div>
             ))}
             {selected.length >= 2 && (
-              <p className="text-xs text-ceyfi-muted">Comparing {selected.length} scenarios — load each to inspect side by side.</p>
+              <div className="rounded-xl border border-ceyfi-line/60 p-4">
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ceyfi-green">
+                  Comparison · worst-case balance
+                </div>
+                <div className="space-y-1.5">
+                  {saved
+                    .filter((s) => selected.includes(s.id))
+                    .map((s) => (
+                      <div key={s.id} className="flex items-center justify-between text-sm">
+                        <span className="text-ceyfi-ink">{s.name}</span>
+                        <span className="font-mono font-semibold text-ceyfi-ink">
+                          {formatters.currency({ number: s.worstCase, maxFractionDigits: 0 })}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
             )}
           </div>
         </ChartCard>
