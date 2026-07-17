@@ -11,6 +11,7 @@ import {
   FlaskConical,
   LayoutDashboard,
   Lightbulb,
+  LineChart,
   MoreHorizontal,
   Sparkles,
   User,
@@ -36,6 +37,7 @@ const MOBILE_PRIMARY = [
 ];
 
 const MOBILE_MORE = [
+  { href: "/market", label: "Market", icon: LineChart },
   { href: "/transactions", label: "Activity", icon: ArrowUpDown },
   { href: "/loans", label: "Loans", icon: CreditCard },
   { href: "/business", label: "Business", icon: BriefcaseBusiness },
