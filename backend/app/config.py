@@ -57,6 +57,24 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = "EXAVITQu4vr4xnSDxMaL"
 
+    # Gemini — one key powers chat + TTS + STT. Preferred over
+    # ElevenLabs/OpenAI/Groq when set. Each model name has its own free-tier
+    # rate-limit bucket, so the client rotates the whole chain on 429/errors to
+    # maximise combined throughput (near-"unlimited" for a demo).
+    gemini_api_key: str = ""
+    gemini_tts_voice: str = "Kore"  # prebuilt voice; e.g. Kore, Aoede, Puck, Charon
+    gemini_chat_models: str = (
+        "gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-2.0-flash-lite,"
+        "gemini-3.5-flash,gemini-3.1-flash-lite,gemini-3-flash-preview,"
+        "gemini-flash-latest,gemini-flash-lite-latest,gemini-2.5-pro,gemini-pro-latest"
+    )
+    gemini_tts_models: str = (
+        "gemini-2.5-flash-preview-tts,gemini-3.1-flash-tts-preview,gemini-2.5-pro-preview-tts"
+    )
+    gemini_stt_models: str = (
+        "gemini-2.5-flash,gemini-2.0-flash,gemini-2.5-flash-lite,gemini-flash-latest"
+    )
+
     # Database (Neon PostgreSQL)
     database_url: str = ""
 
@@ -92,6 +110,18 @@ class Settings(BaseSettings):
     @property
     def cors_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",")]
+
+    @property
+    def gemini_chat_model_list(self) -> list[str]:
+        return [m.strip() for m in self.gemini_chat_models.split(",") if m.strip()]
+
+    @property
+    def gemini_tts_model_list(self) -> list[str]:
+        return [m.strip() for m in self.gemini_tts_models.split(",") if m.strip()]
+
+    @property
+    def gemini_stt_model_list(self) -> list[str]:
+        return [m.strip() for m in self.gemini_stt_models.split(",") if m.strip()]
 
 
 settings = Settings()
