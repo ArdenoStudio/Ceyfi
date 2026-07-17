@@ -105,7 +105,7 @@ async def wallet_transfer(req: WalletTransferRequest, request: Request):
                 destination=settings.seylan_sandbox_destination_account,
                 amount=req.amount_lkr,
                 user_ref=transfer_id[:16],
-                src_narration=f"Seylan Hub remit {req.corridor}",
+                src_narration=f"Ceyfi remit {req.corridor}",
                 dst_narration=f"Family wallet — {req.corridor}",
             )
             log.info("Seylan transfer succeeded: ref=%s", result.get("transaction_reference"))

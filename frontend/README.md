@@ -4,7 +4,7 @@ AI banking platform for Sri Lanka: diaspora wallets, voice assistant, loan healt
 
 ## Deploy URL
 
-https://frontend-taupe-three-96.vercel.app
+https://ceyfi-app.vercel.app
 
 ## Tech Stack
 

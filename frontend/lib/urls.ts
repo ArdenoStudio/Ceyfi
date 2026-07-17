@@ -58,5 +58,5 @@ export function absoluteBackendUrl(): string {
 
   return PRODUCTION_BACKEND_URL.startsWith("http")
     ? PRODUCTION_BACKEND_URL
-    : `https://frontend-taupe-three-96.vercel.app${VERCEL_BACKEND_PATH}`;
+    : `https://ceyfi-app.vercel.app${VERCEL_BACKEND_PATH}`;
 }

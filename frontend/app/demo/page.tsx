@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useDemoAutopilot } from "@/components/demo/DemoAutopilot";
 import {
   CheckCircle2,
   Play,
@@ -162,11 +162,13 @@ function DemoStepIndicator({
 }
 
 export default function DemoControlPage() {
-  const router = useRouter();
   const [running, setRunning] = useState<Action | null>(null);
-  const [scriptRunning, setScriptRunning] = useState(false);
-  const [activeStep, setActiveStep] = useState<number | null>(null);
-  const [completedThrough, setCompletedThrough] = useState(0);
+  // Delegate the full walkthrough to the layout-level autopilot so it survives
+  // navigation and shows the animated cursor + caption chrome. This page's
+  // "Start" button and `S` shortcut both drive that single engine.
+  const { start: runScript, isRunning: scriptRunning, stepIndex } = useDemoAutopilot();
+  const activeStep = scriptRunning ? stepIndex + 1 : null;
+  const completedThrough = scriptRunning ? stepIndex : 0;
 
   async function runAction(action: Action, task: () => Promise<unknown>) {
     setRunning(action);
@@ -190,34 +192,6 @@ export default function DemoControlPage() {
       }),
     []
   );
-
-  const runScript = useCallback(async () => {
-    setScriptRunning(true);
-    setCompletedThrough(0);
-    try {
-      for (const item of DEMO_SCRIPT) {
-        setActiveStep(item.step);
-        toast.info(`Step ${item.step}: ${item.label}`, { description: item.hint });
-        if (item.path) {
-          router.push(item.path);
-          await new Promise((r) => setTimeout(r, 1200));
-        }
-        if (item.action === "spend") {
-          await triggerSpend();
-        } else if (item.action === "reset") {
-          await postDemoReset();
-        }
-        setCompletedThrough(item.step);
-        await new Promise((r) => setTimeout(r, item.seconds * 1000 - (item.path ? 1200 : 0)));
-      }
-      toast.success("90-second demo script complete");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Script failed");
-    } finally {
-      setActiveStep(null);
-      setScriptRunning(false);
-    }
-  }, [router, triggerSpend]);
 
   useEffect(() => {
     const shortcuts: Record<string, () => void> = {
