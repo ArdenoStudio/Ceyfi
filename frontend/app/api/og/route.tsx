@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// Node runtime: Vercel's services model rejects Edge Function output, which
+// was failing every deployment. next/og's ImageResponse runs on Node too.
+export const runtime = "nodejs";
 
 export async function GET() {
   return new ImageResponse(
