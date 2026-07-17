@@ -63,6 +63,7 @@ class Settings(BaseSettings):
     gemini_tts_model: str = "gemini-2.5-flash-preview-tts"
     gemini_tts_voice: str = "Kore"  # prebuilt voice; e.g. Kore, Aoede, Puck, Charon
     gemini_stt_model: str = "gemini-2.5-flash"
+    gemini_chat_model: str = "gemini-2.5-flash"  # assistant + categorizer + business/loans LLM
 
     # Database (Neon PostgreSQL)
     database_url: str = ""

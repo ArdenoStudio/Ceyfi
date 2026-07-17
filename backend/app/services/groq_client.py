@@ -67,7 +67,19 @@ async def _try_models_stream(msgs: list[dict], max_tokens: int, temperature: flo
 
 async def stream_chat(system_prompt: str, messages: list[dict],
                       max_tokens: int = 512, temperature: float = 0.3) -> AsyncIterator[str]:
-    from app.services import openai_client
+    from app.services import gemini_client, openai_client
+    if gemini_client.chat_available():
+        started = False
+        try:
+            async for token in gemini_client.stream_chat(system_prompt, messages, max_tokens, temperature):
+                started = True
+                yield token
+            return
+        except Exception as exc:
+            if started:
+                log.error("gemini: stream error after partial output: %s", exc)
+                raise
+            log.warning("gemini: stream_chat failed (%s), falling back", exc)
     if openai_client.is_available():
         try:
             async for token in openai_client.stream_chat(system_prompt, messages, max_tokens, temperature):
@@ -83,7 +95,12 @@ async def stream_chat(system_prompt: str, messages: list[dict],
 
 async def complete(system_prompt: str, messages: list[dict],
                    max_tokens: int = 512, temperature: float = 0.3) -> str:
-    from app.services import openai_client
+    from app.services import gemini_client, openai_client
+    if gemini_client.chat_available():
+        try:
+            return await gemini_client.complete(system_prompt, messages, max_tokens, temperature)
+        except Exception as exc:
+            log.warning("gemini: complete failed (%s), falling back", exc)
     if openai_client.is_available():
         try:
             return await openai_client.complete(system_prompt, messages, max_tokens, temperature)
@@ -130,7 +147,14 @@ async def complete_with_tools(system_prompt: str, messages: list[dict],
                                tools: list[dict], max_tokens: int = 512,
                                temperature: float = 0.3):
     """Non-streaming completion with tool calling support. Returns the full response message."""
-    from app.services import openai_client
+    from app.services import gemini_client, openai_client
+    if gemini_client.chat_available():
+        try:
+            return await gemini_client.complete_with_tools(
+                system_prompt, messages, tools, max_tokens, temperature
+            )
+        except Exception as exc:
+            log.warning("gemini: complete_with_tools failed (%s), falling back", exc)
     if openai_client.is_available():
         try:
             return await openai_client.complete_with_tools(
