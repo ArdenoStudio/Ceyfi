@@ -32,7 +32,7 @@ export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
             "interactive-press min-h-11 rounded-full px-3 py-1 text-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
             lang.className,
             language === lang.id
-              ? "bg-background font-semibold text-foreground shadow-sm dark:bg-white dark:text-seylan-charcoal"
+              ? "bg-background font-semibold text-foreground shadow-sm dark:bg-white dark:text-ceyfi-ink"
               : "text-muted-foreground hover:text-foreground dark:text-white/35 dark:hover:text-white/60",
           )}
         >

@@ -166,7 +166,7 @@ export default function MetricsPage() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seylan-red mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ceyfi-green mb-1">
               Nasiko · Arize Phoenix
             </p>
             <h1 className="font-heading text-2xl font-bold text-foreground dark:text-white">

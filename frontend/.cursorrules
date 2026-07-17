@@ -9,8 +9,8 @@ Audience: judges at Cursor Buildathon Colombo. 24-hour build. Polish > breadth.
 - Groq llama-3.3-70b for AI. ElevenLabs for TTS. Web Speech API for STT.
 
 ## Conventions
-- Brand colours via Tailwind tokens (seylan-red #C8102E, seylan-charcoal
-  #1A1A2E, seylan-mist #F7F8FA). Health: green-700 / amber-700 / red-700.
+- Brand colours via Tailwind tokens (ceyfi-green #059669, ceyfi-deep #052E16,
+  ceyfi-mint #34D399, ceyfi-ink #10261A). Health: green-700 / amber-700 / red-700.
 - Format LKR via formatLKR() in lib/utils.ts. Always "LKR 1,234,567".
 - Sinhala text wrapped in span.sinhala. Font: Noto Sans Sinhala.
 - No comments in code unless explaining a non-obvious workaround.
@@ -19,9 +19,11 @@ Audience: judges at Cursor Buildathon Colombo. 24-hour build. Polish > breadth.
 
 ## Style
 - shadcn primitives only. No custom Button. No new Card variants.
-- Cards: white bg, 12px radius, border seylan-border, subtle shadow.
+- Cards: white bg, 12px radius, border ceyfi-line, subtle shadow.
 - No emoji in production UI — use Lucide icons.
-- No gradients, no animations beyond shadcn defaults, no dark mode.
+- Dark mode is supported (`.dark` theme in globals.css) — style for both.
+- Gradients and subtle animations (e.g. glow/ping accents) are used
+  intentionally for brand accents; keep them restrained, not decorative.
 
 ## Personas
 P1 Diaspora Provider → /wallet
