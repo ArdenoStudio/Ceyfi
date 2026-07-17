@@ -3,7 +3,7 @@
  * Do not hardcode Cloud Run hostnames here.
  *
  * Default production backend is the monorepo FastAPI service mounted at `/_/backend`
- * (see root vercel.json experimentalServices). Relative URLs work in the browser
+ * (see root vercel.json services). Relative URLs work in the browser
  * (same origin). Server-side proxies should call `absoluteBackendUrl()`.
  */
 export const PRODUCTION_FRONTEND_URL =
