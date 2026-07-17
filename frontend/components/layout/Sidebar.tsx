@@ -11,6 +11,7 @@ import {
   FlaskConical,
   LayoutDashboard,
   Lightbulb,
+  LineChart,
   LogOut,
   Sparkles,
   Wallet,
@@ -29,6 +30,7 @@ const NAV_GROUPS = [
     items: [
       { href: "/", label: "Overview", icon: LayoutDashboard },
       { href: "/wallet", label: "Wallet", icon: Wallet },
+      { href: "/market", label: "Market", icon: LineChart },
       { href: "/transactions", label: "Transactions", icon: ArrowUpDown },
       { href: "/loans", label: "Loans", icon: CreditCard },
       { href: "/business", label: "Business", icon: BriefcaseBusiness },

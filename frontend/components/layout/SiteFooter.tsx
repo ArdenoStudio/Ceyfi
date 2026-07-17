@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 /** HyperUI "Simple stacked" footer pattern — adapted for CEYFI app navigation. */
 const FOOTER_LINKS = [
   { href: "/wallet", label: "Wallet" },
+  { href: "/market", label: "Market" },
   { href: "/loans", label: "Loans" },
   { href: "/assistant", label: "Assistant" },
   { href: "/transactions", label: "Transactions" },

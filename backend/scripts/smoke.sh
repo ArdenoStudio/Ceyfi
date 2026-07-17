@@ -71,5 +71,7 @@ check_post  "/api/tax-jar/rule"     "$BASE/api/tax-jar/rule" \
 check_post  "/api/categorize-transactions" "$BASE/api/categorize-transactions" \
   '{"user_id":"SEY-BIZ-001","transaction_ids":["biz_039","biz_040"]}' "INCOME" "$TOKEN_SME"
 check       "/api/loans/SEY-USR-001/health"        "$BASE/api/loans/SEY-USR-001/health"                      "ON_TRACK"  "$TOKEN_DIASPORA"
+check       "/api/market/overview"                 "$BASE/api/market/overview"                              "COMB"      "$TOKEN_DIASPORA"
+check       "/api/market/fires/f-1"                "$BASE/api/market/fires/f-1"                             "broker_cta" "$TOKEN_DIASPORA"
 
 echo -e "\n${GREEN}All smoke tests passed!${RESET}"

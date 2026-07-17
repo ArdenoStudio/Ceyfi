@@ -9,6 +9,13 @@
 | Frontend (Next.js 16) | 3000 | `cd frontend && npm run dev` | Set `NEXT_PUBLIC_USE_MOCK=true` for demo mode (no backend/keys needed) |
 | Backend (FastAPI) | 8000 | `cd backend && uvicorn app.main:app --port 8000` | Works without external API keys — Groq/Supabase/ElevenLabs degrade gracefully |
 
+### Market (Chime-powered)
+
+- Routes: `/market`, `/market/watchlist`, `/market/alerts`, `/market/alerts/[id]`
+- Backend: `GET /api/market/{overview,watchlist,alerts,fires,fires/{id}}` — mock CSE payloads by default
+- Optional live proxy: set `CHIME_API_BASE` (+ `CHIME_DEMO_TELEGRAM_ID`) on the backend; see `docs/MARKET_CHIME.md`
+- NFA on every surface; broker CTA stays disabled (no order entry). Ceyfi never scrapes cse.lk.
+
 ### Running the app
 
 - **Mock mode (default, no secrets needed):** Frontend runs standalone with hardcoded demo data when `NEXT_PUBLIC_USE_MOCK=true`.
@@ -20,7 +27,7 @@
 - **Frontend lint:** `cd frontend && npm run lint` — ESLint 9 with next config. Currently passes clean (0 errors).
 - **Frontend smoke test:** `cd frontend && npm run test:smoke` — checks demo-critical files exist.
 - **Frontend build:** `cd frontend && npm run build`
-- **Backend smoke test:** `cd backend && bash scripts/smoke.sh http://localhost:8000` — requires running backend. 13 endpoint checks.
+- **Backend smoke test:** `cd backend && bash scripts/smoke.sh http://localhost:8000` — requires running backend. Includes Market `/api/market/*` checks.
 - **Backend unit tests:** `cd backend && python3 -m pytest tests/ -q` — full pytest suite (~565 tests, all pass). Needs `pytest` + `pytest-asyncio` (installed by the update script; not in `requirements.txt`).
 - No frontend unit test suite exists (only the smoke check above).
 

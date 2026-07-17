@@ -23,12 +23,15 @@ Built for **Cursor Buildathon Colombo 2026** by Ardeno Studio.
 | Module | Route | Persona |
 |--------|-------|---------|
 | Diaspora Family Wallet | `/wallet` | Nimal Fernando — diaspora parent |
+| **Market (Chime)** | `/market` | CSE watchlist + alerts + cash context — not a broker |
 | AI Assistant | `/assistant` | EN + Sinhala voice & chat |
 | Loan Dashboard | `/loans` | Sunil Bandara — borrower |
 | Business Bookkeeper | `/business` | Suresh Silva — SME owner |
 | Financial Intelligence | `/intelligence` | Live health score from snapshot API |
 | Decision Room | `/decisions` | Ranked actions from live data |
 | Scenario Lab | `/scenarios` | Shock modeling on real balances |
+
+See [`docs/MARKET_CHIME.md`](docs/MARKET_CHIME.md) for the Chime-powered Market module.
 
 ## Quick Start
 

@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from app.services import metrics_store
 
 from app.config import settings
-from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot, banking_tools
+from app.routers import mock, wallet, chat, tts, loans, business, payments, stt, auth, snapshot, banking_tools, market
 from app.services.auth import (
     authorize_resource,
     is_public_path,
@@ -247,6 +247,7 @@ app.include_router(payhere_router)
 
 
 app.include_router(banking_tools.router)
+app.include_router(market.router)
 
 
 @app.exception_handler(Exception)
