@@ -112,10 +112,17 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
     },
     {
       route: "/market",
+      caption: "Market Appetite — CSE breadth meter from Chime",
+      say: "Session score 0–100: how hot the tape looks. Research only — not a buy signal.",
+      target: '[data-demo-target="market-appetite"]',
+      settleMs: 1100,
+      dwellMs: 5000,
+    },
+    {
       caption: "CSE watchlist next to your cash — powered by Chime",
       say: "Alerts and fires sit beside liquid balance. Ceyfi never scrapes cse.lk.",
       target: '[data-demo-target="market-fire"]',
-      settleMs: 1100,
+      settleMs: 700,
       dwellMs: 4500,
     },
     {

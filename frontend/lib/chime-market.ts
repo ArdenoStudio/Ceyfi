@@ -107,6 +107,80 @@ export type MarketFireCard = MarketFire & {
   } | null;
 };
 
+/** Chime Market Appetite (CSE breadth composite) — research score, not a tip. */
+export const APPETITE_BANDS = [
+  "extreme_caution",
+  "caution",
+  "neutral",
+  "appetite",
+  "strong_appetite",
+] as const;
+
+export type AppetiteBand = (typeof APPETITE_BANDS)[number];
+
+export type AppetiteDay = {
+  trade_date: string;
+  score: number;
+  band: AppetiteBand | string;
+  components: {
+    breadth: number | null;
+    intensity: number | null;
+    index: number | null;
+    participation: number | null;
+  };
+  source: "cse" | "hybrid_research" | string;
+  universe_n: number;
+  advancers?: number | null;
+  decliners?: number | null;
+  unchanged?: number | null;
+  aspi_change_pct?: number | null;
+  computed_at?: string | null;
+};
+
+export type AppetitePayload = {
+  source: string;
+  nfa?: string;
+  latest: AppetiteDay | null;
+  history: AppetiteDay[];
+  deltas: {
+    d1: number | null;
+    d5: number | null;
+    d21: number | null;
+  };
+  days_in_band: number;
+  limit?: number;
+  appetite_source?: string;
+  disclaimer?: string;
+  as_of?: string;
+};
+
+export const APPETITE_BAND_LABEL: Record<AppetiteBand, string> = {
+  extreme_caution: "Extreme Caution",
+  caution: "Caution",
+  neutral: "Neutral",
+  appetite: "Appetite",
+  strong_appetite: "Strong Appetite",
+};
+
+/** Zone fills — readable on meter + badges (muted, not neon). */
+export const APPETITE_BAND_ZONE_COLOR: Record<AppetiteBand, string> = {
+  extreme_caution: "#f0b4a0",
+  caution: "#f0d39a",
+  neutral: "#c8cdd8",
+  appetite: "#a8d9c4",
+  strong_appetite: "#7fc9a8",
+};
+
+export function normalizeAppetiteBand(raw: unknown): AppetiteBand {
+  if (
+    typeof raw === "string" &&
+    (APPETITE_BANDS as readonly string[]).includes(raw)
+  ) {
+    return raw as AppetiteBand;
+  }
+  return "neutral";
+}
+
 async function marketRequest<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { ...authHeaders() },
@@ -141,8 +215,15 @@ export async function getMarketOverview() {
     alerts: MarketAlert[];
     fires: MarketFireCard[];
     focus_fire?: MarketFireCard | null;
+    appetite?: AppetitePayload | null;
     as_of: string;
   }>("/api/market/overview");
+}
+
+export async function getMarketAppetite(limit = 60) {
+  return marketRequest<AppetitePayload>(
+    `/api/market/appetite?limit=${limit}`,
+  );
 }
 
 export async function getMarketWatchlist() {

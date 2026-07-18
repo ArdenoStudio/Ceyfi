@@ -22,6 +22,7 @@ Presenter cheat sheet for the Cursor Buildathon Colombo 2026 judges walkthrough.
 | Tax jar balance | LKR 15,070 | `SEY-BIZ-001` |
 | Tax jar demo trigger | LKR 8,200 in → LKR 820 saved (10%) | `/mock/tax-jar/trigger` |
 | Market fire | COMB crossed above LKR 125 | mock `f-1` |
+| Market Appetite | Score **64** · Appetite · +1.4 vs prior | mock `/api/market/appetite` |
 
 ## Demo personas (login screen)
 
@@ -40,7 +41,7 @@ Press **`S`** on `/demo`, or the floating **Play auto demo** button, to auto-run
 | Time River | `/` · Inspect next risk → Select plan | "CEYFI shows your financial future — pick a plan on Time River." |
 | Wallet | `/wallet` · Simulate family spend | "Nimal sends GBP home; Kumari spends from Household — watch LKR 12,400 drop." |
 | Scenarios | `/scenarios` · Salary delay On | "What-if shocks — stress the plan before you commit." |
-| Market | `/market` → `/market/alerts/f-1` | "CSE alerts via Chime next to cash. Broker CTA stays disabled — NFA." |
+| Market | `/market` (Appetite → fire) → `/market/alerts/f-1` | "Market Appetite shows CSE tape heat; alerts sit next to cash. Broker CTA stays disabled — NFA." |
 | Intelligence | `/intelligence` | "Explainable health score, anomalies and forecast." |
 | Loans · Nimal | `/loans` | "Personal loan next due and repayment progress." |
 | Loans · Sunil | switch persona → `/loans?persona=sunil` | "Borrower lens — AT RISK overdue instalment." |
@@ -77,8 +78,9 @@ Press **`S`** on `/demo`, or the floating **Play auto demo** button, to auto-run
 
 ### Market only
 
-1. Open `/market` — watchlist + recent fires
-2. Open a fire → cash context + disabled **Open my broker**
+1. Open `/market` — Market Appetite strip (score ~64 · Appetite) + watchlist + fires
+2. Optional: `/market/appetite` for history + components
+3. Open a fire → cash context + disabled **Open my broker**
 
 ## Troubleshooting
 

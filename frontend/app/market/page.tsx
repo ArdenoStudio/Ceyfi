@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Bell, LineChart, List } from "lucide-react";
 
 import { ActivityBadge } from "@/components/market/ActivityBadge";
+import { AppetiteStrip } from "@/components/market/AppetiteStrip";
 import { CashContextCard } from "@/components/market/CashContextCard";
 import { FocusFireCard } from "@/components/market/FocusFireCard";
 import { NfaStrip } from "@/components/market/NfaStrip";
@@ -17,6 +18,7 @@ import {
   cashSharePct,
   getMarketOverview,
   shortSymbol,
+  type AppetitePayload,
   type MarketAlert,
   type MarketFireCard,
   type MarketWatchItem,
@@ -50,6 +52,7 @@ export default function MarketPage() {
   const [alerts, setAlerts] = useState<MarketAlert[]>([]);
   const [fires, setFires] = useState<MarketFireCard[]>([]);
   const [focus, setFocus] = useState<MarketFireCard | null>(null);
+  const [appetite, setAppetite] = useState<AppetitePayload | null>(null);
   const [nfa, setNfa] = useState<string>("");
   const [blurb, setBlurb] = useState<string>("");
   const [source, setSource] = useState<string>("mock");
@@ -74,6 +77,7 @@ export default function MarketPage() {
         setAlerts(overview.alerts ?? []);
         setFires(overview.fires ?? []);
         setFocus(overview.focus_fire ?? overview.fires?.[0] ?? null);
+        setAppetite(overview.appetite ?? null);
         setNfa(overview.nfa);
         setBlurb(overview.persona_blurb ?? "");
         setSource(overview.source);
@@ -180,6 +184,8 @@ export default function MarketPage() {
           {error}
         </p>
       ) : null}
+
+      <AppetiteStrip appetite={appetite} loading={loading} />
 
       {!loading && focus ? (
         <FocusFireCard

@@ -6,7 +6,8 @@ Ceyfi hosts the **Market** UI. Chime remains the CSE poller / alert engine.
 
 | Path | Purpose |
 |---|---|
-| `/market` | Watchlist summary + recent fires + cash context |
+| `/market` | Appetite strip + watchlist + recent fires + cash context |
+| `/market/appetite` | Market Appetite history, components, band chronology |
 | `/market/watchlist` | Full watch list with activity badges + last fire |
 | `/market/alerts` | Active rules + fire history |
 | `/market/alerts/[id]` | Fire depth + path/candles + cash % + filings + disabled broker CTA |
@@ -18,12 +19,17 @@ Ceyfi hosts the **Market** UI. Chime remains the CSE poller / alert engine.
 
 | Endpoint | Notes |
 |---|---|
-| `/overview` | Enriched watchlist + fires + persona blurb |
+| `/overview` | Enriched watchlist + fires + `appetite` strip payload + persona blurb |
+| `/appetite` | Market Appetite (0–100 CSE breadth composite) — Chime `GET /api/v1/appetite` or mock |
 | `/watchlist` | `alert_count`, `last_fire`, `activity` (`quiet`/`active`/`noisy`) |
 | `/alerts`, `/fires`, `/fires/{id}` | Fire detail includes `depth` (still_true / cooled_off) + disclosures |
 | `/symbols/{symbol}/bars` | Daily OHLC — Chime `daily-bars` or deterministic mock |
 | `/symbols/{symbol}/path` | Close path + threshold + fire-day marker |
 | `/symbols/{symbol}/disclosures` | Filings + Chime PDF briefs |
+
+**Market Appetite** (Chime greed-meter plan): research score from breadth /
+intensity / ASPI day / participation. Bands: Extreme Caution → Caution →
+Neutral → Appetite → Strong Appetite. Never framed as buy/sell advice.
 
 - Default: mock CSE payloads per persona (demo works offline)
 - Optional live: set `CHIME_API_BASE` to proxy Chime `/api/v1/*` after demo login

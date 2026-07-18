@@ -31,6 +31,20 @@ NFA = (
     "securities. Ceyfi is not a stockbroker; place trades with your licensed broker."
 )
 
+APPETITE_DISCLAIMER = (
+    "Market Appetite is a research composite from CSE breadth, move intensity, "
+    "ASPI day change, and participation. It is not financial advice and not a "
+    "buy/sell signal."
+)
+
+APPETITE_BANDS = (
+    "extreme_caution",
+    "caution",
+    "neutral",
+    "appetite",
+    "strong_appetite",
+)
+
 _PERSONA_BLURB = {
     "SEY-USR-001": "Diaspora lens — CSE names beside remittance cash you already track.",
     "SEY-USR-003": "Borrower lens — a short list so market noise does not drown loan clarity.",
@@ -684,6 +698,244 @@ async def _chime_get(path: str) -> Any | None:
     return (await _chime_session_get([path])).get(path)
 
 
+def _band_for_score(score: float) -> str:
+    s = max(0.0, min(100.0, float(score)))
+    if s < 20:
+        return "extreme_caution"
+    if s < 40:
+        return "caution"
+    if s < 60:
+        return "neutral"
+    if s < 80:
+        return "appetite"
+    return "strong_appetite"
+
+
+def _normalize_appetite_band(raw: Any) -> str:
+    if isinstance(raw, str) and raw in APPETITE_BANDS:
+        return raw
+    return "neutral"
+
+
+def _appetite_delta(history_asc: list[dict[str, Any]], days_back: int) -> float | None:
+    if len(history_asc) < 2:
+        return None
+    end = len(history_asc) - 1
+    idx = end - days_back
+    if idx < 0:
+        return None
+    try:
+        d = float(history_asc[end]["score"]) - float(history_asc[idx]["score"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    return round(d, 1) if d == d else None  # NaN guard
+
+
+def _days_in_band(history_asc: list[dict[str, Any]]) -> int:
+    if not history_asc:
+        return 0
+    band = history_asc[-1].get("band")
+    n = 0
+    for row in reversed(history_asc):
+        if row.get("band") != band:
+            break
+        n += 1
+    return n
+
+
+def _normalize_appetite_day(row: dict[str, Any]) -> dict[str, Any] | None:
+    trade_date = row.get("trade_date")
+    if isinstance(trade_date, str) and len(trade_date) >= 10:
+        trade_date = trade_date[:10]
+    else:
+        return None
+    try:
+        score = float(row.get("score"))
+    except (TypeError, ValueError):
+        return None
+    if score != score:  # NaN
+        return None
+    score = max(0.0, min(100.0, score))
+    comps_raw = row.get("components") if isinstance(row.get("components"), dict) else {}
+
+    def _comp(key: str) -> float | None:
+        v = comps_raw.get(key)
+        if v is None:
+            return None
+        try:
+            n = float(v)
+        except (TypeError, ValueError):
+            return None
+        if n != n:
+            return None
+        return round(max(0.0, min(100.0, n)), 1)
+
+    source = row.get("source") if row.get("source") in ("cse", "hybrid_research") else "cse"
+    band = _normalize_appetite_band(row.get("band")) or _band_for_score(score)
+
+    def _int_or_none(key: str) -> int | None:
+        v = row.get(key)
+        if v is None:
+            return None
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
+
+    aspi = row.get("aspi_change_pct")
+    try:
+        aspi_f = float(aspi) if aspi is not None else None
+    except (TypeError, ValueError):
+        aspi_f = None
+    if aspi_f is not None and aspi_f != aspi_f:
+        aspi_f = None
+
+    return {
+        "trade_date": trade_date,
+        "score": round(score, 1),
+        "band": band,
+        "components": {
+            "breadth": _comp("breadth"),
+            "intensity": _comp("intensity"),
+            "index": _comp("index"),
+            "participation": _comp("participation"),
+        },
+        "source": source,
+        "universe_n": max(0, int(row.get("universe_n") or 0)),
+        "advancers": _int_or_none("advancers"),
+        "decliners": _int_or_none("decliners"),
+        "unchanged": _int_or_none("unchanged"),
+        "aspi_change_pct": round(aspi_f, 2) if aspi_f is not None else None,
+        "computed_at": row.get("computed_at"),
+    }
+
+
+def _mock_appetite_history(limit: int = 60) -> list[dict[str, Any]]:
+    """Deterministic CSE-breadth style series for offline demos.
+
+    Lands near Appetite (~64) so the meter needle is visibly off-centre.
+    History is ascending by trade_date (weekday sessions only).
+    """
+    end = datetime(2026, 7, 17, tzinfo=timezone.utc).date()
+    n = max(2, min(int(limit), 252))
+    base_scores: list[float] = []
+    for i in range(n):
+        t = i / max(n - 1, 1)
+        score = 48.0 + 10.0 * (0.5 - abs(t - 0.55)) + 14.0 * t
+        wobble = ((i * 17) % 7) - 3
+        score = max(22.0, min(86.0, score + wobble * 0.6))
+        base_scores.append(score)
+    # Pin the last two for caption-stable demo numbers (+1.4 d1).
+    base_scores[-2] = 62.8
+    base_scores[-1] = 64.2
+
+    # Walk backwards collecting weekdays, then reverse.
+    dates: list[Any] = []
+    cursor = end
+    while len(dates) < n:
+        if cursor.weekday() < 5:
+            dates.append(cursor)
+        cursor -= timedelta(days=1)
+    dates.reverse()
+
+    out: list[dict[str, Any]] = []
+    for i, score in enumerate(base_scores):
+        d = dates[i]
+        band = _band_for_score(score)
+        breadth = max(20.0, min(90.0, score + 4))
+        intensity = max(20.0, min(90.0, score - 6))
+        index = max(20.0, min(90.0, score + 1))
+        participation = max(20.0, min(90.0, score - 2))
+        adv = int(120 + (score - 50) * 1.8)
+        dec = int(140 - (score - 50) * 1.6)
+        unc = max(0, 280 - adv - dec)
+        aspi_pct = round((score - 50.0) / 25.0, 2)
+        out.append(
+            {
+                "trade_date": d.isoformat(),
+                "score": round(score, 1),
+                "band": band,
+                "components": {
+                    "breadth": round(breadth, 1),
+                    "intensity": round(intensity, 1),
+                    "index": round(index, 1),
+                    "participation": round(participation, 1),
+                },
+                "source": "cse",
+                "universe_n": 280,
+                "advancers": adv,
+                "decliners": max(0, dec),
+                "unchanged": unc,
+                "aspi_change_pct": aspi_pct,
+                "computed_at": datetime(
+                    d.year, d.month, d.day, 11, 0, tzinfo=timezone.utc
+                ).isoformat(),
+            }
+        )
+    return out
+
+
+def _appetite_payload_from_history(
+    history_asc: list[dict[str, Any]],
+    *,
+    source: str,
+    limit: int,
+) -> dict[str, Any]:
+    latest = history_asc[-1] if history_asc else None
+    return {
+        "source": source,
+        "nfa": NFA,
+        "latest": latest,
+        "history": history_asc,
+        "deltas": {
+            "d1": _appetite_delta(history_asc, 1),
+            "d5": _appetite_delta(history_asc, 5),
+            "d21": _appetite_delta(history_asc, 21),
+        },
+        "days_in_band": _days_in_band(history_asc),
+        "limit": limit,
+        "appetite_source": latest.get("source") if latest else "cse",
+        "disclaimer": APPETITE_DISCLAIMER,
+        "as_of": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+async def _load_appetite(limit: int = 60) -> dict[str, Any]:
+    """Chime GET /api/v1/appetite when configured; else deterministic mock."""
+    limit = max(1, min(int(limit), 252))
+    live = await _chime_get(f"/api/v1/appetite?limit={limit}&source=cse")
+    if isinstance(live, dict):
+        raw_hist = live.get("history")
+        if isinstance(raw_hist, list) and raw_hist:
+            history: list[dict[str, Any]] = []
+            for row in raw_hist:
+                if isinstance(row, dict):
+                    norm = _normalize_appetite_day(row)
+                    if norm:
+                        history.append(norm)
+            if history:
+                history.sort(key=lambda r: r["trade_date"])
+                # Prefer Chime's latest/deltas when present; recompute if thin.
+                payload = _appetite_payload_from_history(
+                    history, source="chime", limit=limit
+                )
+                # Overlay Chime deltas when they look sane.
+                chime_deltas = live.get("deltas")
+                if isinstance(chime_deltas, dict):
+                    for key in ("d1", "d5", "d21"):
+                        v = chime_deltas.get(key)
+                        if isinstance(v, (int, float)) and v == v:
+                            payload["deltas"][key] = round(float(v), 1)
+                if isinstance(live.get("days_in_band"), int):
+                    payload["days_in_band"] = live["days_in_band"]
+                if isinstance(live.get("disclaimer"), str) and live["disclaimer"].strip():
+                    payload["disclaimer"] = live["disclaimer"]
+                return payload
+
+    history = _mock_appetite_history(limit=limit)
+    return _appetite_payload_from_history(history, source="mock", limit=limit)
+
+
 async def _load_alerts_fires_watch(
     uid: str,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], str]:
@@ -759,6 +1011,8 @@ async def market_overview(authorization: str | None = Header(default=None)):
         )
 
     focus = rich_fires[0] if rich_fires else None
+    appetite = await _load_appetite(limit=60)
+    # Overview source stays watch/alerts based; appetite may independently be mock/chime.
     return {
         "source": source,
         "nfa": NFA,
@@ -767,8 +1021,26 @@ async def market_overview(authorization: str | None = Header(default=None)):
         "alerts": alerts,
         "fires": rich_fires,
         "focus_fire": focus,
+        "appetite": {
+            "latest": appetite.get("latest"),
+            "history": appetite.get("history"),
+            "deltas": appetite.get("deltas"),
+            "days_in_band": appetite.get("days_in_band"),
+            "source": appetite.get("source"),
+            "disclaimer": appetite.get("disclaimer"),
+        },
         "as_of": datetime.now(timezone.utc).isoformat(),
     }
+
+
+@router.get("/appetite")
+async def market_appetite(
+    limit: int = Query(default=60, ge=1, le=252),
+    authorization: str | None = Header(default=None),
+):
+    """Market Appetite (CSE breadth composite) — Chime proxy or mock."""
+    _user_from_auth(authorization)
+    return await _load_appetite(limit=limit)
 
 
 @router.get("/watchlist")
