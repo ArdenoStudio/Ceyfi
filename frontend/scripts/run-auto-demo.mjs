@@ -38,7 +38,6 @@ const REQUIRED_ROUTES = [
   "/intelligence",
   "/loans",
   "/business",
-  "/assistant",
   "/decisions",
 ];
 
