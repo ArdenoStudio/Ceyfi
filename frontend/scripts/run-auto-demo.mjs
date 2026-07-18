@@ -15,6 +15,10 @@ mkdirSync(OUT, { recursive: true });
 const EXPECTED_CAPTION_FRAGMENTS = [
   "financial future",
   "Pick a plan",
+  "GBP 600",
+  "244,980",
+  "PIN confirmation",
+  "Remittance delivered",
   "Household",
   "salary delay",
   "Market Appetite",
@@ -170,7 +174,7 @@ async function main() {
       missingCaptions.length === 0 &&
       missingRoutes.length === 0 &&
       actionSkips === 0 &&
-      seenCaptions.length >= 11,
+      seenCaptions.length >= 14,
   };
 
   writeFileSync(join(OUT, "summary.json"), JSON.stringify({ summary, log }, null, 2));

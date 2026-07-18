@@ -108,7 +108,12 @@ export function PaymentReceipt({
       </div>
 
       {onDone ? (
-        <Button variant="ghost" className="w-full" onClick={onDone}>
+        <Button
+          data-demo-target="payment-receipt-done"
+          variant="ghost"
+          className="w-full"
+          onClick={onDone}
+        >
           {doneLabel}
         </Button>
       ) : null}

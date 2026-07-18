@@ -218,7 +218,11 @@ export default function WalletPage() {
               <ShoppingCart className="mr-1.5 h-4 w-4" />
               {spendSimulating ? "Simulating…" : "Simulate family spend"}
             </Button>
-            <Button onClick={() => setModalOpen(true)} className="interactive-press rounded-full shadow-brand">
+            <Button
+              data-demo-target="wallet-send-money"
+              onClick={() => setModalOpen(true)}
+              className="interactive-press rounded-full shadow-brand"
+            >
               Send Money
             </Button>
           </div>
