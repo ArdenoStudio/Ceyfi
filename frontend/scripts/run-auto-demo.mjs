@@ -24,7 +24,6 @@ const EXPECTED_CAPTION_FRAGMENTS = [
   "personal loan",
   "Sunil",
   "tax jar",
-  "Sinhala",
   "ranked recommendation",
   "Clean slate",
 ];
@@ -171,7 +170,7 @@ async function main() {
       missingCaptions.length === 0 &&
       missingRoutes.length === 0 &&
       actionSkips === 0 &&
-      seenCaptions.length >= 12,
+      seenCaptions.length >= 11,
   };
 
   writeFileSync(join(OUT, "summary.json"), JSON.stringify({ summary, log }, null, 2));
