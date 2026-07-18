@@ -29,11 +29,17 @@ async def test_market_overview_mock(client):
     assert comb["activity"] in ("quiet", "active", "noisy")
     assert comb["last_fire"]["id"] == "f-1"
     assert isinstance(comb.get("sparkline"), list) and len(comb["sparkline"]) >= 5
+    assert isinstance(comb.get("spark_bars"), list) and len(comb["spark_bars"]) >= 5
+    assert comb["spark_bars"][0]["close"] is not None
+    assert comb["spark_bars"][0]["high"] is not None
     assert len(data["fires"]) >= 1
     assert data["fires"][0]["id"] == "f-1"
     assert data["fires"][0]["depth"]["status"] == "still_true"
     assert data["focus_fire"]["id"] == "f-1"
     assert data["focus_fire"]["path"]["closes"]
+    assert isinstance(data["focus_fire"]["path"].get("bars"), list)
+    assert len(data["focus_fire"]["path"]["bars"]) >= 5
+    assert data["focus_fire"]["path"]["points"][0].get("high") is not None
     disc_fire = next(f for f in data["fires"] if f["id"] == "f-2")
     assert disc_fire["disclosure_snippet"]["title"]
 

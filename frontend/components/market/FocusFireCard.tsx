@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Sparkline } from "@/components/market/Sparkline";
+import { CandleSpark } from "@/components/market/CandleSpark";
 import { buttonVariants } from "@/components/ui/button";
 import {
   cashSharePct,
@@ -41,6 +41,16 @@ export function FocusFireCard({
   const depth = fire.depth;
   const price = depth?.last_price ?? fire.price;
   const share = cashSharePct(price, liquidLkr);
+  const bars =
+    fire.path?.bars ??
+    (fire.path?.points ?? []).map((p) => ({
+      trade_date: p.date ?? "",
+      open: p.open,
+      high: p.high,
+      low: p.low,
+      close: p.close,
+      volume: p.volume,
+    }));
   const closes = fire.path?.closes ?? [];
   const threshold = depth?.threshold;
 
@@ -122,13 +132,19 @@ export function FocusFireCard({
             </dl>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2">
-            <Sparkline values={closes} width={120} height={44} />
+            <CandleSpark
+              bars={bars}
+              closes={closes}
+              width={132}
+              height={48}
+              maxCandles={22}
+            />
             {threshold != null ? (
               <p className="text-[10px] text-muted-foreground">
-                Path · threshold {formatLKR(threshold)}
+                Candles · alert {formatLKR(threshold)}
               </p>
             ) : (
-              <p className="text-[10px] text-muted-foreground">Recent path</p>
+              <p className="text-[10px] text-muted-foreground">Recent candles</p>
             )}
           </div>
         </div>

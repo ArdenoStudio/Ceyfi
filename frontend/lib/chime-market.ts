@@ -7,6 +7,15 @@ import { API_BASE, ApiError } from "@/lib/api";
 
 export type MarketActivity = "quiet" | "active" | "noisy";
 
+export type MarketBar = {
+  trade_date: string;
+  open?: number | null;
+  high?: number | null;
+  low?: number | null;
+  close?: number | null;
+  volume?: number | null;
+};
+
 export type MarketWatchItem = {
   symbol: string;
   name?: string | null;
@@ -16,7 +25,10 @@ export type MarketWatchItem = {
   alert_count?: number;
   fire_count?: number;
   activity?: MarketActivity;
+  /** Close-only series (legacy / fallback). */
   sparkline?: number[];
+  /** OHLC bars for Chime-style candle sparklines. */
+  spark_bars?: MarketBar[];
   last_fire?: {
     id?: string;
     type?: string;
@@ -66,15 +78,6 @@ export type MarketDisclosure = {
   brief_status?: string | null;
 };
 
-export type MarketBar = {
-  trade_date: string;
-  open?: number | null;
-  high?: number | null;
-  low?: number | null;
-  close?: number | null;
-  volume?: number | null;
-};
-
 export type MarketPathPoint = {
   date: string;
   close?: number | null;
@@ -99,6 +102,7 @@ export type MarketFireCard = MarketFire & {
     threshold?: number | null;
     fire_date?: string | null;
     closes?: number[];
+    bars?: MarketBar[];
     points?: MarketPathPoint[];
   } | null;
 };
