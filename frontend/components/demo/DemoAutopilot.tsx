@@ -197,9 +197,14 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
       caption: "Clean slate for the next audience",
       say: "Demo state resets so every run starts identical.",
       action: async () => {
-        await postDemoReset();
+        // Soft-ok when production has DEMO_RESET_ENABLED=false — still restore Nimal.
+        const reset = await postDemoReset();
+        if (!reset.ok) {
+          throw new Error(reset.error || "Demo reset failed");
+        }
         await switchPersona(PERSONA.nimal);
       },
+      toastOnAction: false,
       dwellMs: 3500,
     },
   ];

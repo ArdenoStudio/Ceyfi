@@ -431,18 +431,38 @@ export async function prewarmDemoData() {
   ]);
 }
 
-export async function postDemoReset() {
+export type DemoResetResult =
+  | { ok: true; skipped?: false; result: unknown }
+  /** Production/kiosk builds often leave DEMO_RESET_ENABLED=false — not a hard failure. */
+  | { ok: true; skipped: true; reason: "disabled" | "unconfigured" }
+  | { ok: false; status: number; error: string };
+
+/**
+ * Trigger demo fixture reset via the server proxy.
+ * Soft-succeeds when reset is disabled (403) or unconfigured (503) so the
+ * public auto-demo tour can finish cleanly without DEMO_RESET_ENABLED.
+ */
+export async function postDemoReset(): Promise<DemoResetResult> {
   const res = await fetch("/api/admin/reset", {
     method: "POST",
     headers: authHeaders(),
     signal: AbortSignal.timeout(10000),
   });
-  if (!res.ok) throw new Error("Demo reset failed");
+  if (res.status === 403) {
+    return { ok: true, skipped: true, reason: "disabled" };
+  }
+  if (res.status === 503) {
+    return { ok: true, skipped: true, reason: "unconfigured" };
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => "Demo reset failed");
+    return { ok: false, status: res.status, error: text.slice(0, 200) };
+  }
   const result = await res.json();
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("seylan:demo-reset"));
   }
-  return result;
+  return { ok: true, result };
 }
 
 export function postTaxJarRule(payload: {

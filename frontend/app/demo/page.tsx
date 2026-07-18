@@ -247,7 +247,18 @@ export default function DemoControlPage() {
           description: "Cash Sale - Electrical Fittings",
         })
       ),
-      "3": () => runAction("reset", postDemoReset),
+      "3": () =>
+        runAction("reset", async () => {
+          const reset = await postDemoReset();
+          if (!reset.ok) throw new Error(reset.error || "Demo reset failed");
+          if (reset.skipped) {
+            throw new Error(
+              reset.reason === "disabled"
+                ? "Demo reset is disabled on this deploy"
+                : "Demo reset is not configured",
+            );
+          }
+        }),
       "4": () => runAction("prewarm", prewarmDemoData),
       s: () => !scriptRunning && runScript(),
     };
@@ -448,7 +459,19 @@ export default function DemoControlPage() {
               </div>
             </div>
             <Button
-              onClick={() => runAction("reset", postDemoReset)}
+              onClick={() =>
+                runAction("reset", async () => {
+                  const reset = await postDemoReset();
+                  if (!reset.ok) throw new Error(reset.error || "Demo reset failed");
+                  if (reset.skipped) {
+                    throw new Error(
+                      reset.reason === "disabled"
+                        ? "Demo reset is disabled on this deploy"
+                        : "Demo reset is not configured",
+                    );
+                  }
+                })
+              }
               disabled={running !== null}
               variant="outline"
               className="w-full"
