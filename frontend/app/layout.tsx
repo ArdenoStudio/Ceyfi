@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter, Noto_Sans_Sinhala } from "next/font/google";
-import localFont from "next/font/local";
+import { Geist_Mono, Inter, Noto_Sans_Sinhala, Sora } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -19,14 +18,14 @@ import {
 } from "@/lib/seo";
 import "./globals.css";
 
-// Cal Sans — display / heading face, self-hosted. It is a single-weight display
-// font; declaring the 400–700 range maps every heading weight to the one file
-// so the browser never synthesizes faux-bold.
-const headingFont = localFont({
-  src: "./fonts/CalSans.woff2",
-  variable: "--font-cal-sans",
-  weight: "400 700",
+// Sora for headings — Cal Sans (brand refresh) had uneven glyph sidebearings
+// that made titles look letter-spaced across Market/Wallet/Loans/etc.
+const headingFont = Sora({
+  variable: "--font-sora",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
 });
 
 const bodyFont = Inter({

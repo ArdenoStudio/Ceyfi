@@ -167,8 +167,8 @@ export function HeroColorPanels({
       >
         <div
           className={cn(
-            "flex flex-col gap-3 text-balance",
-            isStrip ? "min-w-0 flex-1 sm:gap-2" : "justify-center sm:gap-4"
+            "flex min-w-0 flex-col gap-3",
+            isStrip ? "flex-1 sm:gap-2" : "justify-center sm:gap-4"
           )}
         >
           {eyebrow ? (
@@ -180,15 +180,15 @@ export function HeroColorPanels({
           <div className={cn(isStrip ? "text-left" : "text-center lg:text-left")}>
             <h1
               className={cn(
-                "font-heading font-semibold tracking-[-0.04em] text-ceyfi-ink dark:text-white",
+                "font-heading font-semibold tracking-[-0.025em] text-ceyfi-ink dark:text-white",
                 isStrip
-                  ? "text-xl sm:text-2xl"
-                  : "text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] lg:leading-[1.08]"
+                  ? "text-xl leading-snug sm:text-2xl"
+                  : "text-2xl leading-snug sm:text-3xl sm:leading-tight md:text-4xl lg:text-[2.6rem] lg:leading-[1.12]"
               )}
             >
               {title}
               {subtitle ? (
-                <span className="mt-1 block text-ceyfi-green dark:text-ceyfi-mint">
+                <span className="mt-1.5 block text-ceyfi-green dark:text-ceyfi-mint">
                   {subtitle}
                 </span>
               ) : null}

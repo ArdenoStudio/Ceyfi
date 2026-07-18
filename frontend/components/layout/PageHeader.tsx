@@ -25,11 +25,11 @@ export function PageHeader({
       <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
           {eyebrow && (
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-ceyfi-green">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-ceyfi-green">
               {eyebrow}
             </p>
           )}
-          <h1 className="font-heading text-2xl font-semibold leading-tight text-ceyfi-ink dark:text-white sm:text-4xl">
+          <h1 className="font-heading text-2xl font-semibold leading-[1.15] tracking-[-0.025em] text-ceyfi-ink dark:text-white sm:text-4xl">
             {title}
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground dark:text-white/45 sm:text-base">
