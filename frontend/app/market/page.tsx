@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bell, LineChart, List } from "lucide-react";
 
+import { ActivityBadge } from "@/components/market/ActivityBadge";
 import { CashContextCard } from "@/components/market/CashContextCard";
 import { NfaStrip } from "@/components/market/NfaStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,6 +13,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getFinancialSnapshot } from "@/lib/api";
 import {
   getMarketOverview,
+  shortSymbol,
   type MarketAlert,
   type MarketFire,
   type MarketWatchItem,
@@ -24,6 +26,7 @@ export default function MarketPage() {
   const [alerts, setAlerts] = useState<MarketAlert[]>([]);
   const [fires, setFires] = useState<MarketFire[]>([]);
   const [nfa, setNfa] = useState<string>("");
+  const [blurb, setBlurb] = useState<string>("");
   const [source, setSource] = useState<string>("mock");
   const [liquid, setLiquid] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,6 +48,7 @@ export default function MarketPage() {
         setAlerts(overview.alerts ?? []);
         setFires(overview.fires ?? []);
         setNfa(overview.nfa);
+        setBlurb(overview.persona_blurb ?? "");
         setSource(overview.source);
         if (snap) {
           setLiquid(
@@ -70,7 +74,10 @@ export default function MarketPage() {
       <PageHeader
         eyebrow="Market · powered by Chime"
         title="CSE watch & alerts"
-        description="See names you care about and recent Chime pings next to your Ceyfi cash. You still trade with your licensed broker."
+        description={
+          blurb ||
+          "See names you care about and recent Chime pings next to your Ceyfi cash. You still trade with your licensed broker."
+        }
         action={
           <div className="flex flex-wrap gap-2">
             <Link
@@ -91,7 +98,10 @@ export default function MarketPage() {
         }
         meta={
           <p className="text-xs text-muted-foreground">
-            Data source: {source === "chime" ? "Live Chime API" : "Demo mock (set CHIME_API_BASE to proxy)"}
+            Data source:{" "}
+            {source === "chime"
+              ? "Live Chime API"
+              : "Demo mock — set CHIME_API_BASE on the backend for live CSE data"}
           </p>
         }
       />
@@ -120,34 +130,42 @@ export default function MarketPage() {
             ) : (
               <ul className="divide-y divide-ceyfi-line/70 dark:divide-white/10">
                 {watch.map((row) => (
-                  <li
-                    key={row.symbol}
-                    className="flex items-center justify-between gap-3 py-2.5"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-mono text-sm font-semibold">
-                        {row.symbol.replace(/\.(N|X)0000$/i, "")}
-                      </p>
-                      <p className="truncate text-[12px] text-muted-foreground">
-                        {row.name ?? row.symbol}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-mono text-sm tabular-nums">
-                        {row.price != null ? formatLKR(row.price) : "—"}
-                      </p>
-                      <p
-                        className={
-                          (row.change_pct ?? 0) >= 0
-                            ? "font-mono text-[11px] text-emerald-700 dark:text-emerald-400"
-                            : "font-mono text-[11px] text-red-600 dark:text-red-400"
-                        }
-                      >
-                        {row.change_pct != null
-                          ? `${row.change_pct > 0 ? "+" : ""}${row.change_pct.toFixed(2)}%`
-                          : "—"}
-                      </p>
-                    </div>
+                  <li key={row.symbol}>
+                    <Link
+                      href={`/market/symbol/${encodeURIComponent(row.symbol)}`}
+                      className="flex items-center justify-between gap-3 py-2.5 transition-colors hover:bg-ceyfi-sprout/25 dark:hover:bg-white/[0.03]"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-mono text-sm font-semibold">
+                            {shortSymbol(row.symbol)}
+                          </p>
+                          <ActivityBadge activity={row.activity} />
+                        </div>
+                        <p className="truncate text-[12px] text-muted-foreground">
+                          {row.name ?? row.symbol}
+                          {row.alert_count
+                            ? ` · ${row.alert_count} alert${row.alert_count === 1 ? "" : "s"}`
+                            : ""}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-sm tabular-nums">
+                          {row.price != null ? formatLKR(row.price) : "—"}
+                        </p>
+                        <p
+                          className={
+                            (row.change_pct ?? 0) >= 0
+                              ? "font-mono text-[11px] text-emerald-700 dark:text-emerald-400"
+                              : "font-mono text-[11px] text-red-600 dark:text-red-400"
+                          }
+                        >
+                          {row.change_pct != null
+                            ? `${row.change_pct > 0 ? "+" : ""}${row.change_pct.toFixed(2)}%`
+                            : "—"}
+                        </p>
+                      </div>
+                    </Link>
                   </li>
                 ))}
               </ul>
