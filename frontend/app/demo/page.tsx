@@ -54,7 +54,6 @@ const DEMO_SCRIPT: DemoStep[] = [
     step: 2,
     label: "Send money",
     path: "/wallet",
-    action: "remittance",
     hint: "GBP 600 → LKR 244,980 · PIN · receipt",
     seconds: 10,
     persona: "Nimal Fernando",
