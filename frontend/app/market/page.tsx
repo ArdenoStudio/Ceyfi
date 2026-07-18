@@ -134,7 +134,7 @@ export default function MarketPage() {
   return (
     <div
       data-module="market"
-      className="mx-auto max-w-[1400px] space-y-5 p-4 sm:p-6 lg:p-8"
+      className="mx-auto max-w-[1400px] space-y-4 p-4 sm:p-6 lg:p-8"
     >
       <PageHeader
         eyebrow="Market · powered by Chime"
@@ -190,7 +190,7 @@ export default function MarketPage() {
         />
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,0.75fr)]">
         <section className="space-y-4">
           <div className="rounded-[1.25rem] border border-ceyfi-line bg-card p-4 dark:border-white/10">
             <div className="mb-3 flex items-center gap-2">

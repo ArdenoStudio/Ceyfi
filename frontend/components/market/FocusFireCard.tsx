@@ -70,7 +70,7 @@ export function FocusFireCard({
         className="w-full text-left"
         aria-pressed={selected}
       >
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -131,7 +131,7 @@ export function FocusFireCard({
               ) : null}
             </dl>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-2">
+          <div className="flex shrink-0 flex-col items-start gap-1.5 sm:items-end">
             <CandleSpark
               bars={bars}
               closes={closes}
