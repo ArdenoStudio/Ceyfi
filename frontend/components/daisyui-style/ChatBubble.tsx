@@ -15,7 +15,7 @@ export type ChatBubbleTone =
 const bubbleToneStyles: Record<ChatBubbleTone, string> = {
   neutral:
     "border border-border/80 bg-card/90 text-foreground backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white/85",
-  primary: "bg-seylan-red text-white shadow-lg shadow-seylan-red/20",
+  primary: "bg-primary text-white shadow-lg shadow-primary/20",
   secondary: "bg-ceyfi-deep text-white shadow-md shadow-ceyfi-deep/20",
   info: "bg-blue-600 text-white shadow-md shadow-blue-600/20",
   success: "bg-emerald-600 text-white shadow-md shadow-emerald-600/20",

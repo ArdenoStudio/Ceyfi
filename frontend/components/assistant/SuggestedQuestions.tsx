@@ -62,11 +62,11 @@ export function SuggestedQuestions({ language, onSelect }: SuggestedQuestionsPro
             className={cn(
               "interactive-card flex items-center gap-2 rounded-full border border-border/80 bg-card/70 px-4 py-2 text-xs text-muted-foreground backdrop-blur-sm",
               "transition-all duration-200",
-              "hover:border-primary/30 hover:bg-primary/5 hover:text-foreground dark:border-white/10 dark:bg-white/[0.04] dark:text-white/50 dark:hover:border-seylan-red/30 dark:hover:bg-seylan-red/[0.08] dark:hover:text-white/80",
+              "hover:border-primary/30 hover:bg-primary/5 hover:text-foreground dark:border-white/10 dark:bg-white/[0.04] dark:text-white/50 dark:hover:border-primary/30 dark:hover:bg-primary/[0.08] dark:hover:text-white/80",
               isSinhala && "sinhala"
             )}
           >
-            <action.icon className="h-3.5 w-3.5 shrink-0 text-seylan-red/50" />
+            <action.icon className="h-3.5 w-3.5 shrink-0 text-primary/50" />
             {displayLabel}
           </button>
         );

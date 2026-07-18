@@ -121,7 +121,7 @@ export default function ProfilePage() {
       <div className="relative z-10 stagger space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
         <NetworkErrorBanner offline={offline} message={error} onRetry={loadProfile} />
         <header className="relative overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-brand-lg backdrop-blur-xl sm:p-8 dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
-          <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-seylan-red/25 blur-3xl" />
+          <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-ceyfi-green/25 blur-3xl" />
           <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center">
             <div className="relative">
               <PersonaAvatar
@@ -133,7 +133,7 @@ export default function ProfilePage() {
             </div>
             {/* Info */}
             <div className="text-center sm:text-left">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-seylan-red">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-ceyfi-green">
                 My account
               </p>
               <h1 className="font-heading text-2xl font-semibold text-foreground dark:text-white sm:text-4xl">
@@ -157,7 +157,7 @@ export default function ProfilePage() {
               metric: formatLKR(totalBalance),
               subLabel: "Combined account value",
               icon: Wallet,
-              accent: "seylan",
+              accent: "ceyfi",
             },
             {
               label: "Savings Account",

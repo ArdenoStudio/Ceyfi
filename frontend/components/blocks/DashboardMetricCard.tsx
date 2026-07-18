@@ -9,7 +9,7 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type DashboardMetricAccent = "seylan" | "ceyfi" | "amber" | "neutral";
+export type DashboardMetricAccent = "ceyfi" | "amber" | "neutral";
 
 export interface DashboardMetricItem {
   label: string;
@@ -35,14 +35,6 @@ const accentStyles: Record<
     iconText: string;
   }
 > = {
-  seylan: {
-    pillBg: "bg-seylan-red/10",
-    pillText: "text-seylan-red",
-    glowColor: "rgba(227,24,33,0.12)",
-    accentGradient: "from-seylan-red via-rose-400 to-amber-400",
-    iconBg: "bg-seylan-red/15",
-    iconText: "text-seylan-red",
-  },
   ceyfi: {
     pillBg: "bg-ceyfi-green/10",
     pillText: "text-ceyfi-green",

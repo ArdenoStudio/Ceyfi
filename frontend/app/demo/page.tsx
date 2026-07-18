@@ -267,7 +267,7 @@ export default function DemoControlPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-xl font-bold text-seylan-charcoal dark:text-white">Demo Controls</h1>
+        <h1 className="text-xl font-bold text-ceyfi-ink dark:text-white">Demo Controls</h1>
         <p className="text-sm text-muted-foreground">
           Presenter panel for the full CEYFI product tour. Shortcuts: 1 spend · 2 tax · 3 reset · 4 prewarm · S script
         </p>
@@ -298,7 +298,7 @@ export default function DemoControlPage() {
             subLabel: "Household bucket",
             description: "Softlogic Glomark — press 1 to trigger live spend",
             icon: WalletCards,
-            accent: "seylan",
+            accent: "ceyfi",
           },
           {
             label: "Tax jar",
@@ -386,12 +386,12 @@ export default function DemoControlPage() {
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
-              <WalletCards className="h-5 w-5 text-seylan-red" />
+              <WalletCards className="h-5 w-5 text-ceyfi-green" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal dark:text-white">Wallet spend trigger</h2>
+                <h2 className="font-semibold text-ceyfi-ink dark:text-white">Wallet spend trigger</h2>
                 <p className="text-sm text-muted-foreground">
                   Softlogic Glomark spend drops Household by {formatLKR(12400)}. Press <kbd className="rounded bg-muted px-1">1</kbd>
                 </p>
@@ -407,12 +407,12 @@ export default function DemoControlPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal dark:text-white">Tax jar trigger</h2>
+                <h2 className="font-semibold text-ceyfi-ink dark:text-white">Tax jar trigger</h2>
                 <p className="text-sm text-muted-foreground">
                   Incoming {formatLKR(8200)} auto-saves {formatLKR(820)}. Press <kbd className="rounded bg-muted px-1">2</kbd>
                 </p>
@@ -436,12 +436,12 @@ export default function DemoControlPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
-              <RefreshCw className="h-5 w-5 text-seylan-red" />
+              <RefreshCw className="h-5 w-5 text-ceyfi-green" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal dark:text-white">Reset demo state</h2>
+                <h2 className="font-semibold text-ceyfi-ink dark:text-white">Reset demo state</h2>
                 <p className="text-sm text-muted-foreground">
                   Protected admin endpoint. Press <kbd className="rounded bg-muted px-1">3</kbd>
                 </p>
@@ -458,12 +458,12 @@ export default function DemoControlPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-seylan-border">
+        <Card className="border-ceyfi-line">
           <CardContent className="space-y-4 p-5">
             <div className="flex items-center gap-3">
               <Sparkles className="h-5 w-5 text-amber-600" />
               <div>
-                <h2 className="font-semibold text-seylan-charcoal dark:text-white">Prewarm demo data</h2>
+                <h2 className="font-semibold text-ceyfi-ink dark:text-white">Prewarm demo data</h2>
                 <p className="text-sm text-muted-foreground">
                   Loads wallet, loans, business paths. Press <kbd className="rounded bg-muted px-1">4</kbd>
                 </p>

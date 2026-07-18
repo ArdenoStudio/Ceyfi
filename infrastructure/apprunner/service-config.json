@@ -1,0 +1,46 @@
+{
+  "ServiceName": "ceyfi-backend",
+  "SourceConfiguration": {
+    "AutoDeploymentsEnabled": true,
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ceyfi-apprunner-ecr-access-role"
+    },
+    "ImageRepository": {
+      "ImageIdentifier": "ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/ceyfi-backend:latest",
+      "ImageRepositoryType": "ECR",
+      "ImageConfiguration": {
+        "Port": "8080",
+        "RuntimeEnvironmentVariables": {
+          "PYTHONUNBUFFERED": "1",
+          "USE_SEYLAN_REAL": "false",
+          "CORS_ORIGINS": "http://localhost:3000,http://localhost:3003,http://localhost:3005,https://frontend-taupe-three-96.vercel.app,https://ceyfi.app",
+          "FRONTEND_BASE_URL": "https://frontend-taupe-three-96.vercel.app",
+          "MPGS_API_VERSION": "62",
+          "MPGS_ENABLE": "true",
+          "ELEVENLABS_VOICE_ID": "EXAVITQu4vr4xnSDxMaL"
+        },
+        "RuntimeEnvironmentSecrets": {
+          "DATABASE_URL": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:ceyfi/database-url",
+          "GROQ_API_KEY": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:ceyfi/groq-api-key",
+          "DEMO_SESSION_SECRET": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:ceyfi/demo-session-secret",
+          "DEMO_ADMIN_KEY": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:ceyfi/demo-admin-key",
+          "MPGS_MERCHANT_ID": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:ceyfi/mpgs-merchant-id",
+          "MPGS_API_PASSWORD": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:ceyfi/mpgs-api-password"
+        }
+      }
+    }
+  },
+  "InstanceConfiguration": {
+    "Cpu": "1 vCPU",
+    "Memory": "2 GB",
+    "InstanceRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ceyfi-apprunner-instance-role"
+  },
+  "HealthCheckConfiguration": {
+    "Protocol": "HTTP",
+    "Path": "/health",
+    "Interval": 10,
+    "Timeout": 5,
+    "HealthyThreshold": 1,
+    "UnhealthyThreshold": 5
+  }
+}
