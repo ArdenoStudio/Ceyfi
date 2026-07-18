@@ -397,6 +397,7 @@ export function SendMoneyModal({
             {/* CTA */}
             <button
               type="button"
+              data-demo-target="send-money-submit"
               disabled={sending || !isValid}
               onClick={requestSend}
               className="group relative w-full overflow-hidden rounded-xl bg-[#E31821] py-3.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(227,24,33,0.3)] transition-all hover:bg-[#c41219] hover:shadow-[0_6px_24px_rgba(227,24,33,0.4)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"

@@ -52,6 +52,8 @@ type DemoStep = {
   prepare?: () => Promise<unknown>;
   /** Real (mock) side-effect fired mid-step (after cursor / click). */
   action?: () => Promise<unknown>;
+  /** When true, fill demo PIN (1234) before clicking the target. */
+  typePin?: boolean;
   /** Extra settle time after navigation before seeking the target. */
   settleMs?: number;
   /** How long to linger on this step so the audience can read it. */
@@ -88,8 +90,41 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
     },
     {
       route: "/wallet",
-      caption: "Nimal sends money home — Household drops LKR 12,400",
-      say: "Diaspora remittance lands, family spends, buckets update live.",
+      caption: "Nimal sends GBP 600 home to Sri Lanka",
+      say: "Demo remittance — school, household, and savings split on every transfer.",
+      target: '[data-demo-target="wallet-send-money"]',
+      click: true,
+      settleMs: 1100,
+      dwellMs: 4500,
+    },
+    {
+      caption: "Recipient gets LKR 244,980 — allocation rules applied",
+      say: "Card or demo mode. We simulate the corridor without real payouts.",
+      target: '[data-demo-target="send-money-submit"]',
+      click: true,
+      settleMs: 700,
+      dwellMs: 5000,
+    },
+    {
+      caption: "PIN confirmation — same as mobile banking",
+      say: "Enter 1234 to authorise the transfer.",
+      target: '[data-demo-target="pin-confirm"]',
+      typePin: true,
+      click: true,
+      settleMs: 500,
+      dwellMs: 5500,
+    },
+    {
+      caption: "Remittance delivered — receipt and bucket split",
+      say: "Funds land in the family wallet with your saved allocation.",
+      target: '[data-demo-target="payment-receipt-done"]',
+      click: true,
+      settleMs: 900,
+      dwellMs: 4000,
+    },
+    {
+      caption: "Family spends locally — Household drops LKR 12,400",
+      say: "Buckets update live as the family uses the remittance at home.",
       target: '[data-demo-target="wallet-spend"]',
       action: () =>
         postTriggerSpend({
@@ -98,7 +133,7 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
           merchant: "Softlogic Glomark",
           bucket_id: "household",
         }),
-      settleMs: 900,
+      settleMs: 600,
       dwellMs: 6500,
     },
     {
@@ -222,6 +257,20 @@ export function useDemoAutopilot(): Ctx {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+function fillDemoPin(pin = "1234") {
+  const inputs = document.querySelectorAll('input[aria-label^="PIN digit"]');
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    "value",
+  )?.set;
+  inputs.forEach((node, i) => {
+    if (!(node instanceof HTMLInputElement) || i >= pin.length) return;
+    setter?.call(node, pin[i]);
+    node.dispatchEvent(new Event("input", { bubbles: true }));
+    node.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+}
+
 export function DemoAutopilotProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { switchPersona } = useAuth();
@@ -344,6 +393,11 @@ export function DemoAutopilotProvider({ children }: { children: React.ReactNode 
       const el = await moveCursorTo(step.target);
       await sleep(700); // let the cursor glide (CSS transition)
       if (abortRef.current) break;
+
+      if (step.typePin) {
+        fillDemoPin();
+        await sleep(400);
+      }
 
       if (step.click || step.action) {
         await pulseClick();

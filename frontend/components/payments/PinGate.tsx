@@ -132,6 +132,7 @@ export function PinGate({
             Cancel
           </Button>
           <Button
+            data-demo-target="pin-confirm"
             className="bg-ceyfi-green text-white hover:bg-ceyfi-deep"
             disabled={!ready}
             onClick={() => void submit()}
