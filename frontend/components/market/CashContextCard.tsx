@@ -2,17 +2,24 @@
 
 import Link from "next/link";
 import { Wallet } from "lucide-react";
+
+import { cashSharePct } from "@/lib/chime-market";
 import { formatLKR } from "@/lib/utils";
 
 export function CashContextCard({
   liquidLkr,
+  signalPrice,
   label,
   loading,
 }: {
   liquidLkr: number | null;
+  /** Last price of the signal — shown as %% of liquid cash (framing only). */
+  signalPrice?: number | null;
   label?: string;
   loading?: boolean;
 }) {
+  const share = cashSharePct(signalPrice, liquidLkr);
+
   return (
     <section className="rounded-[1.25rem] border border-ceyfi-line bg-card p-4 shadow-sm dark:border-white/10">
       <div className="flex items-start gap-3">
@@ -30,8 +37,22 @@ export function CashContextCard({
                 ? formatLKR(liquidLkr)
                 : "Unavailable"}
           </p>
+          {share != null ? (
+            <p className="mt-1 text-[13px] leading-snug text-foreground/90">
+              This ping is ~{share < 0.01 ? share.toFixed(3) : share.toFixed(2)}%
+              of your liquid estimate
+              {signalPrice != null ? (
+                <span className="text-muted-foreground">
+                  {" "}
+                  (one share ≈ {formatLKR(signalPrice)})
+                </span>
+              ) : null}
+              .
+            </p>
+          ) : null}
           <p className="mt-1 text-[12px] text-muted-foreground">
-            {label ?? "Liquid estimate from your Ceyfi snapshot — not a buy signal."}
+            {label ??
+              "Liquid estimate from your Ceyfi snapshot — framing only, not a buy signal."}
           </p>
           <Link
             href="/wallet"

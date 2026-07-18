@@ -53,7 +53,13 @@ CORS_ORIGINS=https://ceyfi-app.vercel.app,https://ceyfi.app
 USE_SEYLAN_REAL=false
 SEYLAN_API_KEY=...
 MPGS_ENABLE=false
+
+# Market ↔ Chime (optional; leave empty for persona mocks)
+CHIME_API_BASE=https://your-chime-host
+CHIME_DEMO_TELEGRAM_ID=123456789
 ```
+
+Set `CHIME_API_BASE` in production so `/market` serves live CSE watch/alerts/bars/disclosures from Chime instead of demo mocks.
 
 `CORS_ORIGINS` must include every frontend origin that calls the API when the backend is on a different host. Same-origin `/_/backend` does not need CORS. Code defaults also cover local dev ports `3000`/`3003`/`3005`.
 
