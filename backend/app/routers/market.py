@@ -389,6 +389,7 @@ def _enrich_watch_row(
     alerts: list[dict[str, Any]],
     fires: list[dict[str, Any]],
     sparkline: list[float] | None = None,
+    spark_bars: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     sym = row.get("symbol") or ""
     sym_alerts = [a for a in alerts if a.get("symbol") == sym and a.get("active", True)]
@@ -414,6 +415,8 @@ def _enrich_watch_row(
     out["activity"] = _activity_badge(len(sym_alerts), len(sym_fires))
     if sparkline is not None:
         out["sparkline"] = sparkline
+    if spark_bars is not None:
+        out["spark_bars"] = spark_bars
     return out
 
 
@@ -454,32 +457,85 @@ def _resolve_last_price(
     return _lookup_price(str(fire.get("symbol") or ""), uid)
 
 
-def _sparkline_closes(symbol: str, uid: str, limit: int = 20) -> list[float]:
-    bars = _mock_daily_bars(symbol, _lookup_price(symbol, uid), limit=limit)
+def _normalize_spark_bar(row: dict[str, Any]) -> dict[str, Any] | None:
+    """Sanitize one daily bar for home candlestick sparklines."""
+    close_raw = row.get("close", row.get("price"))
+    try:
+        close = float(close_raw)
+    except (TypeError, ValueError):
+        return None
+    if not (close > 0):
+        return None
+
+    def _opt(key: str) -> float | None:
+        v = row.get(key)
+        if v is None:
+            return None
+        try:
+            n = float(v)
+        except (TypeError, ValueError):
+            return None
+        return n if n > 0 else None
+
+    open_p = _opt("open")
+    high = _opt("high")
+    low = _opt("low")
+    open_for_bound = open_p if open_p is not None else close
+    if high is None:
+        high = max(open_for_bound, close)
+    if low is None:
+        low = min(open_for_bound, close)
+    high = max(high, open_for_bound, close)
+    low = min(low, open_for_bound, close)
+
+    trade_date = row.get("trade_date") or row.get("date")
+    if isinstance(trade_date, str) and len(trade_date) >= 10:
+        trade_date = trade_date[:10]
+    else:
+        trade_date = None
+
+    vol = row.get("volume")
+    try:
+        volume = float(vol) if vol is not None else None
+    except (TypeError, ValueError):
+        volume = None
+
+    return {
+        "trade_date": trade_date,
+        "open": round(open_p, 4) if open_p is not None else None,
+        "high": round(high, 4),
+        "low": round(low, 4),
+        "close": round(close, 4),
+        "volume": volume,
+    }
+
+
+def _closes_from_bars(bars: list[dict[str, Any]]) -> list[float]:
     return [float(b["close"]) for b in bars if b.get("close") is not None]
+
+
+async def _bars_for_symbol(symbol: str, uid: str, limit: int = 20) -> list[dict[str, Any]]:
+    """Prefer Chime daily OHLC; fall back to deterministic mock bars."""
+    symbol = symbol.upper()
+    path = f"/api/v1/symbols/{quote(symbol, safe='')}/daily-bars?limit={limit}"
+    live = await _chime_get(path)
+    raw = _unwrap_list(live, "bars", "items")
+    if raw:
+        bars: list[dict[str, Any]] = []
+        for b in raw:
+            if not isinstance(b, dict):
+                continue
+            norm = _normalize_spark_bar(b)
+            if norm:
+                bars.append(norm)
+        if bars:
+            return bars[-limit:]
+    return _mock_daily_bars(symbol, _lookup_price(symbol, uid), limit=limit)
 
 
 async def _sparkline_for_symbol(symbol: str, uid: str, limit: int = 20) -> list[float]:
     """Prefer Chime daily closes; fall back to deterministic mock path."""
-    symbol = symbol.upper()
-    path = f"/api/v1/symbols/{quote(symbol, safe='')}/daily-bars?limit={limit}"
-    live = await _chime_get(path)
-    bars = _unwrap_list(live, "bars", "items")
-    if bars:
-        closes: list[float] = []
-        for b in bars:
-            if not isinstance(b, dict):
-                continue
-            c = b.get("close", b.get("price"))
-            if c is None:
-                continue
-            try:
-                closes.append(float(c))
-            except (TypeError, ValueError):
-                continue
-        if closes:
-            return closes[-limit:]
-    return _sparkline_closes(symbol, uid, limit=limit)
+    return _closes_from_bars(await _bars_for_symbol(symbol, uid, limit=limit))
 
 
 async def _enrich_fire_card(
@@ -518,25 +574,35 @@ async def _enrich_fire_card(
                 "published_at": d0.get("published_at"),
             }
     if include_path:
-        spark = await _sparkline_for_symbol(str(fire.get("symbol") or ""), uid, limit=path_limit)
+        bars = await _bars_for_symbol(str(fire.get("symbol") or ""), uid, limit=path_limit)
+        closes = _closes_from_bars(bars)
         fire_date = str(fire.get("fired_at") or "")[:10] or None
+        points: list[dict[str, Any]] = []
+        for b in bars:
+            points.append(
+                {
+                    "date": b.get("trade_date"),
+                    "open": b.get("open"),
+                    "high": b.get("high"),
+                    "low": b.get("low"),
+                    "close": b.get("close"),
+                    "volume": b.get("volume"),
+                    "threshold": depth.get("threshold"),
+                    "is_fire_day": bool(
+                        fire_date and b.get("trade_date") == fire_date
+                    ),
+                }
+            )
+        # Mark last point as fire-day proxy when we lack an exact bar date match
+        if points and not any(p.get("is_fire_day") for p in points):
+            points[-1]["is_fire_day"] = True
         out["path"] = {
             "threshold": depth.get("threshold"),
             "fire_date": fire_date,
-            "closes": spark,
-            "points": [
-                {
-                    "date": None,
-                    "close": c,
-                    "threshold": depth.get("threshold"),
-                    "is_fire_day": False,
-                }
-                for c in spark
-            ],
+            "closes": closes,
+            "bars": bars,
+            "points": points,
         }
-        # Mark last point as fire-day proxy when we lack exact bar dates on sparkline
-        if out["path"]["points"]:
-            out["path"]["points"][-1]["is_fire_day"] = True
     return out
 
 
@@ -662,12 +728,20 @@ async def market_overview(authorization: str | None = Header(default=None)):
     uid = _user_from_auth(authorization)
     watch, alerts, fires, source = await _load_alerts_fires_watch(uid)
 
-    # Sparklines for watched symbols (home watchlist)
+    # OHLC candle sparklines for watched symbols (home watchlist)
     enriched: list[dict[str, Any]] = []
     for w in watch:
         sym = str(w.get("symbol") or "")
-        spark = await _sparkline_for_symbol(sym, uid, limit=20) if sym else []
-        enriched.append(_enrich_watch_row(w, alerts, fires, sparkline=spark))
+        bars = await _bars_for_symbol(sym, uid, limit=20) if sym else []
+        enriched.append(
+            _enrich_watch_row(
+                w,
+                alerts,
+                fires,
+                sparkline=_closes_from_bars(bars),
+                spark_bars=bars,
+            )
+        )
 
     # Richer fire cards (depth + disclosure snippet); focus fire also gets a path
     recent = fires[:5]

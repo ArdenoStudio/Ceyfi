@@ -8,7 +8,7 @@ import { ActivityBadge } from "@/components/market/ActivityBadge";
 import { CashContextCard } from "@/components/market/CashContextCard";
 import { FocusFireCard } from "@/components/market/FocusFireCard";
 import { NfaStrip } from "@/components/market/NfaStrip";
-import { Sparkline } from "@/components/market/Sparkline";
+import { CandleSpark } from "@/components/market/CandleSpark";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { buttonVariants } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -238,7 +238,13 @@ export default function MarketPage() {
                                 : ""}
                             </p>
                           </div>
-                          <Sparkline values={row.sparkline} />
+                          <CandleSpark
+                            bars={row.spark_bars}
+                            closes={row.sparkline}
+                            width={80}
+                            height={30}
+                            maxCandles={16}
+                          />
                           <div className="w-[4.5rem] shrink-0 text-right">
                             <p className="font-mono text-sm tabular-nums">
                               {row.price != null ? formatLKR(row.price) : "—"}
