@@ -28,8 +28,14 @@ async def test_market_overview_mock(client):
     assert comb["alert_count"] >= 1
     assert comb["activity"] in ("quiet", "active", "noisy")
     assert comb["last_fire"]["id"] == "f-1"
+    assert isinstance(comb.get("sparkline"), list) and len(comb["sparkline"]) >= 5
     assert len(data["fires"]) >= 1
     assert data["fires"][0]["id"] == "f-1"
+    assert data["fires"][0]["depth"]["status"] == "still_true"
+    assert data["focus_fire"]["id"] == "f-1"
+    assert data["focus_fire"]["path"]["closes"]
+    disc_fire = next(f for f in data["fires"] if f["id"] == "f-2")
+    assert disc_fire["disclosure_snippet"]["title"]
 
 
 @pytest.mark.asyncio
