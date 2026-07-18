@@ -95,6 +95,9 @@ const requiredSnippets = [
   ["app/manifest.ts", "/favicon.ico"],
   ["components/payments/PayHereButton.tsx", "Pay with PayHere"],
   ["components/layout/SiteFooter.tsx", "CEYFI"],
+  ["lib/urls.ts", "absoluteBackendUrl"],
+  ["lib/urls.ts", "isProtectedVercelDeploymentUrl"],
+  ["lib/urls.ts", "VERCEL_PROJECT_PRODUCTION_URL"],
 ];
 
 const missing = requiredFiles.filter((file) => !existsSync(join(root, file)));
