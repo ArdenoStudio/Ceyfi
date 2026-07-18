@@ -175,20 +175,11 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
       dwellMs: 6500,
     },
     {
-      route:
-        "/assistant?lang=si&prompt=" +
-        encodeURIComponent("මගේ ණය ගෙවීම කවදාද?"),
-      caption: "Ask in Sinhala — live balances and loan context",
-      say: "Back to Nimal. The assistant answers grounded in fixture data.",
-      prepare: () => switchPersona(PERSONA.nimal),
-      settleMs: 2000,
-      dwellMs: 8000,
-    },
-    {
       route: "/decisions?plan=d1",
       caption: "One ranked recommendation — execute with evidence",
-      say: "Ceyfi turns the whole picture into a single next best action.",
+      say: "Back to Nimal. Ceyfi turns the whole picture into a single next best action.",
       target: '[data-demo-target="decision-execute"]',
+      prepare: () => switchPersona(PERSONA.nimal),
       action: () => executeDecision(PERSONA.nimal, "d1"),
       settleMs: 1200,
       dwellMs: 6000,
