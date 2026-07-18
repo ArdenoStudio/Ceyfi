@@ -16,6 +16,7 @@ export type MarketWatchItem = {
   alert_count?: number;
   fire_count?: number;
   activity?: MarketActivity;
+  sparkline?: number[];
   last_fire?: {
     id?: string;
     type?: string;
@@ -85,6 +86,23 @@ export type MarketPathPoint = {
   is_fire_day?: boolean;
 };
 
+export type MarketFireCard = MarketFire & {
+  depth?: MarketFireDepth;
+  alert?: MarketAlert | null;
+  disclosure_snippet?: {
+    title?: string;
+    brief?: string | null;
+    brief_status?: string | null;
+    published_at?: string;
+  } | null;
+  path?: {
+    threshold?: number | null;
+    fire_date?: string | null;
+    closes?: number[];
+    points?: MarketPathPoint[];
+  } | null;
+};
+
 async function marketRequest<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { ...authHeaders() },
@@ -117,7 +135,8 @@ export async function getMarketOverview() {
     persona_blurb?: string;
     watchlist: MarketWatchItem[];
     alerts: MarketAlert[];
-    fires: MarketFire[];
+    fires: MarketFireCard[];
+    focus_fire?: MarketFireCard | null;
     as_of: string;
   }>("/api/market/overview");
 }
