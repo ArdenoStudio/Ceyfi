@@ -57,6 +57,14 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = "EXAVITQu4vr4xnSDxMaL"
 
+    # Gemini voice (TTS + STT). When gemini_api_key is set, the /api/tts and
+    # /api/stt routers prefer Gemini and fall back to ElevenLabs / OpenAI.
+    gemini_api_key: str = ""
+    gemini_tts_model: str = "gemini-2.5-flash-preview-tts"
+    gemini_tts_voice: str = "Kore"  # prebuilt voice; e.g. Kore, Aoede, Puck, Charon
+    gemini_stt_model: str = "gemini-2.5-flash"
+    gemini_chat_model: str = "gemini-2.5-flash"  # assistant + categorizer + business/loans LLM
+
     # Database (Neon PostgreSQL)
     database_url: str = ""
 
