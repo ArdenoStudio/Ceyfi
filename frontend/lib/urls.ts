@@ -77,16 +77,14 @@ export function absoluteBackendUrl(): string {
     process.env.NEXT_PUBLIC_API_BASE,
     process.env.NEXT_PUBLIC_API_URL,
   ];
-  for (let i = 0; i < candidates.length; i++) {
-    const candidate = candidates[i];
+  for (const candidate of candidates) {
     if (!isUsableBackendUrl(candidate)) continue;
     const cleaned = candidate.replace(/\/$/, "");
     if (!isAbsoluteHttpUrl(cleaned)) continue;
-    // Explicit BACKEND_URL wins even on a deploy host (operator override).
-    const isExplicitBackend = i === 0;
-    if (isExplicitBackend || !isProtectedVercelDeploymentUrl(cleaned)) {
-      return cleaned;
-    }
+    // Skip hashed *.vercel.app deploy hosts — they often have Deployment
+    // Protection / SSO and break server-side wallet proxies (401).
+    if (isProtectedVercelDeploymentUrl(cleaned)) continue;
+    return cleaned;
   }
 
   if (process.env.NODE_ENV !== "production") {
