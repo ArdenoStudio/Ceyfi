@@ -11,8 +11,9 @@
 
 ### Market (Chime-powered)
 
-- Routes: `/market`, `/market/watchlist`, `/market/alerts`, `/market/alerts/[id]`, `/market/symbol/[symbol]`
-- Backend: `GET /api/market/*` including symbol `bars`, `path`, `disclosures` — mock CSE payloads by default
+- Routes: `/market`, `/market/appetite`, `/market/watchlist`, `/market/alerts`, `/market/alerts/[id]`, `/market/symbol/[symbol]`
+- Backend: `GET /api/market/*` including `appetite`, symbol `bars`, `path`, `disclosures` — mock CSE payloads by default
+- Market Appetite: Chime CSE breadth composite (0–100) on `/market` + `/market/appetite`; proxies `GET /api/v1/appetite` when live
 - Optional live proxy: set `CHIME_API_BASE` (+ `CHIME_DEMO_TELEGRAM_ID`) on the backend (recommended in prod); see `docs/MARKET_CHIME.md`
 - Charts: path-to-alert line/area; candles when `candle_ok`. Filings via Chime disclosure briefs/PDFs.
 - NFA on every surface; broker CTA stays disabled (no order entry). Ceyfi never scrapes cse.lk.

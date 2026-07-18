@@ -42,6 +42,111 @@ async def test_market_overview_mock(client):
     assert data["focus_fire"]["path"]["points"][0].get("high") is not None
     disc_fire = next(f for f in data["fires"] if f["id"] == "f-2")
     assert disc_fire["disclosure_snippet"]["title"]
+    appetite = data["appetite"]
+    assert appetite["latest"]["score"] == pytest.approx(64.2, abs=0.05)
+    assert appetite["latest"]["band"] == "appetite"
+    assert appetite["deltas"]["d1"] == pytest.approx(1.4, abs=0.05)
+    assert len(appetite["history"]) >= 5
+    assert "not financial advice" in (appetite.get("disclaimer") or "").lower()
+
+
+@pytest.mark.asyncio
+async def test_market_appetite_mock(client):
+    resp = await client.get("/api/market/appetite?limit=30")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["source"] == "mock"
+    assert data["latest"]["score"] == pytest.approx(64.2, abs=0.05)
+    assert data["latest"]["band"] == "appetite"
+    assert data["latest"]["universe_n"] >= 100
+    assert data["deltas"]["d1"] == pytest.approx(1.4, abs=0.05)
+    assert data["days_in_band"] >= 1
+    assert len(data["history"]) == 30
+    # Ascending trade dates
+    dates = [row["trade_date"] for row in data["history"]]
+    assert dates == sorted(dates)
+    assert "breadth" in data["latest"]["components"]
+    assert "not financial advice" in data["disclaimer"].lower()
+    assert "not financial advice" in data["nfa"].lower()
+
+
+@pytest.mark.asyncio
+async def test_market_appetite_proxy_from_chime(client, monkeypatch):
+    monkeypatch.setattr(market_router, "CHIME_API_BASE", "http://chime.test")
+
+    async def fake_get(path: str):
+        if not path.startswith("/api/v1/appetite"):
+            return None
+        return {
+            "latest": {
+                "trade_date": "2026-07-16",
+                "score": 71.5,
+                "band": "appetite",
+                "components": {
+                    "breadth": 74.0,
+                    "intensity": 60.0,
+                    "index": 68.0,
+                    "participation": 55.0,
+                },
+                "source": "cse",
+                "universe_n": 290,
+                "advancers": 160,
+                "decliners": 100,
+                "unchanged": 30,
+                "aspi_change_pct": 0.8,
+                "computed_at": "2026-07-16T11:00:00Z",
+            },
+            "history": [
+                {
+                    "trade_date": "2026-07-15",
+                    "score": 68.0,
+                    "band": "appetite",
+                    "components": {
+                        "breadth": 70.0,
+                        "intensity": 58.0,
+                        "index": 65.0,
+                        "participation": 52.0,
+                    },
+                    "source": "cse",
+                    "universe_n": 288,
+                    "advancers": 150,
+                    "decliners": 110,
+                    "unchanged": 28,
+                    "aspi_change_pct": 0.4,
+                    "computed_at": "2026-07-15T11:00:00Z",
+                },
+                {
+                    "trade_date": "2026-07-16",
+                    "score": 71.5,
+                    "band": "appetite",
+                    "components": {
+                        "breadth": 74.0,
+                        "intensity": 60.0,
+                        "index": 68.0,
+                        "participation": 55.0,
+                    },
+                    "source": "cse",
+                    "universe_n": 290,
+                    "advancers": 160,
+                    "decliners": 100,
+                    "unchanged": 30,
+                    "aspi_change_pct": 0.8,
+                    "computed_at": "2026-07-16T11:00:00Z",
+                },
+            ],
+            "deltas": {"d1": 3.5, "d5": None, "d21": None},
+            "days_in_band": 2,
+            "disclaimer": "Chime research composite — not financial advice.",
+        }
+
+    monkeypatch.setattr(market_router, "_chime_get", fake_get)
+    resp = await client.get("/api/market/appetite")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["source"] == "chime"
+    assert data["latest"]["score"] == pytest.approx(71.5)
+    assert data["deltas"]["d1"] == pytest.approx(3.5)
+    assert data["days_in_band"] == 2
 
 
 @pytest.mark.asyncio

@@ -23,7 +23,7 @@ Built for **Cursor Buildathon Colombo 2026** by Ardeno Studio.
 | Module | Route | Persona |
 |--------|-------|---------|
 | Diaspora Family Wallet | `/wallet` | Nimal Fernando — diaspora parent |
-| **Market (Chime)** | `/market` | CSE watchlist + alerts + cash context — not a broker |
+| **Market (Chime)** | `/market` | Appetite meter + CSE watchlist + alerts + cash context — not a broker |
 | AI Assistant | `/assistant` | EN + Sinhala voice & chat |
 | Loan Dashboard | `/loans` | Sunil Bandara — borrower |
 | Business Bookkeeper | `/business` | Suresh Silva — SME owner |

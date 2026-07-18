@@ -17,6 +17,7 @@ const EXPECTED_CAPTION_FRAGMENTS = [
   "Pick a plan",
   "Household",
   "salary delay",
+  "Market Appetite",
   "CSE watchlist",
   "Alert detail",
   "financial health",
