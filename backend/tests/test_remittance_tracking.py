@@ -30,18 +30,44 @@ async def test_wallet_transfer_includes_tracking(client):
     )
     assert resp.status_code == 200
     data = resp.json()
-    assert data["status"] == "COMPLETED"
+    assert data["status"] in {"COMPLETED", "IN_TRANSIT"}
     tracking = data["tracking"]
     assert tracking is not None
     assert tracking["transfer_id"] == data["transfer_id"]
-    assert tracking["status"] == "COMPLETED"
+    assert tracking["status"] in {"COMPLETED", "IN_TRANSIT"}
     assert [s["id"] for s in tracking["steps"]] == [
         "initiated",
         "corridor",
         "clearing",
         "landed",
     ]
-    assert all(s["state"] == "done" for s in tracking["steps"])
+
+
+@pytest.mark.asyncio
+async def test_remittance_webhook_lands(client):
+    transfer = await client.post(
+        "/api/wallet/transfer",
+        json={
+            "sender_account_id": "SEY-USR-001",
+            "recipient_account_id": "SEY-ACC-002",
+            "amount_lkr": 2500,
+            "corridor": "GBPLKR",
+            "allocation_rules": [
+                {"bucket_id": "school", "pct": 40},
+                {"bucket_id": "household", "pct": 40},
+                {"bucket_id": "savings", "pct": 20},
+            ],
+        },
+    )
+    transfer_id = transfer.json()["transfer_id"]
+    resp = await client.post(
+        "/api/wallet/remittance/webhook",
+        json={"transfer_id": transfer_id, "step": "landed"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "COMPLETED"
+    assert resp.json()["current_step"] == "landed"
+    assert resp.json()["source"] == "bank_webhook"
 
 
 @pytest.mark.asyncio

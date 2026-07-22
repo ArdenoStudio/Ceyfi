@@ -16,6 +16,8 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { getProfileData } from "@/lib/api";
+import { useLocale } from "@/contexts/LocaleContext";
+import { LanguageToggle } from "@/components/assistant/LanguageToggle";
 import {
   Wallet,
   CreditCard,
@@ -27,6 +29,7 @@ import {
   Percent,
   Clock,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 function formatLKR(amount: number) {
   return `LKR ${Math.abs(amount).toLocaleString("en-LK")}`;
@@ -46,6 +49,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { userId, user } = useCurrentUser();
   const { offline } = useNetworkStatus();
+  const { t, locale, setLocale, scriptClassName } = useLocale();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +124,7 @@ export default function ProfilePage() {
 
       <div className="relative z-10 stagger space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
         <NetworkErrorBanner offline={offline} message={error} onRetry={loadProfile} />
-        <header className="relative overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-brand-lg backdrop-blur-xl sm:p-8 dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]">
+        <header className={cn("relative overflow-hidden rounded-[2rem] border border-border bg-card/90 p-6 shadow-brand-lg backdrop-blur-xl sm:p-8 dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]", scriptClassName)}>
           <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-ceyfi-green/25 blur-3xl" />
           <div className="relative flex flex-col items-center gap-5 sm:flex-row sm:items-center">
             <div className="relative">
@@ -131,10 +135,9 @@ export default function ProfilePage() {
               />
               <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-background bg-emerald-400 dark:border-[#0c0407]" />
             </div>
-            {/* Info */}
             <div className="text-center sm:text-left">
               <p className="mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-ceyfi-green">
-                My account
+                {t.profile.title}
               </p>
               <h1 className="font-heading text-2xl font-semibold text-foreground dark:text-white sm:text-4xl">
                 {profile.account_holder}
@@ -145,6 +148,15 @@ export default function ProfilePage() {
               <p className="mt-0.5 text-xs text-muted-foreground/80 dark:text-white/30">
                 User ID: {profile.user_id}
               </p>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <span className="text-xs text-muted-foreground">{t.profile.languagePreference}</span>
+                <LanguageToggle
+                  language={locale}
+                  onChange={setLocale}
+                  ariaLabel={t.common.language}
+                  size="sm"
+                />
+              </div>
             </div>
           </div>
         </header>

@@ -17,7 +17,13 @@ def _base_url(group: ServiceGroup) -> str:
 
 
 def _headers() -> dict:
+    # Gateway expects x-api-key (documented in seylan-hub-api-mapping.md).
     return {"x-api-key": settings.seylan_api_key, "Accept": "application/json"}
+
+
+def _tls_verify() -> bool:
+    """Verify TLS unless explicitly disabled for broken sandbox certs."""
+    return bool(settings.seylan_tls_verify)
 
 
 def assert_success(response: dict, wrapper_key: str) -> dict:
@@ -36,8 +42,8 @@ def assert_success(response: dict, wrapper_key: str) -> dict:
 
 async def seylan_get(group: ServiceGroup, path: str, params: dict) -> dict:
     url = f"{_base_url(group)}{path}"
-    log.info("Seylan GET %s params=%s", path, list(params.keys()))
-    async with httpx.AsyncClient(verify=False, timeout=15.0) as c:
+    log.info("Seylan GET %s params=%s verify=%s", path, list(params.keys()), _tls_verify())
+    async with httpx.AsyncClient(verify=_tls_verify(), timeout=15.0) as c:
         resp = await c.get(url, headers=_headers(), params=params)
         resp.raise_for_status()
         return resp.json()
@@ -45,8 +51,8 @@ async def seylan_get(group: ServiceGroup, path: str, params: dict) -> dict:
 
 async def seylan_post(group: ServiceGroup, path: str, body: dict) -> dict:
     url = f"{_base_url(group)}{path}"
-    log.info("Seylan POST %s", path)
-    async with httpx.AsyncClient(verify=False, timeout=15.0) as c:
+    log.info("Seylan POST %s verify=%s", path, _tls_verify())
+    async with httpx.AsyncClient(verify=_tls_verify(), timeout=15.0) as c:
         resp = await c.post(url, headers=_headers(), json=body)
         resp.raise_for_status()
         return resp.json()

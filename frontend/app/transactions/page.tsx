@@ -33,6 +33,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAccountContext } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useLocale } from "@/contexts/LocaleContext";
 import { lkrAxisTick } from "@/lib/chartUtils";
 import { useChartTheme } from "@/hooks/useChartTheme";
 import {
@@ -112,6 +113,7 @@ function enrichBasic(
 export default function TransactionsPage() {
   const { colors } = useChartTheme();
   const { userId } = useCurrentUser();
+  const { t, scriptClassName } = useLocale();
   const [transactions, setTransactions] = useState(FALLBACK_TRANSACTIONS);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
@@ -299,15 +301,15 @@ export default function TransactionsPage() {
         </div>
       ) : (
         <>
-      <header>
+      <header className={scriptClassName}>
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ceyfi-green">
-          Transaction analytics
+          {t.nav.transactions}
         </div>
         <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-[-0.035em] text-ceyfi-ink">
-          Follow every rupee
+          {t.transactions.title}
         </h1>
         <p className="mt-2 text-sm text-ceyfi-muted">
-          Overview, analytics, and a filterable ledger — all offline-ready.
+          {t.transactions.description}
         </p>
         {loadError ? (
           <div className="mt-4">

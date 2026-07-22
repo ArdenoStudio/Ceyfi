@@ -1,8 +1,11 @@
 "use client";
 
-import { Check, Circle, Loader2, X } from "lucide-react";
+import { Check, Circle, Loader2, MessageCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/contexts/LocaleContext";
+import { shareText } from "@/lib/share";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { RemittanceTracking } from "@/types";
 
 const STEP_LABEL_KEYS = [
@@ -123,6 +126,36 @@ export function RemittanceTracker({ tracking, className }: RemittanceTrackerProp
       </ol>
 
       <p className="mt-4 text-[11px] text-muted-foreground">{t.remittance.demoNote}</p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="mt-3 rounded-full"
+        onClick={() => {
+          void (async () => {
+            const statusLabel =
+              tracking.status === "FAILED"
+                ? t.remittance.statusFailed
+                : tracking.status === "COMPLETED"
+                  ? t.remittance.statusComplete
+                  : t.remittance.statusActive;
+            const text = tf(t.remittance.shareMessage, {
+              id: tracking.transfer_id,
+              status: statusLabel,
+              amount: Math.round(tracking.amount_lkr).toLocaleString("en-LK"),
+            });
+            const result = await shareText({
+              title: t.remittance.trackingTitle,
+              text,
+            });
+            if (result === "copied") toast.success(t.common.copy);
+            else if (result !== "failed") toast.success(t.remittance.shareStatus);
+          })();
+        }}
+      >
+        <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
+        {t.remittance.shareStatus}
+      </Button>
     </section>
   );
 }

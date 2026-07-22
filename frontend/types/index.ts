@@ -84,6 +84,7 @@ export interface RemittanceTracking {
   current_step: string;
   steps: RemittanceTrackStep[];
   updated_at: string;
+  started_at?: string | null;
   source?: string;
 }
 

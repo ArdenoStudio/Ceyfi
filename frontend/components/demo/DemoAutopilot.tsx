@@ -90,6 +90,22 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
     },
     {
       route: "/wallet",
+      caption: "Remittance path — initiated to landed",
+      say: "Sinhala and Tamil on the wallet — remittance path and sender guidance for blue-collar families.",
+      target: '[data-demo-target="remittance-tracker"]',
+      click: true,
+      settleMs: 1100,
+      dwellMs: 4500,
+    },
+    {
+      caption: "Guide how the family spends at home",
+      say: "Sender guidance keeps school, household, and savings on track after money lands.",
+      target: '[data-demo-target="sender-guidance"]',
+      click: true,
+      settleMs: 600,
+      dwellMs: 4000,
+    },
+    {
       caption: "Nimal sends GBP 600 home to Sri Lanka",
       say: "Demo remittance — school, household, and savings split on every transfer.",
       target: '[data-demo-target="wallet-send-money"]',
@@ -99,7 +115,7 @@ function buildSteps(switchPersona: (userId: string) => Promise<void>): DemoStep[
     },
     {
       caption: "Recipient gets LKR 244,980 — allocation rules applied",
-      say: "Card or demo mode. We simulate the corridor without real payouts.",
+      say: "Watch the corridor animate: initiated → clearing → landed.",
       target: '[data-demo-target="send-money-submit"]',
       click: true,
       settleMs: 700,

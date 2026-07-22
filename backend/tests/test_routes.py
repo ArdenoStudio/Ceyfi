@@ -143,10 +143,18 @@ async def test_wallet_transfer_valid(client):
     })
     assert resp.status_code == 200
     data = resp.json()
-    assert data["status"] == "COMPLETED"
+    assert data["status"] in {"COMPLETED", "IN_TRANSIT"}
     assert len(data["buckets_credited"]) == 3
     total = sum(b["amount_lkr"] for b in data["buckets_credited"])
     assert abs(total - 10000) < 0.001
+    assert data["tracking"] is not None
+    assert data["tracking"]["transfer_id"] == data["transfer_id"]
+    assert [s["id"] for s in data["tracking"]["steps"]] == [
+        "initiated",
+        "corridor",
+        "clearing",
+        "landed",
+    ]
 
 
 @pytest.mark.asyncio

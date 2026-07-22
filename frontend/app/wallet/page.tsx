@@ -22,6 +22,7 @@ import {
   ApiError,
   postTriggerSpend,
   getDemoRemittanceTrack,
+  getRemittanceTrack,
 } from "@/lib/api";
 import { toast } from "sonner";
 import { GBP_LKR_RATE, type RemittanceCurrency } from "@/lib/remittance-fx";
@@ -102,6 +103,29 @@ export default function WalletPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!tracking || tracking.status !== "IN_TRANSIT") return;
+    const transferId = tracking.transfer_id;
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const next = await getRemittanceTrack(transferId);
+        if (cancelled) return;
+        setTracking(next);
+        if (next.status === "COMPLETED") {
+          toast.success(t.remittance.landedToast);
+        }
+      } catch {
+        /* ignore poll errors */
+      }
+    };
+    const id = window.setInterval(() => void tick(), 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [tracking, t.remittance.landedToast]);
 
   const accountHolderRef = useRef("");
   const handleSpend = useCallback((tx: Transaction, newBalance: number) => {
@@ -422,7 +446,14 @@ export default function WalletPage() {
               corridor: currency ? `${currency.code} → LKR` : "GBP → LKR",
             });
           }
-          if (nextTracking) setTracking(nextTracking);
+          if (nextTracking) {
+            setTracking(nextTracking);
+            if (nextTracking.status === "IN_TRANSIT") {
+              toast.message(t.remittance.inTransitToast);
+            } else if (nextTracking.status === "COMPLETED") {
+              toast.success(t.remittance.landedToast);
+            }
+          }
           void refetch(true);
         }}
         open={modalOpen}

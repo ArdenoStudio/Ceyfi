@@ -41,6 +41,14 @@ class RemittanceTracking(BaseModel):
     steps: list[RemittanceTrackStep]
     updated_at: str
     source: str = "demo_tracker"
+    started_at: str | None = None
+
+
+class RemittanceWebhookRequest(BaseModel):
+    transfer_id: str = Field(..., min_length=1, max_length=64)
+    step: str = Field(..., description="initiated|corridor|clearing|landed|failed")
+    amount_lkr: float | None = Field(default=None, gt=0, le=50_000_000)
+    corridor: str | None = Field(default=None, max_length=16)
 
 
 class WalletTransferResponse(BaseModel):
