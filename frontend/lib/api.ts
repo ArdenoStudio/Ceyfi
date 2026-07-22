@@ -8,6 +8,7 @@
  */
 import { authHeaders } from "@/lib/auth";
 import { PRODUCTION_BACKEND_URL } from "@/lib/urls";
+import type { RemittanceTracking } from "@/types";
 
 function jsonHeaders(extra?: Record<string, string>): Record<string, string> {
   return {
@@ -182,7 +183,25 @@ export async function postWalletTransfer(payload: {
     const text = await res.text().catch(() => "Unknown error");
     throw new ApiError(res.status, text);
   }
-  return res.json();
+  return res.json() as Promise<{
+    transfer_id: string;
+    status: string;
+    amount_lkr: number;
+    timestamp: string;
+    buckets_credited: { bucket_id: string; amount_lkr: number }[];
+    note?: string | null;
+    tracking?: RemittanceTracking | null;
+  }>;
+}
+
+export async function getRemittanceTrack(transferId: string = "TRF-DEMO01") {
+  return request<RemittanceTracking>(
+    `/api/wallet/remittance/${encodeURIComponent(transferId)}/track`
+  );
+}
+
+export async function getDemoRemittanceTrack() {
+  return request<RemittanceTracking>("/api/wallet/remittance/demo/track");
 }
 
 export async function postDemoLoanPayment(payload: {

@@ -28,44 +28,46 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-
-const MOBILE_PRIMARY = [
-  { href: "/wallet", label: "Wallet", icon: Wallet },
-  { href: "/", label: "Overview", icon: LayoutDashboard },
-  { href: "/decisions", label: "Decide", icon: Zap },
-  { href: "/assistant", label: "AI", icon: Sparkles },
-];
-
-const MOBILE_MORE = [
-  { href: "/market", label: "Market", icon: LineChart },
-  { href: "/transactions", label: "Activity", icon: ArrowUpDown },
-  { href: "/loans", label: "Loans", icon: CreditCard },
-  { href: "/business", label: "Business", icon: BriefcaseBusiness },
-  { href: "/intelligence", label: "Intel", icon: Lightbulb },
-  { href: "/scenarios", label: "Scenarios", icon: FlaskConical },
-  { href: "/profile", label: "Profile", icon: User },
-  { href: "/metrics", label: "Metrics", icon: Activity },
-];
+import { useLocale } from "@/contexts/LocaleContext";
 
 export function MobileNav() {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
   const { user } = useAuth();
+  const { t, scriptClassName } = useLocale();
+
+  const mobilePrimary = [
+    { href: "/wallet", label: t.nav.wallet, icon: Wallet },
+    { href: "/", label: t.nav.overview, icon: LayoutDashboard },
+    { href: "/decisions", label: t.nav.decide, icon: Zap },
+    { href: "/assistant", label: t.nav.ai, icon: Sparkles },
+  ];
+
+  const mobileMore = [
+    { href: "/market", label: t.nav.market, icon: LineChart },
+    { href: "/transactions", label: t.nav.activity, icon: ArrowUpDown },
+    { href: "/loans", label: t.nav.loans, icon: CreditCard },
+    { href: "/business", label: t.nav.business, icon: BriefcaseBusiness },
+    { href: "/intelligence", label: t.nav.intel, icon: Lightbulb },
+    { href: "/scenarios", label: t.nav.scenarios, icon: FlaskConical },
+    { href: "/profile", label: t.nav.profile, icon: User },
+    { href: "/metrics", label: t.nav.metrics, icon: Activity },
+  ].filter((item) => item.href !== "/business" || user?.persona === "sme");
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
 
-  const mobileMore = MOBILE_MORE.filter(
-    (item) => item.href !== "/business" || user?.persona === "sme"
-  );
   const moreActive = mobileMore.some((item) => isActive(item.href));
 
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed inset-x-3 bottom-3 z-30 flex rounded-[22px] border border-border/80 bg-card/92 p-1.5 shadow-[0_16px_44px_rgba(5,46,22,0.12)] backdrop-blur-xl dark:bg-card/88 dark:shadow-[0_16px_44px_rgba(0,0,0,0.45)] md:hidden"
+      className={cn(
+        "fixed inset-x-3 bottom-3 z-30 flex rounded-[22px] border border-border/80 bg-card/92 p-1.5 shadow-[0_16px_44px_rgba(5,46,22,0.12)] backdrop-blur-xl dark:bg-card/88 dark:shadow-[0_16px_44px_rgba(0,0,0,0.45)] md:hidden",
+        scriptClassName
+      )}
     >
-      {MOBILE_PRIMARY.map((item) => {
+      {mobilePrimary.map((item) => {
         const active = isActive(item.href);
         return (
           <Link
@@ -82,17 +84,14 @@ export function MobileNav() {
             {active && !reduceMotion ? (
               <motion.span
                 layoutId="mobile-nav-pill"
-                className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15"
-                transition={{ type: "spring", stiffness: 520, damping: 34 }}
+                className="absolute inset-0 rounded-[16px] bg-primary/10"
+                transition={{ type: "spring", stiffness: 480, damping: 36 }}
               />
             ) : active ? (
-              <span className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15" />
+              <span className="absolute inset-0 rounded-[16px] bg-primary/10" />
             ) : null}
-            <item.icon
-              className="relative z-10 h-[18px] w-[18px]"
-              strokeWidth={active ? 2.2 : 1.8}
-            />
-            <span className="relative z-10 truncate">{item.label}</span>
+            <item.icon className="relative z-10 h-4 w-4" strokeWidth={1.8} />
+            <span className="relative z-10 truncate px-1">{item.label}</span>
           </Link>
         );
       })}
@@ -101,43 +100,30 @@ export function MobileNav() {
         <SheetTrigger
           render={
             <Button
+              type="button"
               variant="ghost"
               className={cn(
-                "relative flex h-auto min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[16px] py-2 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
-                moreActive ? "text-primary" : "text-muted-foreground",
+                "relative flex h-auto min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[16px] py-2 text-[10px] font-medium",
+                moreActive ? "text-primary" : "text-muted-foreground"
               )}
             />
           }
         >
-          {moreActive && !reduceMotion ? (
-            <motion.span
-              layoutId="mobile-nav-pill"
-              className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15"
-              transition={{ type: "spring", stiffness: 520, damping: 34 }}
-            />
-          ) : moreActive ? (
-            <span className="absolute inset-0 rounded-[16px] bg-primary/10 dark:bg-primary/15" />
-          ) : null}
-          <MoreHorizontal className="relative z-10 h-[18px] w-[18px]" />
-          <span className="relative z-10">More</span>
+          <MoreHorizontal className="h-4 w-4" />
+          <span>{t.nav.morePages}</span>
         </SheetTrigger>
-        <SheetContent side="bottom" className="rounded-t-[22px]">
+        <SheetContent side="bottom" className={cn("rounded-t-3xl", scriptClassName)}>
           <SheetHeader>
-            <SheetTitle>More pages</SheetTitle>
+            <SheetTitle>{t.nav.morePages}</SheetTitle>
           </SheetHeader>
-          <div className="grid grid-cols-3 gap-3 px-4 pb-6">
+          <div className="grid grid-cols-2 gap-2 px-4 pb-6">
             {mobileMore.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  "interactive-card flex flex-col items-center gap-2 rounded-xl border p-4 text-center text-xs font-medium",
-                  isActive(item.href)
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground",
-                )}
+                className="flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3 py-3 text-sm"
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-4 w-4 text-muted-foreground" />
                 {item.label}
               </Link>
             ))}

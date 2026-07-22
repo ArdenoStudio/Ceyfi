@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Bucket } from "@/types";
 import { ChevronDown, SlidersHorizontal, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface AllocationEditorProps {
   buckets: Bucket[];
@@ -15,13 +16,18 @@ interface AllocationEditorProps {
 }
 
 const BUCKET_ACCENT: Record<string, { dot: string; track: string }> = {
-  school:    { dot: "bg-blue-500",    track: "[&_[data-slot=slider-range]]:bg-blue-500" },
+  school: { dot: "bg-blue-500", track: "[&_[data-slot=slider-range]]:bg-blue-500" },
   household: { dot: "bg-emerald-500", track: "[&_[data-slot=slider-range]]:bg-emerald-500" },
-  savings:   { dot: "bg-violet-500",  track: "[&_[data-slot=slider-range]]:bg-violet-500" },
+  savings: { dot: "bg-violet-500", track: "[&_[data-slot=slider-range]]:bg-violet-500" },
 };
 const FALLBACK_ACCENT = { dot: "bg-slate-400", track: "" };
 
-export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: AllocationEditorProps) {
+export function AllocationEditor({
+  buckets,
+  onSave,
+  defaultExpanded = false,
+}: AllocationEditorProps) {
+  const { t, scriptClassName } = useLocale();
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [allocations, setAllocations] = useState<Record<string, number>>(
     Object.fromEntries(buckets.map((b) => [b.bucket_id, b.allocation_pct]))
@@ -39,7 +45,8 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
     if (othersTotal === 0) {
       const share = Math.round(remaining / others.length);
       others.forEach(([id], i) => {
-        updated[id] = i === others.length - 1 ? remaining - share * (others.length - 1) : share;
+        updated[id] =
+          i === others.length - 1 ? remaining - share * (others.length - 1) : share;
       });
     } else {
       others.forEach(([id, v]) => {
@@ -54,8 +61,7 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
   }
 
   return (
-    <Card className="card-glass shadow-brand border-0 overflow-hidden">
-      {/* Accordion toggle */}
+    <Card className={cn("card-glass shadow-brand border-0 overflow-hidden", scriptClassName)}>
       <button
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
@@ -65,7 +71,9 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-ceyfi-sprout border border-ceyfi-line dark:bg-white/[0.08] dark:border-white/[0.10]">
             <SlidersHorizontal className="h-3.5 w-3.5 text-ceyfi-deep dark:text-white/60" />
           </div>
-          <span className="text-sm font-semibold text-ceyfi-ink dark:text-white">Allocation Rules</span>
+          <span className="text-sm font-semibold text-ceyfi-ink dark:text-white">
+            {expanded ? t.allocation.collapse : t.allocation.expand}
+          </span>
         </div>
         <ChevronDown
           className={cn(
@@ -77,17 +85,32 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
 
       {expanded && (
         <CardContent className="border-t border-ceyfi-line/60 dark:border-white/[0.06] px-5 pb-5 pt-4">
+          <div className="mb-4">
+            <p className="font-heading text-base font-semibold text-ceyfi-ink dark:text-white">
+              {t.allocation.title}
+            </p>
+            <p className="text-xs text-muted-foreground">{t.allocation.subtitle}</p>
+          </div>
           <div className="space-y-5">
             {buckets.map((bucket) => {
               const key = bucket.icon ?? bucket.label.toLowerCase();
               const accent = BUCKET_ACCENT[key] ?? FALLBACK_ACCENT;
               const pct = allocations[bucket.bucket_id] ?? 0;
+              const localizedLabel = key.includes("school")
+                ? t.buckets.school
+                : key.includes("household")
+                  ? t.buckets.household
+                  : key.includes("saving")
+                    ? t.buckets.savings
+                    : bucket.label;
               return (
                 <div key={bucket.bucket_id} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={cn("h-2 w-2 rounded-full shrink-0", accent.dot)} />
-                      <span className="text-sm font-medium text-ceyfi-ink dark:text-white">{bucket.label}</span>
+                      <span className="text-sm font-medium text-ceyfi-ink dark:text-white">
+                        {localizedLabel}
+                      </span>
                     </div>
                     <span className="font-heading text-sm font-bold text-ceyfi-ink dark:text-white tabular-nums">
                       {pct}%
@@ -107,9 +130,13 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
             })}
           </div>
 
-          {/* Footer */}
           <div className="mt-5 flex items-center justify-between gap-3 border-t border-ceyfi-line/60 dark:border-white/[0.06] pt-4">
-            <div className={cn("flex items-center gap-1.5 text-sm font-medium", isValid ? "text-emerald-600" : "text-red-600")}>
+            <div
+              className={cn(
+                "flex items-center gap-1.5 text-sm font-medium",
+                isValid ? "text-emerald-600" : "text-red-600"
+              )}
+            >
               {isValid ? (
                 <CheckCircle2 className="h-4 w-4" />
               ) : (
@@ -118,7 +145,7 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
               <span className="tabular-nums">Total: {total}%</span>
               {!isValid && (
                 <span className="text-xs font-normal opacity-75">
-                  (must equal 100%)
+                  ({t.allocation.mustSum100})
                 </span>
               )}
             </div>
@@ -128,7 +155,7 @@ export function AllocationEditor({ buckets, onSave, defaultExpanded = false }: A
               onClick={() => onSave(allocations)}
               className="rounded-full"
             >
-              Save Rules
+              {t.allocation.saveRules}
             </Button>
           </div>
         </CardContent>

@@ -24,6 +24,7 @@ import {
   type MarketWatchItem,
 } from "@/lib/chime-market";
 import { cn, formatLKR } from "@/lib/utils";
+import { useLocale } from "@/contexts/LocaleContext";
 
 function statusLabel(status?: string) {
   if (status === "still_true") return "Still true";
@@ -48,6 +49,7 @@ type Selection =
 
 export default function MarketPage() {
   const { userId, loading: authLoading } = useCurrentUser();
+  const { t } = useLocale();
   const [watch, setWatch] = useState<MarketWatchItem[]>([]);
   const [alerts, setAlerts] = useState<MarketAlert[]>([]);
   const [fires, setFires] = useState<MarketFireCard[]>([]);
@@ -150,6 +152,9 @@ export default function MarketPage() {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <span
+              title={
+                source === "chime" ? t.market.chimeLiveHint : t.market.chimeDemoHint
+              }
               className={cn(
                 "rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]",
                 source === "chime"

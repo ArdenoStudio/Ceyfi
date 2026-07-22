@@ -26,6 +26,23 @@ class BucketCredit(BaseModel):
     amount_lkr: float
 
 
+class RemittanceTrackStep(BaseModel):
+    id: str
+    state: str
+    at: str | None = None
+
+
+class RemittanceTracking(BaseModel):
+    transfer_id: str
+    status: str
+    amount_lkr: float
+    corridor: str
+    current_step: str
+    steps: list[RemittanceTrackStep]
+    updated_at: str
+    source: str = "demo_tracker"
+
+
 class WalletTransferResponse(BaseModel):
     transfer_id: str
     status: str
@@ -33,6 +50,7 @@ class WalletTransferResponse(BaseModel):
     timestamp: str
     buckets_credited: list[BucketCredit]
     note: str | None = None
+    tracking: RemittanceTracking | None = None
 
 
 class ChatMessage(BaseModel):

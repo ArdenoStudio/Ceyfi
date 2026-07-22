@@ -39,13 +39,19 @@ import { VerificationCard } from "@/components/ui/verification-card";
 import { CurrencyExchangeCard } from "@/components/wallet/CurrencyExchangeCard";
 import { PinGate } from "@/components/payments/PinGate";
 import { PaymentReceipt } from "@/components/payments/PaymentReceipt";
+import type { RemittanceTracking } from "@/types";
 
 interface SendMoneyModalProps {
   senderId: string;
   recipientId: string;
   recipientAccountHolder: string;
   allocations: Record<string, number>;
-  onSuccess: (amountLkr?: number, amountGbp?: number, currency?: RemittanceCurrency) => void;
+  onSuccess: (
+    amountLkr?: number,
+    amountGbp?: number,
+    currency?: RemittanceCurrency,
+    tracking?: RemittanceTracking | null
+  ) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -173,7 +179,7 @@ export function SendMoneyModal({
         amount_lkr: amountLkr,
         corridor: `${currency.code}->LKR`,
         allocation_rules: allocations,
-      }) as { transfer_id?: string; status?: string; note?: string };
+      });
       if (transfer?.status === "FAILED") {
         setPinOpen(false);
         toast.error(transfer.note || "Transfer failed. Please try again.");
@@ -203,7 +209,7 @@ export function SendMoneyModal({
           </div>
         </div>
       ), { duration: 4000 });
-      onSuccess(amountLkr, amount, currency);
+      onSuccess(amountLkr, amount, currency, transfer.tracking ?? null);
     } catch (err) {
       setPinOpen(false);
       const msg = err instanceof Error ? err.message : "";

@@ -29,7 +29,8 @@ export function VoiceButton({ language, onTranscript, disabled }: VoiceButtonPro
 
   if (!supported) return null;
 
-  const lang = language === "si" ? "si-LK" : "en-US";
+  const lang =
+    language === "si" ? "si-LK" : language === "ta" ? "ta-LK" : "en-US";
   const errorLabel = error ? (MIC_ERROR_LABELS[error] ?? "Mic error — click to retry") : null;
 
   function handleClick() {

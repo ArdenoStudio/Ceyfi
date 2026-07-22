@@ -18,6 +18,12 @@
 - Charts: path-to-alert line/area; candles when `candle_ok`. Filings via Chime disclosure briefs/PDFs.
 - NFA on every surface; broker CTA stays disabled (no order entry). Ceyfi never scrapes cse.lk.
 
+### Localisation & remittance
+
+- App chrome EN / Sinhala / Tamil via `frontend/lib/i18n` + `LocaleProvider` (sidebar language toggle)
+- Remittance path tracking: `GET /api/wallet/remittance/*/track` — see `docs/BANK_PARTNERSHIP.md`
+- Bank rails stay behind `USE_SEYLAN_REAL`; one-partner strategy documented in `docs/BANK_PARTNERSHIP.md`
+
 ### Running the app
 
 - **Mock mode (default, no secrets needed):** Frontend runs standalone with hardcoded demo data when `NEXT_PUBLIC_USE_MOCK=true`.

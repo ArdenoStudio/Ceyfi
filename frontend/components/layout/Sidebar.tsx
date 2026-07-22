@@ -19,37 +19,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { LanguageToggle } from "@/components/assistant/LanguageToggle";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
 import { CeyfiLogoIcon } from "@/components/brand/CeyfiLogoIcon";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocale } from "@/contexts/LocaleContext";
 import { cn } from "@/lib/utils";
-
-const NAV_GROUPS = [
-  {
-    label: "My Money",
-    items: [
-      { href: "/", label: "Overview", icon: LayoutDashboard },
-      { href: "/wallet", label: "Wallet", icon: Wallet },
-      { href: "/market", label: "Market", icon: LineChart },
-      { href: "/transactions", label: "Transactions", icon: ArrowUpDown },
-      { href: "/loans", label: "Loans", icon: CreditCard },
-      { href: "/business", label: "Business", icon: BriefcaseBusiness },
-    ],
-  },
-  {
-    label: "Intelligence",
-    items: [
-      { href: "/intelligence", label: "Intelligence", icon: Lightbulb },
-      { href: "/scenarios", label: "Scenarios", icon: FlaskConical },
-      { href: "/decisions", label: "Decisions", icon: Zap },
-      { href: "/assistant", label: "CEYFI AI", icon: Sparkles },
-    ],
-  },
-];
-
-const SYSTEM_ITEMS = [
-  { href: "/metrics", label: "Metrics", icon: Activity },
-];
 
 function NavLink({
   href,
@@ -76,7 +51,6 @@ function NavLink({
           : "text-sidebar-foreground/52 hover:text-sidebar-accent-foreground"
       )}
     >
-      {/* Animated active background — slides between items */}
       {active ? (
         <motion.span
           {...(animate ? { layoutId: "sidebar-active-pill" } : {})}
@@ -87,7 +61,6 @@ function NavLink({
         <span className="absolute inset-0 rounded-xl bg-transparent transition-colors duration-200 group-hover:bg-sidebar-accent/45" />
       )}
 
-      {/* Left accent bar on the active item */}
       {active ? (
         <motion.span
           {...(animate ? { layoutId: "sidebar-active-bar" } : {})}
@@ -122,21 +95,51 @@ function NavLink({
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { t, locale, setLocale, scriptClassName } = useLocale();
   const reduceMotion = useReducedMotion();
   const animate = !reduceMotion;
   const personaLabel =
     user?.persona === "sme"
-      ? "SME profile"
+      ? t.nav.smeProfile
       : user?.persona === "borrower"
-        ? "Borrower profile"
-        : "Diaspora profile";
+        ? t.nav.borrowerProfile
+        : t.nav.diasporaProfile;
+
+  const navGroups = [
+    {
+      label: t.nav.myMoney,
+      items: [
+        { href: "/", label: t.nav.overview, icon: LayoutDashboard },
+        { href: "/wallet", label: t.nav.wallet, icon: Wallet },
+        { href: "/market", label: t.nav.market, icon: LineChart },
+        { href: "/transactions", label: t.nav.transactions, icon: ArrowUpDown },
+        { href: "/loans", label: t.nav.loans, icon: CreditCard },
+        { href: "/business", label: t.nav.business, icon: BriefcaseBusiness },
+      ],
+    },
+    {
+      label: t.nav.intelligence,
+      items: [
+        { href: "/intelligence", label: t.nav.intelligencePage, icon: Lightbulb },
+        { href: "/scenarios", label: t.nav.scenarios, icon: FlaskConical },
+        { href: "/decisions", label: t.nav.decisions, icon: Zap },
+        { href: "/assistant", label: t.nav.assistant, icon: Sparkles },
+      ],
+    },
+  ];
+
+  const systemItems = [{ href: "/metrics", label: t.nav.metrics, icon: Activity }];
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[17.5rem] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
-      {/* Ambient brand glow */}
+    <aside
+      className={cn(
+        "fixed inset-y-0 left-0 z-30 hidden w-[17.5rem] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex",
+        scriptClassName
+      )}
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(120%_70%_at_15%_0%,rgba(52,211,153,0.16),transparent_70%)] dark:bg-[radial-gradient(120%_70%_at_15%_0%,rgba(224,175,73,0.14),transparent_70%)]"
@@ -150,10 +153,10 @@ export function Sidebar() {
           />
           <span>
             <span className="block font-heading text-base font-bold tracking-[0.16em]">
-              CEYFI
+              {t.common.ceyfi}
             </span>
             <span className="block text-[11px] text-sidebar-foreground/42">
-              Financial clarity workspace
+              {t.nav.tagline}
             </span>
           </span>
         </Link>
@@ -165,13 +168,15 @@ export function Sidebar() {
           className="interactive-card flex items-center gap-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/50 p-3 transition-all duration-200 hover:border-sidebar-ring/25 hover:bg-sidebar-accent"
         >
           <PersonaAvatar
-            name={user?.name ?? "Demo user"}
+            name={user?.name ?? t.nav.demoUser}
             persona={user?.persona}
             size="sm"
             className="rounded-[14px]"
           />
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">{user?.name ?? "Demo user"}</div>
+            <div className="truncate text-sm font-semibold">
+              {user?.name ?? t.nav.demoUser}
+            </div>
             <div className="truncate text-[10px] text-sidebar-foreground/38">
               {personaLabel}
             </div>
@@ -188,10 +193,10 @@ export function Sidebar() {
             aria-hidden
             className="absolute bottom-8 left-[var(--nav-icon-rail)] top-8 w-px -translate-x-1/2 bg-gradient-to-b from-sidebar-ring/35 via-sidebar-border to-transparent"
           />
-          {NAV_GROUPS.map((group, groupIndex) => (
+          {navGroups.map((group, groupIndex) => (
             <div
               key={group.label}
-              className={cn("mb-6", groupIndex === NAV_GROUPS.length - 1 && "mb-5")}
+              className={cn("mb-6", groupIndex === navGroups.length - 1 && "mb-5")}
             >
               <div className="mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/28">
                 {group.label}
@@ -215,10 +220,10 @@ export function Sidebar() {
 
           <div className="mt-auto border-t border-sidebar-border pt-4">
             <div className="mb-2 px-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/28">
-              System
+              {t.nav.system}
             </div>
             <div className="space-y-1">
-              {SYSTEM_ITEMS.map((item) => (
+              {systemItems.map((item) => (
                 <NavLink
                   key={item.href}
                   href={item.href}
@@ -234,8 +239,21 @@ export function Sidebar() {
       </LayoutGroup>
 
       <div className="relative border-t border-sidebar-border px-4 py-5">
+        <div className="mb-3 flex items-center justify-between gap-2 px-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">
+            {t.common.language}
+          </span>
+          <LanguageToggle
+            language={locale}
+            onChange={setLocale}
+            ariaLabel={t.common.language}
+            size="sm"
+          />
+        </div>
         <div className="mb-3 flex items-center justify-between px-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">Theme</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">
+            {t.common.theme}
+          </span>
           <ThemeToggle />
         </div>
         <button
@@ -244,17 +262,17 @@ export function Sidebar() {
           className="interactive-press mb-3 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] text-sidebar-foreground/45 transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           <LogOut className="h-3.5 w-3.5" aria-hidden />
-          Switch persona
+          {t.common.switchPersona}
         </button>
         <div className="flex items-center gap-2 px-2 text-[11px] leading-none text-sidebar-foreground/32">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sidebar-ring/70" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sidebar-ring" />
           </span>
-          Demo data connected
+          {t.common.demoDataConnected}
         </div>
         <div className="mt-1 px-2 text-[10px] text-sidebar-foreground/20">
-          CEYFI · Demo workspace
+          {t.common.demoWorkspace}
         </div>
       </div>
     </aside>
