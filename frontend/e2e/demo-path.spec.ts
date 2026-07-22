@@ -49,9 +49,10 @@ test.describe("CEYFI demo path", () => {
     await expect(page.getByRole("heading", { name: "CEYFI" })).toBeVisible({
       timeout: 20000,
     });
-    await expect(page.getByText("A CEYFI financial intelligence demo")).toBeVisible({
+    await expect(page.getByText("Pick a language before you continue")).toBeVisible({
       timeout: 20000,
     });
+    await expect(page.getByText("Choose a persona")).toBeVisible({ timeout: 20000 });
     await expect(page.getByText("Nimal Fernando")).toBeVisible({ timeout: 20000 });
   });
 });
