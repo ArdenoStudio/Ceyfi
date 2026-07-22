@@ -9,12 +9,20 @@ from app.config import settings
 from app.models.schemas import (
     AllocationRule,
     BucketCredit,
+    RemittanceTracking,
+    RemittanceWebhookRequest,
     SaveAllocationRulesRequest,
     WalletTransferRequest,
     WalletTransferResponse,
 )
 from app.services import supabase_client
 from app.services.auth import assert_transfer_access, assert_user_access
+from app.services.remittance_tracking import (
+    apply_webhook_step,
+    build_tracking,
+    get_tracking,
+    seed_demo_track,
+)
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["wallet"])
@@ -95,7 +103,8 @@ async def wallet_transfer(req: WalletTransferRequest, request: Request):
         log.warning("Failed to persist allocation rule: %s", exc)
 
     # Real bank transfer when enabled — uses configured sandbox test accounts
-    status = "COMPLETED"
+    # Demo path returns IN_TRANSIT so the UI can animate initiated → landed.
+    status = "IN_TRANSIT"
     note: str | None = None
     if settings.seylan_enable_transfers and settings.use_seylan_real:
         try:
@@ -109,19 +118,31 @@ async def wallet_transfer(req: WalletTransferRequest, request: Request):
                 dst_narration=f"Family wallet — {req.corridor}",
             )
             log.info("Seylan transfer succeeded: ref=%s", result.get("transaction_reference"))
+            status = "COMPLETED"
             note = "Seylan sandbox transfer completed"
         except Exception as exc:
             log.error("Seylan transfer failed: %s — not claiming COMPLETED", exc)
+            failed_ts = datetime.now(timezone.utc).isoformat()
+            tracking = RemittanceTracking(
+                **build_tracking(
+                    transfer_id,
+                    status="FAILED",
+                    amount_lkr=float(req.amount_lkr),
+                    corridor=req.corridor,
+                    timestamp=failed_ts,
+                )
+            )
             return WalletTransferResponse(
                 transfer_id=transfer_id,
                 status="FAILED",
                 amount_lkr=req.amount_lkr,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=failed_ts,
                 buckets_credited=[],
                 note="Seylan transfer failed — funds were not moved",
+                tracking=tracking,
             )
     else:
-        note = "Demo transfer (Seylan transfers not enabled)"
+        note = "Demo transfer in transit (Seylan transfers not enabled)"
 
     # Record per-bucket credits so Supabase realtime and bucket balances stay consistent
     try:
@@ -140,15 +161,62 @@ async def wallet_transfer(req: WalletTransferRequest, request: Request):
     except Exception as exc:
         log.warning("Failed to record transfer transaction: %s", exc)
 
+    ts = datetime.now(timezone.utc).isoformat()
+    tracking = RemittanceTracking(
+        **build_tracking(
+            transfer_id,
+            status=status,
+            amount_lkr=float(req.amount_lkr),
+            corridor=req.corridor,
+            timestamp=ts,
+            force_complete=status == "COMPLETED",
+        )
+    )
     log.info("wallet_transfer sender=%s amount=%s status=%s", req.sender_account_id, req.amount_lkr, status)
     return WalletTransferResponse(
         transfer_id=transfer_id,
         status=status,
         amount_lkr=req.amount_lkr,
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=ts,
         buckets_credited=buckets_credited,
         note=note,
+        tracking=tracking,
     )
+
+
+@router.get("/wallet/remittance/{transfer_id}/track", response_model=RemittanceTracking)
+async def remittance_track(transfer_id: str):
+    """Multi-step remittance path (initiated → corridor → clearing → landed)."""
+    track = get_tracking(transfer_id)
+    if track:
+        return RemittanceTracking(**track)
+    # Demo fallback so the wallet UI can show a completed path without a fresh send
+    if transfer_id.upper() in {"TRF-DEMO01", "LAST", "DEMO"}:
+        return RemittanceTracking(**seed_demo_track(transfer_id.upper() if transfer_id.upper().startswith("TRF") else "TRF-DEMO01"))
+    raise HTTPException(status_code=404, detail="Remittance track not found")
+
+
+@router.get("/wallet/remittance/demo/track", response_model=RemittanceTracking)
+async def remittance_demo_track():
+    """Seeded completed remittance path for diaspora wallet demos."""
+    return RemittanceTracking(**seed_demo_track())
+
+
+@router.post("/wallet/remittance/webhook", response_model=RemittanceTracking)
+async def remittance_webhook(req: RemittanceWebhookRequest):
+    """Bank/partner webhook to advance clearing → landed (or fail)."""
+    track = apply_webhook_step(
+        req.transfer_id,
+        step=req.step,
+        amount_lkr=req.amount_lkr,
+        corridor=req.corridor,
+    )
+    if not track:
+        raise HTTPException(
+            status_code=404,
+            detail="Unknown transfer_id — create a transfer first or pass amount_lkr",
+        )
+    return RemittanceTracking(**track)
 
 
 @router.post("/wallet/rules/{sender_id}")

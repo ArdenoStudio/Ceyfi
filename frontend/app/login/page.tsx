@@ -8,8 +8,10 @@ import { API_BASE } from "@/lib/api";
 import type { DemoPersona } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { LanguageToggle } from "@/components/assistant/LanguageToggle";
 import { PersonaAvatar } from "@/components/ui/PersonaAvatar";
 import { CeyfiLogoIcon } from "@/components/brand/CeyfiLogoIcon";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const FALLBACK_PERSONAS: DemoPersona[] = [
   {
@@ -43,6 +45,7 @@ const FALLBACK_PERSONAS: DemoPersona[] = [
 
 export default function LoginPage() {
   const { login, user } = useAuth();
+  const { t, locale, setLocale, scriptClassName } = useLocale();
   const [personas, setPersonas] = useState<DemoPersona[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,16 +66,16 @@ export default function LoginPage() {
     try {
       await login(userId);
     } catch {
-      setError("Could not sign in. Check that the backend is running.");
+      setError(t.login.signInError);
     } finally {
       setLoading(null);
     }
   }
 
   const personaLabels = {
-    diaspora: "Diaspora wallet",
-    borrower: "Loan dashboard",
-    sme: "Business bookkeeper",
+    diaspora: t.login.diaspora,
+    borrower: t.login.borrower,
+    sme: t.login.sme,
   } as const;
 
   const motionOn = ready && !reduceMotion;
@@ -87,15 +90,21 @@ export default function LoginPage() {
       <div className="ambient-login pointer-events-none absolute inset-0" aria-hidden />
 
       <motion.div
-        className="absolute right-4 top-4 z-20"
+        className="absolute right-4 top-4 z-20 flex items-center gap-2"
         initial={motionOn ? { opacity: 0, y: -8 } : false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.4 }}
       >
+        <LanguageToggle
+          language={locale}
+          onChange={setLocale}
+          ariaLabel={t.common.language}
+          size="sm"
+        />
         <ThemeToggle variant="standalone" />
       </motion.div>
 
-      <div className="relative z-10 w-full max-w-lg">
+      <div className={cn("relative z-10 w-full max-w-lg", scriptClassName)}>
         <motion.div
           className="text-center"
           initial={motionOn ? { opacity: 0, y: 14 } : false}
@@ -104,11 +113,11 @@ export default function LoginPage() {
         >
           <CeyfiLogoIcon size={56} priority className="mx-auto shadow-brand-lg" />
           <h1 className="mt-4 font-heading text-3xl font-semibold tracking-tight text-foreground">
-            CEYFI
+            {t.common.ceyfi}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Clarity for every rupee</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t.overview.title}</p>
           <p className="mt-3 text-xs text-muted-foreground/80">
-            A CEYFI financial intelligence demo
+            {t.login.languageHint}
           </p>
         </motion.div>
 
@@ -123,10 +132,10 @@ export default function LoginPage() {
             Demo environment
           </div>
           <h2 className="font-heading text-lg font-semibold text-foreground">
-            Choose a persona
+            {t.login.choosePersona}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Three Sri Lankan banking journeys — diaspora, borrower, and SME.
+            {t.login.subtitle}
           </p>
 
           <div className="mt-5 space-y-3">

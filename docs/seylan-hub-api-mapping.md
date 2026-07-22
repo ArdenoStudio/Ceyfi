@@ -11,8 +11,9 @@ Pydantic BaseSettings reads these from environment; names are **`UPPER_SNAKE_CAS
 | `USE_SEYLAN_REAL` | `false` | When `true`, eligible code paths attempt live Seylan gateway calls instead of mocks-only behaviour. |
 | `SEYLAN_ENABLE_TRANSFERS` | `false` | Enables `transfer_funds` from [`wallet.py`](../../backend/app/routers/wallet.py) POST `/api/wallet/transfer`. |
 | `SEYLAN_ENABLE_MERCHANT_QR` | `false` | Reserved for routers that expose QR generation (wired from [`qr.py`](../../backend/app/seylan/qr.py) once routes are enabled). |
+| `SEYLAN_TLS_VERIFY` | `true` | Verify TLS certificates on Seylan HTTPS gateway calls. Set `false` only for broken sandbox certs on local UAT. |
 
-**Note:** Effective internal transfer additionally requires **`USE_SEYLAN_REAL=true`** in the wallet route.
+**Note:** Effective internal transfer requires **both** `USE_SEYLAN_REAL=true` **and** `SEYLAN_ENABLE_TRANSFERS=true` in the wallet route. One flag alone is not enough.
 
 ## Gateway and credentials
 
@@ -20,7 +21,8 @@ Pydantic BaseSettings reads these from environment; names are **`UPPER_SNAKE_CAS
 |----------|-------------|
 | `SEYLAN_GATEWAY_DEFAULT` | Default host for inquiries, postings, Merchant QR (`ServiceGroup.DEFAULT` in [`client.py`](../../backend/app/seylan/client.py)). |
 | `SEYLAN_GATEWAY_QR` | Alternate base used when client uses `ServiceGroup.QR`. |
-| `SEYLAN_API_KEY` | Sent as HTTP header `api_key` on every gateway request (see [`client.py`](../../backend/app/seylan/client.py)). |
+| `SEYLAN_API_KEY` | Sent as HTTP header `x-api-key` on every gateway request (see [`client.py`](../../backend/app/seylan/client.py)). |
+| `SEYLAN_TLS_VERIFY` | Passed through to the HTTP client verify flag (default `true`). |
 
 ### Merchant QR (`qr.py`)
 

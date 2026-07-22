@@ -20,6 +20,7 @@ import { ConnectionDiagramSkeleton } from "@/components/lazy/LazySkeletons";
 import { FaqSection } from "@/components/blocks/FaqSection";
 import { getFamilyWallet } from "@/lib/api";
 import { useChartTheme } from "@/hooks/useChartTheme";
+import { useLocale } from "@/contexts/LocaleContext";
 import { WalletState } from "@/types";
 
 const FinanceConnectionDiagram = dynamic(
@@ -42,6 +43,7 @@ const TYPEWRITER_PROMPTS = [
 function AssistantPageContent() {
   const { isDark } = useChartTheme();
   const { userId, walletAccountId } = useCurrentUser();
+  const { locale, setLocale } = useLocale();
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt");
   const context = searchParams.get("context");
@@ -49,6 +51,15 @@ function AssistantPageContent() {
   const promptSentRef = useRef(false);
   const chatInputRef = useRef<ChatInputHandle>(null);
   const { messages, isStreaming, language, setLanguage, send } = useChat(userId);
+
+  useEffect(() => {
+    if (language !== locale) setLanguage(locale);
+  }, [locale, language, setLanguage]);
+
+  function handleLanguageChange(next: typeof locale) {
+    setLocale(next);
+    setLanguage(next);
+  }
 
   useEffect(() => {
     promptSentRef.current = false;
@@ -130,7 +141,7 @@ function AssistantPageContent() {
         <div className="stagger relative z-10 flex flex-1 flex-col items-center justify-center px-4">
           <div className="absolute right-4 top-4 flex items-center gap-2 sm:right-6">
             <ThemeToggle variant="standalone" />
-            <LanguageToggle language={language} onChange={setLanguage} />
+            <LanguageToggle language={language} onChange={handleLanguageChange} />
           </div>
 
           <div className="mb-8 text-center">
@@ -195,7 +206,7 @@ function AssistantPageContent() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle variant="standalone" />
-              <LanguageToggle language={language} onChange={setLanguage} />
+              <LanguageToggle language={language} onChange={handleLanguageChange} />
             </div>
           </div>
 

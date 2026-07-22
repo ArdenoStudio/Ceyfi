@@ -8,17 +8,25 @@ import { BucketGrid } from "@/components/wallet/BucketGrid";
 import { AllocationEditor } from "@/components/wallet/AllocationEditor";
 import { TransactionFeed } from "@/components/wallet/TransactionFeed";
 import { LastRemittanceBanner } from "@/components/wallet/LastRemittanceBanner";
+import { RemittanceTracker } from "@/components/wallet/RemittanceTracker";
+import { SenderGuidanceCard } from "@/components/wallet/SenderGuidanceCard";
 import { SendMoneyModal } from "@/components/wallet/SendMoneyModal";
 import { fireSpendToast } from "@/components/wallet/SpendNotificationToast";
 import { InsightActionStrip } from "@/components/insights/InsightActionStrip";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Transaction } from "@/types";
-import { saveAllocationRules, ApiError, postTriggerSpend } from "@/lib/api";
+import { RemittanceTracking, Transaction } from "@/types";
+import {
+  saveAllocationRules,
+  ApiError,
+  postTriggerSpend,
+  getDemoRemittanceTrack,
+  getRemittanceTrack,
+} from "@/lib/api";
 import { toast } from "sonner";
 import { GBP_LKR_RATE, type RemittanceCurrency } from "@/lib/remittance-fx";
-import { formatLKR } from "@/lib/utils";
+import { formatLKR, cn } from "@/lib/utils";
 import { AlertBanner } from "@/components/hyperui";
 import { ArrowRightLeft, Bot, PieChart, ShieldCheck, Send, TrendingUp, ShoppingCart } from "lucide-react";
 import { WalletBalanceHeader } from "@/components/wallet/WalletBalanceHeader";
@@ -27,17 +35,20 @@ import { WalletAnalyticsSections } from "@/components/wallet/WalletAnalyticsSect
 import { WalletBalanceHistory } from "@/components/wallet/WalletBalanceHistory";
 import { NetworkErrorBanner } from "@/components/NetworkErrorBanner";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const ASSISTANT_PROMPT =
   "Explain the latest family wallet activity and tell me whether any bucket needs attention before the next transfer.";
 
 export default function WalletPage() {
   const { walletAccountId, userId, defaultRoute, persona, loading: authLoading } = useCurrentUser();
+  const { t, tf, scriptClassName } = useLocale();
   const router = useRouter();
   const { offline } = useNetworkStatus();
   const [modalOpen, setModalOpen] = useState(false);
   const [spendSimulating, setSpendSimulating] = useState(false);
   const [allocationFromHash, setAllocationFromHash] = useState(false);
+  const [tracking, setTracking] = useState<RemittanceTracking | null>(null);
   const [remittanceOverride, setRemittanceOverride] = useState<{
     amount_lkr: number;
     date: string;
@@ -79,6 +90,43 @@ export default function WalletPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    getDemoRemittanceTrack()
+      .then((track) => {
+        if (!cancelled) setTracking(track);
+      })
+      .catch(() => {
+        /* demo track is optional when backend is down */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!tracking || tracking.status !== "IN_TRANSIT") return;
+    const transferId = tracking.transfer_id;
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const next = await getRemittanceTrack(transferId);
+        if (cancelled) return;
+        setTracking(next);
+        if (next.status === "COMPLETED") {
+          toast.success(t.remittance.landedToast);
+        }
+      } catch {
+        /* ignore poll errors */
+      }
+    };
+    const id = window.setInterval(() => void tick(), 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [tracking, t.remittance.landedToast]);
+
   const accountHolderRef = useRef("");
   const handleSpend = useCallback((tx: Transaction, newBalance: number) => {
     fireSpendToast(tx, newBalance, { accountHolder: accountHolderRef.current });
@@ -102,8 +150,8 @@ export default function WalletPage() {
         aria-busy="true"
         aria-live="polite"
       >
-        <p className="text-sm text-muted-foreground">
-          {authLoading ? "Loading CEYFI…" : "Opening your dashboard…"}
+        <p className={cn("text-sm text-muted-foreground", scriptClassName)}>
+          {authLoading ? t.common.loading : t.common.openingDashboard}
         </p>
       </div>
     );
@@ -117,7 +165,7 @@ export default function WalletPage() {
         aria-busy="true"
         aria-live="polite"
       >
-        <span className="sr-only">Loading wallet</span>
+        <span className="sr-only">{t.wallet.loadingWallet}</span>
         <NetworkErrorBanner offline={offline} onRetry={() => void refetch()} />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-20 w-full" />
@@ -168,26 +216,29 @@ export default function WalletPage() {
   const walletCopy =
     persona === "diaspora"
       ? {
-          eyebrow: "Diaspora family wallet",
-          title: "Track money sent home with confidence",
-          description:
-            "See the latest remittance, how the family is using each bucket, and adjust the next split before sending again.",
+          eyebrow: t.wallet.diasporaEyebrow,
+          title: t.wallet.diasporaTitle,
+          description: t.wallet.diasporaDescription,
         }
       : {
-          eyebrow: "Family wallet",
-          title: "Keep the family's money organised and clear",
-          description:
-            "See the latest top-up, how each bucket is being used, and adjust the split before the next transfer.",
+          eyebrow: t.wallet.familyEyebrow,
+          title: t.wallet.familyTitle,
+          description: t.wallet.familyDescription,
         };
 
   return (
-    <div data-module="wallet" className="stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+    <div
+      data-module="wallet"
+      className={cn(
+        "stagger mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8",
+        scriptClassName
+      )}
+    >
       <NetworkErrorBanner offline={offline} message={error} onRetry={() => void refetch()} />
       <PageHeader
         eyebrow={walletCopy.eyebrow}
         title={walletCopy.title}
         description={walletCopy.description}
-
         action={
           <div className="flex flex-wrap gap-2">
             <Button
@@ -203,12 +254,12 @@ export default function WalletPage() {
                     merchant: "Softlogic Glomark",
                     bucket_id: "household",
                   });
-                  toast.success("Family spend simulated", {
+                  toast.success(t.wallet.spendSimulated, {
                     description: "Softlogic Glomark · LKR 12,400 from Household",
                   });
                   await refetch(true);
                 } catch {
-                  toast.error("Could not simulate spend.");
+                  toast.error(t.wallet.spendSimFailed);
                 } finally {
                   setSpendSimulating(false);
                 }
@@ -216,14 +267,14 @@ export default function WalletPage() {
               className="interactive-press rounded-full"
             >
               <ShoppingCart className="mr-1.5 h-4 w-4" />
-              {spendSimulating ? "Simulating…" : "Simulate family spend"}
+              {spendSimulating ? t.wallet.simulating : t.wallet.simulateSpend}
             </Button>
             <Button
               data-demo-target="wallet-send-money"
               onClick={() => setModalOpen(true)}
               className="interactive-press rounded-full shadow-brand"
             >
-              Send Money
+              {t.common.sendMoney}
             </Button>
           </div>
         }
@@ -237,32 +288,50 @@ export default function WalletPage() {
             isLive={realtimeConnected || !error}
           />
           <LastRemittanceBanner
-          wallet={remittanceOverride
-            ? { ...wallet, last_remittance: { ...wallet.last_remittance, ...remittanceOverride } }
-            : wallet}
-          onSendAgain={() => setModalOpen(true)}
-        />
+            wallet={
+              remittanceOverride
+                ? { ...wallet, last_remittance: { ...wallet.last_remittance, ...remittanceOverride } }
+                : wallet
+            }
+            onSendAgain={() => setModalOpen(true)}
+          />
+
+          {tracking ? <RemittanceTracker tracking={tracking} /> : null}
+
+          <SenderGuidanceCard
+            buckets={buckets}
+            accountId={accountId}
+            onTuneSplit={() => {
+              window.location.hash = "allocation-editor";
+            }}
+          />
 
           {showRemittanceAlert ? (
             <AlertBanner
               tone="success"
               icon={Send}
-              title="Remittance delivered to the family wallet"
-              description={`${formatLKR(remittanceOverride.amount_lkr)} landed via ${remittanceOverride.provider}. Buckets were split using your saved allocation rules.`}
-              actionLabel="Send again"
+              title={t.wallet.remittanceDeliveredTitle}
+              description={tf(t.wallet.remittanceDeliveredDesc, {
+                amount: formatLKR(remittanceOverride.amount_lkr),
+                provider: remittanceOverride.provider,
+              })}
+              actionLabel={t.common.sendAgain}
               onAction={() => setModalOpen(true)}
             />
           ) : showSpendAlert ? (
             <AlertBanner
               tone="warning"
               icon={TrendingUp}
-              title={`${mostUsedBucket.label} is ${bucketUtilPct}% used this cycle`}
+              title={tf(t.wallet.bucketUsedTitle, {
+                label: mostUsedBucket.label,
+                pct: bucketUtilPct,
+              })}
               description={
                 latestSpend
-                  ? `Latest spend at ${latestSpend.merchant}. Review the split before your next transfer.`
-                  : "This bucket is moving faster than the others. Consider tuning your allocation."
+                  ? tf(t.wallet.bucketUsedDescSpend, { merchant: latestSpend.merchant })
+                  : t.wallet.bucketUsedDescGeneric
               }
-              actionLabel="Tune split"
+              actionLabel={t.common.tuneSplit}
               href="#allocation-editor"
             />
           ) : null}
@@ -270,11 +339,11 @@ export default function WalletPage() {
       )}
 
       <InsightActionStrip
-        eyebrow="Family money signal"
-        title="What needs attention before the next transfer"
+        eyebrow={t.wallet.signalEyebrow}
+        title={t.wallet.signalTitle}
         insights={[
           {
-            label: "Spend watch",
+            label: t.wallet.spendWatch,
             value: mostUsedBucket
               ? `${Math.round(
                   (mostUsedBucket.spent_lkr /
@@ -284,40 +353,38 @@ export default function WalletPage() {
                 )}%`
               : "0%",
             detail: mostUsedBucket
-              ? `${mostUsedBucket.label} is the fastest-moving bucket this cycle.`
-              : "No bucket movement yet.",
+              ? tf(t.wallet.fastestBucket, { label: mostUsedBucket.label })
+              : t.wallet.noBucketMovement,
             tone: "alert",
             icon: PieChart,
           },
           {
-            label: "Latest activity",
-            value: latestSpend ? latestSpend.merchant : "No spend",
-            detail: latestSpend
-              ? "Tap the Assistant to explain whether this looks usual."
-              : "The wallet is quiet after the latest remittance.",
+            label: t.wallet.latestActivity,
+            value: latestSpend ? latestSpend.merchant : t.wallet.noSpend,
+            detail: latestSpend ? t.wallet.askIfUsual : t.wallet.walletQuiet,
             tone: "info",
             icon: Bot,
           },
           {
-            label: "Confidence",
-            value: "Protected",
-            detail: "Allocations are still separated for school, household, and savings.",
+            label: t.wallet.confidence,
+            value: t.wallet.protected,
+            detail: t.wallet.allocationsSeparated,
             tone: "success",
             icon: ShieldCheck,
           },
         ]}
         actions={[
           {
-            label: "Send again",
+            label: t.common.sendAgain,
             icon: ArrowRightLeft,
             onClick: () => setModalOpen(true),
           },
           {
-            label: "Ask Assistant",
+            label: t.common.askAssistant,
             icon: Bot,
             href: `/assistant?prompt=${encodeURIComponent(ASSISTANT_PROMPT)}&context=wallet&accountId=${encodeURIComponent(accountId)}`,
           },
-          { label: "Tune split", icon: PieChart, href: "#allocation-editor" },
+          { label: t.common.tuneSplit, icon: PieChart, href: "#allocation-editor" },
         ]}
       />
 
@@ -337,12 +404,8 @@ export default function WalletPage() {
           defaultExpanded={allocationFromHash}
           onSave={async (newAllocations) => {
             try {
-              await saveAllocationRules(
-                userId,
-                newAllocations,
-                accountId
-              );
-              toast.success("Allocation rules saved for your next transfer.");
+              await saveAllocationRules(userId, newAllocations, accountId);
+              toast.success(t.wallet.allocationSaved);
               await refetch(true);
             } catch (e) {
               const msg =
@@ -350,7 +413,7 @@ export default function WalletPage() {
                   ? `${e.status}: ${e.message}`
                   : e instanceof Error
                     ? e.message
-                    : "Could not save allocation rules.";
+                    : t.wallet.allocationSaveFailed;
               toast.error(msg);
             }
           }}
@@ -366,7 +429,12 @@ export default function WalletPage() {
         recipientId={accountId}
         recipientAccountHolder={wallet?.account_holder ?? ""}
         allocations={allocations}
-        onSuccess={(amountLkr?: number, amountGbp?: number, currency?: RemittanceCurrency) => {
+        onSuccess={(
+          amountLkr?: number,
+          amountGbp?: number,
+          currency?: RemittanceCurrency,
+          nextTracking?: RemittanceTracking | null
+        ) => {
           if (amountLkr != null && amountGbp != null) {
             setRemittanceOverride({
               amount_lkr: amountLkr,
@@ -377,6 +445,14 @@ export default function WalletPage() {
               currency_code: currency?.code ?? "GBP",
               corridor: currency ? `${currency.code} → LKR` : "GBP → LKR",
             });
+          }
+          if (nextTracking) {
+            setTracking(nextTracking);
+            if (nextTracking.status === "IN_TRANSIT") {
+              toast.message(t.remittance.inTransitToast);
+            } else if (nextTracking.status === "COMPLETED") {
+              toast.success(t.remittance.landedToast);
+            }
           }
           void refetch(true);
         }}

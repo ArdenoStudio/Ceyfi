@@ -45,17 +45,18 @@ type DemoStep = {
 const DEMO_SCRIPT: DemoStep[] = [
   {
     step: 1,
-    label: "Time River",
-    path: "/",
-    hint: "Inspect next risk → select a plan",
-    seconds: 9,
+    label: "Language + wallet",
+    path: "/wallet",
+    hint: "Switch SI/TA → remittance path + sender guidance",
+    seconds: 10,
+    persona: "Nimal Fernando",
   },
   {
     step: 2,
     label: "Send money",
     path: "/wallet",
-    hint: "GBP 600 → LKR 244,980 · PIN · receipt",
-    seconds: 10,
+    hint: "GBP 600 → track initiated → corridor → landed",
+    seconds: 12,
     persona: "Nimal Fernando",
   },
   {
@@ -63,7 +64,7 @@ const DEMO_SCRIPT: DemoStep[] = [
     label: "Wallet spend",
     path: "/wallet",
     action: "spend",
-    hint: "Household −LKR 12,400",
+    hint: "Household −LKR 12,400 · sender sees it live",
     seconds: 7,
     persona: "Nimal Fernando",
   },
@@ -78,7 +79,7 @@ const DEMO_SCRIPT: DemoStep[] = [
     step: 5,
     label: "Market",
     path: "/market → /market/alerts/f-1",
-    hint: "Chime fires + cash context + broker CTA",
+    hint: "Chime fires deep-link + cash context (NFA)",
     seconds: 10,
   },
   {

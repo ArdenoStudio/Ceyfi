@@ -70,6 +70,24 @@ export interface ChatMessage {
   payment_action?: PaymentAction;
 }
 
+export interface RemittanceTrackStep {
+  id: "initiated" | "corridor" | "clearing" | "landed" | string;
+  state: "done" | "current" | "pending" | "failed" | string;
+  at?: string | null;
+}
+
+export interface RemittanceTracking {
+  transfer_id: string;
+  status: "COMPLETED" | "FAILED" | "IN_TRANSIT" | string;
+  amount_lkr: number;
+  corridor: string;
+  current_step: string;
+  steps: RemittanceTrackStep[];
+  updated_at: string;
+  started_at?: string | null;
+  source?: string;
+}
+
 export interface AccountContext {
   user_id: string;
   name?: string;

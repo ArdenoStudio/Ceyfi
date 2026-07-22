@@ -60,3 +60,26 @@ export function formatReceiptMessage(opts: {
     .filter(Boolean)
     .join("\n");
 }
+
+export function formatRemittanceShareMessage(opts: {
+  transferId: string;
+  status: string;
+  amountLkr: number;
+}): string {
+  const amount = new Intl.NumberFormat("en-LK").format(opts.amountLkr);
+  return [
+    `CEYFI remittance ${opts.transferId}`,
+    `Status: ${opts.status}`,
+    `Amount: LKR ${amount}`,
+    "",
+    "Track in the CEYFI app · Clarity for every rupee",
+  ].join("\n");
+}
+
+/** Deep-link path for a Chime Telegram fire into CEYFI Market. */
+export function chimeFireDeepLink(fireId: string, origin?: string): string {
+  const base =
+    origin ??
+    (typeof window !== "undefined" ? window.location.origin : "https://ceyfi.app");
+  return `${base}/market/alerts/${encodeURIComponent(fireId)}`;
+}

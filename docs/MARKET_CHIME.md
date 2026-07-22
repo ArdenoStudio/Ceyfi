@@ -32,7 +32,8 @@ intensity / ASPI day / participation. Bands: Extreme Caution → Caution →
 Neutral → Appetite → Strong Appetite. Never framed as buy/sell advice.
 
 - Default: mock CSE payloads per persona (demo works offline)
-- Optional live: set `CHIME_API_BASE` to proxy Chime `/api/v1/*` after demo login
+- Keep poller on Chime. CEYFI deep-links fires to `/market/alerts/{id}` (see `chimeFireDeepLink` in `frontend/lib/share.ts`) so Telegram alerts can open the Market fire view.
+- Document shared demo Telegram ID (`CHIME_DEMO_TELEGRAM_ID`) vs CEYFI bot subscribers — identity is not shared yet; CEYFI `/track` is for remittance path, Chime bot for CSE fires.
 
 ```bash
 # backend .env (production: set on Vercel backend service)

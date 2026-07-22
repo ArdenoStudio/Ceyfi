@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatLKR } from "@/lib/utils";
+import { formatLKR, cn } from "@/lib/utils";
 import {
   createPaymentSession,
   getSandboxTransferAccounts,
@@ -39,13 +39,20 @@ import { VerificationCard } from "@/components/ui/verification-card";
 import { CurrencyExchangeCard } from "@/components/wallet/CurrencyExchangeCard";
 import { PinGate } from "@/components/payments/PinGate";
 import { PaymentReceipt } from "@/components/payments/PaymentReceipt";
+import type { RemittanceTracking } from "@/types";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface SendMoneyModalProps {
   senderId: string;
   recipientId: string;
   recipientAccountHolder: string;
   allocations: Record<string, number>;
-  onSuccess: (amountLkr?: number, amountGbp?: number, currency?: RemittanceCurrency) => void;
+  onSuccess: (
+    amountLkr?: number,
+    amountGbp?: number,
+    currency?: RemittanceCurrency,
+    tracking?: RemittanceTracking | null
+  ) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -75,6 +82,7 @@ export function SendMoneyModal({
   open,
   onOpenChange,
 }: SendMoneyModalProps) {
+  const { t, tf, scriptClassName } = useLocale();
   const [paymentMode, setPaymentMode] = useState<"card" | "demo">("demo");
   const [amount, setAmount] = useState(600);
   const [currency, setCurrency] = useState<RemittanceCurrency>(DEFAULT_CURRENCY);
@@ -173,10 +181,10 @@ export function SendMoneyModal({
         amount_lkr: amountLkr,
         corridor: `${currency.code}->LKR`,
         allocation_rules: allocations,
-      }) as { transfer_id?: string; status?: string; note?: string };
+      });
       if (transfer?.status === "FAILED") {
         setPinOpen(false);
-        toast.error(transfer.note || "Transfer failed. Please try again.");
+        toast.error(transfer.note || t.send.transferFailed);
         return;
       }
       const reference =
@@ -195,7 +203,7 @@ export function SendMoneyModal({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-white">
-              Sent {formatLKR(amountLkr)}
+              {tf(t.send.sentTitle, { amount: formatLKR(amountLkr) })}
             </p>
             <p className="mt-0.5 text-xs leading-relaxed text-white/50">
               {buildSuccessToastDescription()}
@@ -203,7 +211,7 @@ export function SendMoneyModal({
           </div>
         </div>
       ), { duration: 4000 });
-      onSuccess(amountLkr, amount, currency);
+      onSuccess(amountLkr, amount, currency, transfer.tracking ?? null);
     } catch (err) {
       setPinOpen(false);
       const msg = err instanceof Error ? err.message : "";
@@ -211,9 +219,9 @@ export function SendMoneyModal({
       toast.error(
         paymentMode === "card"
           ? isUnconfigured
-            ? "Card payments are not yet activated. Use Demo Mode to test."
-            : "Could not create payment session. Please try again."
-          : "Transfer failed. Please try again."
+            ? t.send.cardNotReady
+            : t.send.transferFailed
+          : t.send.transferFailed
       );
     } finally {
       setSending(false);
@@ -239,11 +247,11 @@ export function SendMoneyModal({
                 <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#E31821]">
                   CEYFI
                 </p>
-                <DialogTitle className="font-heading text-lg font-semibold text-foreground">
-                  Send to Sri Lanka
+                <DialogTitle className={cn("font-heading text-lg font-semibold text-foreground", scriptClassName)}>
+                  {t.send.title}
                 </DialogTitle>
                 <DialogDescription className="sr-only">
-                  Send remittance to your CEYFI family wallet with card or demo transfer.
+                  {t.send.description}
                 </DialogDescription>
               </div>
               <button
@@ -406,7 +414,7 @@ export function SendMoneyModal({
                 {sending ? (
                   <>
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                    {paymentMode === "card" ? "Redirecting…" : "Sending…"}
+                    {paymentMode === "card" ? "Redirecting…" : t.send.sending}
                   </>
                 ) : (
                   <>
@@ -463,9 +471,9 @@ export function SendMoneyModal({
       key={`${open}-${pinOpen}`}
       open={pinOpen}
       onOpenChange={setPinOpen}
-      title="Confirm remittance"
-      description={`Enter your PIN to send ${formatLKR(amountLkr)} to the family wallet.`}
-      confirmLabel={paymentMode === "card" ? "Continue to card" : "Send money"}
+      title={t.send.confirmRemittance}
+      description={`${t.send.pinDescription} (${formatLKR(amountLkr)})`}
+      confirmLabel={paymentMode === "card" ? "Continue to card" : t.common.sendMoney}
       loading={sending}
       onConfirm={handleSubmit}
     />
@@ -482,10 +490,10 @@ export function SendMoneyModal({
       <DialogContent className="max-w-sm">
         {receipt ? (
           <PaymentReceipt
-            title="Remittance sent"
+            title={t.send.receiptTitle}
             amountLkr={receipt.amountLkr}
             reference={receipt.reference}
-            detail={receipt.detail}
+            detail={receipt.detail || t.send.receiptDetail}
             onDone={() => {
               setReceipt(null);
               handleDialogOpenChange(false);

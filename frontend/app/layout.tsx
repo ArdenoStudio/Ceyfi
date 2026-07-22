@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter, Noto_Sans_Sinhala, Sora } from "next/font/google";
+import { Geist_Mono, Inter, Noto_Sans_Sinhala, Noto_Sans_Tamil, Sora } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { DemoAutopilotProvider } from "@/components/demo/DemoAutopilot";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -46,6 +47,14 @@ const geistMono = Geist_Mono({
 const notoSansSinhala = Noto_Sans_Sinhala({
   variable: "--font-noto-sinhala",
   subsets: ["sinhala"],
+  weight: ["400", "600"],
+  display: "swap",
+  preload: false,
+});
+
+const notoSansTamil = Noto_Sans_Tamil({
+  variable: "--font-noto-tamil",
+  subsets: ["tamil"],
   weight: ["400", "600"],
   display: "swap",
   preload: false,
@@ -128,18 +137,20 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${headingFont.variable} ${bodyFont.variable} ${geistMono.variable} ${notoSansSinhala.variable} h-full antialiased`}
+      className={`${headingFont.variable} ${bodyFont.variable} ${geistMono.variable} ${notoSansSinhala.variable} ${notoSansTamil.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <JsonLd />
         <ErrorBoundary>
           <ThemeProvider>
             <AuthProvider>
-              <DemoAutopilotProvider>
-                <AuthGuard>
-                  <AppShell>{children}</AppShell>
-                </AuthGuard>
-              </DemoAutopilotProvider>
+              <LocaleProvider>
+                <DemoAutopilotProvider>
+                  <AuthGuard>
+                    <AppShell>{children}</AppShell>
+                  </AuthGuard>
+                </DemoAutopilotProvider>
+              </LocaleProvider>
             </AuthProvider>
           </ThemeProvider>
         </ErrorBoundary>

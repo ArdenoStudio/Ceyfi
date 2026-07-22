@@ -12,8 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Lock, Loader2 } from "lucide-react";
+import { useLocale } from "@/contexts/LocaleContext";
 
-/** Demo PIN — any 4 digits works; 1234 is the suggested demo value. */
 const DEMO_HINT = "1234";
 
 interface PinGateProps {
@@ -29,20 +29,24 @@ interface PinGateProps {
 export function PinGate({
   open,
   onOpenChange,
-  title = "Confirm with PIN",
-  description = "Enter your 4-digit CEYFI PIN to authorise this action.",
-  confirmLabel = "Confirm",
+  title,
+  description,
+  confirmLabel,
   loading = false,
   onConfirm,
 }: PinGateProps) {
+  const { t, scriptClassName } = useLocale();
+  const resolvedTitle = title ?? t.send.pinTitle;
+  const resolvedDescription = description ?? t.send.pinDescription;
+  const resolvedConfirm = confirmLabel ?? t.send.pinConfirm;
   const [digits, setDigits] = useState(["", "", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (!open) return;
-    const t = window.setTimeout(() => inputs.current[0]?.focus(), 50);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => inputs.current[0]?.focus(), 50);
+    return () => window.clearTimeout(timer);
   }, [open]);
 
   const pin = digits.join("");
@@ -74,22 +78,21 @@ export function PinGate({
 
   async function submit() {
     if (pin.length !== 4) {
-      setError("Enter all 4 digits");
+      setError(t.common.enterPinDigits);
       return;
     }
-    // Demo: any 4-digit PIN is accepted (bank OTP simulation).
     await onConfirm();
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className={cn("sm:max-w-sm", scriptClassName)}>
         <DialogHeader>
           <div className="mx-auto mb-2 grid h-11 w-11 place-items-center rounded-2xl bg-ceyfi-sprout text-ceyfi-green">
             <Lock className="h-5 w-5" />
           </div>
-          <DialogTitle className="text-center font-heading">{title}</DialogTitle>
-          <DialogDescription className="text-center">{description}</DialogDescription>
+          <DialogTitle className="text-center font-heading">{resolvedTitle}</DialogTitle>
+          <DialogDescription className="text-center">{resolvedDescription}</DialogDescription>
         </DialogHeader>
 
         <div className="flex justify-center gap-2 py-2">
@@ -119,7 +122,8 @@ export function PinGate({
           <p className="text-center text-xs font-medium text-rose-600">{error}</p>
         ) : (
           <p className="text-center text-[11px] text-ceyfi-faint">
-            Demo tip: use <span className="font-mono font-semibold">{DEMO_HINT}</span> or any 4 digits
+            {t.common.demoPinTip}{" "}
+            <span className="font-mono font-semibold">{DEMO_HINT}</span>
           </p>
         )}
 
@@ -129,7 +133,7 @@ export function PinGate({
             onClick={() => handleOpenChange(false)}
             disabled={loading}
           >
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button
             data-demo-target="pin-confirm"
@@ -138,7 +142,7 @@ export function PinGate({
             onClick={() => void submit()}
           >
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {confirmLabel}
+            {resolvedConfirm}
           </Button>
         </DialogFooter>
       </DialogContent>

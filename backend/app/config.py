@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     seylan_gateway_default: str = "http://34.21.206.87:3000"
     seylan_gateway_qr: str = "https://dev.apigateway1.seylan.lk:2250"
     seylan_api_key: str = ""
+    # TLS verification for Seylan HTTPS gateways. Default True for bank reviews.
+    # Set SEYLAN_TLS_VERIFY=false only for broken sandbox certs on local UAT.
+    seylan_tls_verify: bool = True
     seylan_checksum_key_merchant: str = ""
     seylan_checksum_key_lankaqr: str = ""
     seylan_justpay_code: str = "6289_M001_001"
