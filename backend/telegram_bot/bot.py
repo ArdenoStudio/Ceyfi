@@ -44,10 +44,12 @@ HELP_TEXT = (
     "/summary — financial snapshot\n"
     "/chart — wallet bucket chart\n"
     "/spendchart — spending breakdown chart\n"
+    "/track [transfer_id] — remittance path status (default latest/demo)\n"
     "/subscribe — hourly spend alerts\n"
     "/unsubscribe — stop spend alerts\n"
     "/ai <question> — ask the CEYFI assistant\n"
-    "/help — this message"
+    "/help — this message\n\n"
+    "Sinhala/Tamil UI is available in the CEYFI app."
 )
 
 
@@ -403,6 +405,84 @@ async def cmd_ai(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f"Assistant unavailable: {exc}")
 
 
+_STEP_MARKERS = {
+    "done": "✅",
+    "current": "▶️",
+    "pending": "⬜",
+    "failed": "❌",
+}
+
+_STEP_LABELS = {
+    "initiated": "Initiated",
+    "corridor": "Corridor",
+    "clearing": "Clearing",
+    "landed": "Landed",
+}
+
+
+def _format_remittance_track(tracking: dict) -> str:
+    transfer_id = tracking.get("transfer_id", "—")
+    status = tracking.get("status", "—")
+    amount = tracking.get("amount_lkr", 0)
+    lines = [
+        "*Remittance path*",
+        f"Transfer: `{transfer_id}`",
+        f"Status: {status}",
+        f"Amount: {_fmt_lkr(amount)}",
+        "",
+        "Steps:",
+    ]
+    for step in tracking.get("steps") or []:
+        state = str(step.get("state", "pending")).lower()
+        marker = _STEP_MARKERS.get(state, "⬜")
+        step_id = str(step.get("id", "?"))
+        label = _STEP_LABELS.get(step_id, step_id.replace("_", " ").title())
+        lines.append(f"{marker} {label}")
+    return "\n".join(lines)
+
+
+async def track_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    transfer_id = " ".join(context.args).strip() if context.args else ""
+    path = (
+        f"/api/wallet/remittance/{transfer_id}/track"
+        if transfer_id
+        else "/api/wallet/remittance/demo/track"
+    )
+    try:
+        tracking = await _api_get(path)
+        await update.message.reply_text(
+            _format_remittance_track(tracking),
+            parse_mode="Markdown",
+        )
+    except Exception as exc:
+        log.exception("track command failed")
+        await update.message.reply_text(f"Could not fetch remittance track: {exc}")
+
+
+async def notify_remittance_landed(chat_ids: list[int] | set[int], tracking: dict) -> None:
+    """Notify chat IDs that a remittance has landed. Callable from wallet router later."""
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if not token or not chat_ids:
+        return
+
+    amount = tracking.get("amount_lkr", 0)
+    transfer_id = tracking.get("transfer_id", "—")
+    message = (
+        f"*Money landed*\n"
+        f"{_fmt_lkr(amount)} is in the family wallet.\n"
+        f"Transfer: `{transfer_id}`"
+    )
+
+    from telegram import Bot  # noqa: PLC0415
+
+    bot = Bot(token=token)
+    for chat_id in chat_ids:
+        try:
+            await bot.send_message(chat_id=chat_id, text=message, parse_mode="Markdown")
+        except Exception as exc:
+            log.warning("Failed to notify remittance landed for %s: %s", chat_id, exc)
+
+
 async def hourly_spend_alert(context: ContextTypes.DEFAULT_TYPE) -> None:
     subscribers = _load_subscribers()
     if not subscribers:
@@ -478,6 +558,7 @@ def build_application(token: str) -> Application:
         ("summary", cmd_summary),
         ("chart", cmd_chart),
         ("spendchart", cmd_spendchart),
+        ("track", track_cmd),
         ("subscribe", cmd_subscribe),
         ("unsubscribe", cmd_unsubscribe),
         ("ai", cmd_ai),
