@@ -9,7 +9,7 @@
 
 The core idea is simple: banking in Sri Lanka still feels like it was designed in 2005. You can't see where your money actually went. You don't understand your loan. You definitely don't have an accountant. And if you're sending money home from abroad, you're basically flying blind.
 
-We picked three real personas — the diaspora expat, the anxious borrower, and the small business owner — and built one unified platform that speaks to all of them. In English. Or Sinhala."
+We picked three real personas — the diaspora expat, the anxious borrower, and the small business owner — and built one unified platform that speaks to all of them. In English, Sinhala, or Tamil — full app, not assistant-only."
 
 ---
 
@@ -21,7 +21,7 @@ We picked three real personas — the diaspora expat, the anxious borrower, and 
 - **Backend:** FastAPI on Fly.io in Singapore
 - **Database:** Supabase Postgres with realtime subscriptions
 - **AI:** Groq's llama-3.3-70b for the LLM work, ElevenLabs for voice
-- **Payments:** Mastercard's MPGS Hosted Checkout, plus Seylan Bank's own gateway integration — feature-flagged so we can flip it live the moment the bank provisions us
+- **Payments / bank rails:** MPGS Hosted Checkout when credentials are present; Seylan client modules behind `USE_SEYLAN_REAL` + `SEYLAN_ENABLE_TRANSFERS` (not a one-flip go-live). JustPay is not configured yet.
 
 Everything's live right now at ceyfi.app."
 
@@ -29,17 +29,17 @@ Everything's live right now at ceyfi.app."
 
 ## FEATURE 1 — DIASPORA FAMILY WALLET `/wallet` (1.5–2 min)
 
-"First up — the **Family Wallet**. This is for Sri Lankan expats living in the UK, Australia, the US — people sending money home to their family every month.
+"First up — the **Family Wallet**. Remittance-narrow MVP for Sri Lankan expats sending money home.
 
-The problem is: you send £500, and two weeks later you have no idea if it paid for school fees or got spent on something else. There's no visibility. No control.
+Banks and corridors like Wise already move FX. CEYFI does **not** compete with those rails. We add **control after the money arrives** — post-arrival visibility and guidance the family can actually use.
 
-So we built **allocation buckets**. When you send money, you split it: 40% School, 40% Household, 20% Savings — whatever the family needs. Those rules stick.
+**Beat 1 — Post-arrival path.** Sender sees the remittance path: initiated → corridor → bank clearing → landed. Demo transfers return `IN_TRANSIT` and advance on a timer until a bank webhook can take over. No fake 'instant settled' claim.
 
-The moment your family member spends from a bucket — say Mum buys groceries — you get a **live notification**. Not a day later. Instantly. That's powered by **Supabase Realtime**: we're listening to Postgres changes on the transactions table and pushing updates to the frontend the second they hit the database. There's also a polling fallback so nothing breaks if the websocket drops.
+**Beat 2 — Sender guidance + buckets.** Split the land: School / Household / Savings — rules stick. Sender guidance nudges how the family should spend and save this month. When someone spends from a bucket, you see it — realtime with a polling fallback.
 
-You can also see the **live balance**, the full transaction feed, and today's forex rates — GBP, USD, EUR, AUD all converting to LKR in real time. And sending money is a clean two-step flow: pick the amount, confirm, and the allocation rules auto-apply.
+**Beat 3 — Full-app localisation.** English, Sinhala, and Tamil across the **whole app** — chrome, wallet copy, not just the assistant. Sampath feedback: most remittances support blue-collar families — keep labels simple so everyone can follow.
 
-This is the module that makes remittance feel like something you're actually in control of."
+Demo send is still clean: amount, confirm, allocation auto-applies. Pitch to a bank: remittance visibility + allocation MVP — not a multi-rail FX product."
 
 ---
 
@@ -53,7 +53,7 @@ Our assistant is powered by **Groq's llama-3.3-70b** — one of the fastest LLMs
 
 You can ask it things like: 'How much did I spend on food this month?' or 'When's my next loan payment?' or 'Can you explain my repayment schedule?' and it gives you a real, specific answer.
 
-**Language toggle** — one click switches between English and Sinhala. The model dynamically switches its response language. This matters a lot in Sri Lanka.
+**Language** — the full app is EN / Sinhala / Tamil. The assistant follows the same locale so answers match the chrome the family already sees.
 
 **Voice responses** — via ElevenLabs TTS, the turbo model for low latency. You can listen to the answer instead of reading it. We cache up to 64 unique responses in-process so repeat questions are instant.
 
@@ -100,13 +100,13 @@ You can also **accept payments from customers** via MPGS — and that 10% auto-s
 
 ## INTEGRATIONS HIGHLIGHT (30–45 sec)
 
-"A few integrations worth calling out:
+"A few integrations worth calling out — honestly:
 
-**Seylan Bank Gateway** — we've built the full client: account inquiry, internal transfers, CEFTS cross-bank transfers, QR code generation, JustPay mandates. It's all feature-flagged right now — `USE_SEYLAN_REAL=false` — because we're in sandbox mode until the bank provisions us. One environment variable flip and it's live.
+**Seylan Bank Gateway** — client modules exist for account inquiry, internal transfers, CEFTS, and Merchant QR shapes. Live calls need **both** `USE_SEYLAN_REAL=true` **and** `SEYLAN_ENABLE_TRANSFERS=true` (plus sandbox credentials and an agreement). TLS verify defaults **on** (`SEYLAN_TLS_VERIFY=true`). JustPay is **not built** — it raises `NotConfiguredError` until the bank delivers the mandate/debit spec. One env flip is not how this goes live.
 
-**MPGS** — Mastercard Payment Gateway Services. Hosted Checkout across three flows: remittances, loan payments, and business collections. Session creation, redirect, webhook capture, Supabase write — complete.
+**MPGS** — Mastercard Hosted Checkout wired for remittance / loan / business collection demos when credentials are present.
 
-**ElevenLabs + Groq** — voice and intelligence baked into every module. Not bolt-ons. The assistant, the advisor, the categorizer — all of it is AI-native."
+**ElevenLabs + Groq** — voice and intelligence across assistant, advisor, and categorizer, with deterministic fallbacks when keys are absent."
 
 ---
 
@@ -114,7 +114,7 @@ You can also **accept payments from customers** via MPGS — and that 10% auto-s
 
 "We built this in 24 hours. The frontend is live on Vercel. The backend is running on Fly.io in Singapore. The database is on Supabase with realtime subscriptions firing across every module.
 
-CEYFI isn't a mockup. It's a working product, with real AI, real payments, and real-time data — designed for real people.
+CEYFI isn't a mockup. It's a working remittance-narrow MVP — post-arrival visibility, allocation, and localisation — with real AI where keys exist, honest demo rails where the bank isn't live yet, and a clear path to one partner bank.
 
 Thanks — we're Ardeno Studio."
 

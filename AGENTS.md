@@ -21,8 +21,9 @@
 ### Localisation & remittance
 
 - App chrome EN / Sinhala / Tamil via `frontend/lib/i18n` + `LocaleProvider` (sidebar language toggle)
-- Remittance path tracking: `GET /api/wallet/remittance/*/track` — see `docs/BANK_PARTNERSHIP.md`
-- Bank rails stay behind `USE_SEYLAN_REAL`; one-partner strategy documented in `docs/BANK_PARTNERSHIP.md`
+- Remittance path: `GET /api/wallet/remittance/*/track`; demo transfers return `IN_TRANSIT` and advance on a timer; bank advances via `POST /api/wallet/remittance/webhook` — see `docs/BANK_PARTNERSHIP.md`
+- Tracks persist to `backend/data/remittance_tracks.json`
+- Bank rails: both `USE_SEYLAN_REAL` and `SEYLAN_ENABLE_TRANSFERS` required for live transfers; `SEYLAN_TLS_VERIFY=true` by default; header `x-api-key`
 
 ### Running the app
 
@@ -45,4 +46,5 @@
 - The frontend uses Next.js **16** (not 15 as some docs say). Read `node_modules/next/dist/docs/` before making changes.
 - Backend `requirements.txt` uses `supabase>=2.5.0` which pulls in many transitive deps; `pip install` can take ~30s.
 - The backend global exception handler (`app/main.py`) returns raw `str(exc)` — be careful not to leak secrets in error paths.
-- `USE_SEYLAN_REAL=false` (default) keeps all Seylan Bank API calls disabled. The JustPay module raises `NotConfiguredError` unconditionally.
+- `USE_SEYLAN_REAL=false` (default) keeps Seylan Bank API calls disabled. Live transfers also need `SEYLAN_ENABLE_TRANSFERS=true` — one env flip is not enough. JustPay raises `NotConfiguredError` unconditionally.
+- Seylan HTTPS uses `SEYLAN_TLS_VERIFY=true` by default; set `false` only for broken sandbox certs on local UAT.
